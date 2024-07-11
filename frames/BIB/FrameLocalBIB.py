@@ -1,8 +1,11 @@
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, simpledialog
 
-from frames.BIB.FrameHolding import ModalDialog
+import Utils
+from UI.TreeviewEdit import TreeviewEdit
 from frames.CustomFrame import CustomFrame
 import tkinter as tk
+
+from model.LocalBIB import LocalBIB
 
 
 class FrameLocalBIB(CustomFrame):
@@ -21,197 +24,173 @@ class FrameLocalBIB(CustomFrame):
         self._init_widgets()
 
     def _init_widgets(self):
-        self.local_bibs = dict()
+        tree_frame = tk.Frame(self.container_frame)
+        tree_frame.pack()
 
-        self.scrollable_frame = self._init_scrollbar(self.container_frame)
+        tree_vertical_scroll_local_bibs = tk.Scrollbar(tree_frame)
+        tree_vertical_scroll_local_bibs.pack(side=tk.RIGHT, fill=tk.Y)
+        tree_horizontal_scroll_local_bibs = tk.Scrollbar(tree_frame)
+        tree_horizontal_scroll_local_bibs.pack(side=tk.BOTTOM, fill=tk.X)
 
-        button_local_bib_frame = tk.Frame(self.scrollable_frame)
-        button_local_bib_frame.grid(row=0, column=0, sticky=tk.NSEW, columnspan=2)
-        button_local_bib_frame.columnconfigure((0, 1), weight=1)
-        add_holding_button = tk.Button(button_local_bib_frame, text="Aggiungi Local BIB", command=self._add_local_bib)
-        add_holding_button.grid(column=0, row=0)
-        modify_holding_button = tk.Button(button_local_bib_frame, text="Modifica Local BIB", command=self._modify_local_bib)
-        modify_holding_button.grid(column=1, row=0)
+        self.table_local_bibs = ttk.Treeview(tree_frame, yscrollcommand=tree_vertical_scroll_local_bibs.set,
+                                             xscrollcommand=tree_horizontal_scroll_local_bibs.set)
+        tree_vertical_scroll_local_bibs.config(command=self.table_local_bibs.yview)
+        tree_horizontal_scroll_local_bibs.config(command=self.table_local_bibs.xview)
 
-        # Treeview per gli holdings
-        self.local_bibs_tree = ttk.Treeview(self.scrollable_frame,
-                                            columns=("geo_coord", "not_date"),
-                                            show="headings")
-        self.local_bibs_tree.heading("geo_coord", text="geo_coord")
-        self.local_bibs_tree.heading("not_date", text="not_date")
-        self.local_bibs_tree.grid(row=1, column=0, columnspan=2, sticky=tk.NSEW)
+        self.table_local_bibs['columns'] = ("geo_coords", "not_dates")
+        self.table_local_bibs.column("#0", width=0, stretch=tk.NO)
+        self.table_local_bibs.column("geo_coords", anchor=tk.W, width=120)
+        self.table_local_bibs.column("not_dates", anchor=tk.W, width=120)
+
+        # create headings
+        self.table_local_bibs.heading("#0", text="Label", anchor=tk.W)
+        self.table_local_bibs.heading("geo_coords", text="Geo Coords", anchor=tk.W)
+        self.table_local_bibs.heading("not_dates", text="Not Dates", anchor=tk.W)
+        # populate table
+        self.count = 0
+        self.local_bibs = self.controller.session.get(Utils.KEY_SESSION_LOCAL_BIB, [])
+
+        for local_bib in self.local_bibs:
+            geo_coords_str = local_bib.print_geo_coords()
+            not_dates_str = local_bib.print_not_dates()
+            row = (geo_coords_str, not_dates_str)
+            self.table_local_bibs.insert(parent='', index=tk.END, text="Parent", values=row, iid=self.count)
+            self.count += 1
+
+        self.table_local_bibs.pack()
+        #add frame
+        add_frame = tk.Frame(self.container_frame)
+        add_frame.pack(pady=10)
+
+        # table geo coord
+        frame_geo_coord = tk.Frame(add_frame)
+        tree_frame_geo_cord = tk.Frame(frame_geo_coord)
+        tree_frame_geo_coord.grid(row=0, column=0)
+        tree_vertical_scroll_geo_coord = tk.Scrollbar(tree_frame_geo_coord)
+        tree_vertical_scroll_geo_coord.pack(side=tk.RIGHT, fill=tk.Y)
+        tree_horizontal_scroll_geo_coord = tk.Scrollbar(tree_frame_geo_coord)
+        tree_horizontal_scroll_geo_coord.pack(side=tk.BOTTOM, fill=tk.X)
+
+        self.table_geo_coord = TreeviewEdit(tree_frame_geo_coord, yscrollcommand=tree_vertical_scroll_geo_coord.set,
+                                            xscrollcommand=tree_horizontal_scroll_geo_coord.set)
+        tree_vertical_scroll_geo_coord.config(command=self.table_geo_coord.yview)
+        tree_horizontal_scroll_geo_coord.config(command=self.table_geo_coord.xview)
+        self.table_geo_coord['columns'] = ("geo_coord")
+        self.table_geo_coord.column("#0", width=0, stretch=tk.NO)
+        self.table_geo_coord.column("geo_coord", anchor=tk.W, width=120)
+
+        # create headings
+        self.table_geo_coord.heading("#0", text="Label", anchor=tk.W)
+        self.table_geo_coord.heading("geo_coord", text="Geo Coord", anchor=tk.W)
+
+        self.table_geo_coord.pack()
+        button_add_geo_coord = tk.Button(tree_frame_geo_coord, text="Aggiungi geo coord", command=self._add_geo_coord)
+        button_add_geo_coord.pack(pady=10)
+
+        # table not date
+        tree_frame_not_date = tk.Frame(add_frame)
+        tree_frame_not_date.grid(row=0, column=1)
+        tree_vertical_scroll_not_date = tk.Scrollbar(tree_frame_not_date)
+        tree_vertical_scroll_not_date.pack(side=tk.RIGHT, fill=tk.Y)
+        tree_horizontal_scroll_not_date = tk.Scrollbar(tree_frame_not_date)
+        tree_horizontal_scroll_not_date.pack(side=tk.BOTTOM, fill=tk.X)
+
+        self.table_not_date = TreeviewEdit(tree_frame_not_date, yscrollcommand=tree_vertical_scroll_not_date.set,
+                                            xscrollcommand=tree_horizontal_scroll_not_date.set)
+        tree_vertical_scroll_not_date.config(command=self.table_not_date.yview)
+        tree_horizontal_scroll_not_date.config(command=self.table_not_date.xview)
+        self.table_not_date['columns'] = ("not_date")
+        self.table_not_date.column("#0", width=0, stretch=tk.NO)
+        self.table_not_date.column("not_date", anchor=tk.W, width=120)
+
+        # create headings
+        self.table_not_date.heading("#0", text="Label", anchor=tk.W)
+        self.table_not_date.heading("not_date", text="Not Date", anchor=tk.W)
+
+        self.table_not_date.pack()
+        button_add_not_date = tk.Button(tree_frame_not_date, text="Aggiungi not date", command=self._add_not_date)
+        button_add_not_date.pack(pady=10)
+
+        # buttons
+        buttons_frame = tk.Frame(self.container_frame)
+        buttons_frame.pack(pady=10)
+
+        button_add_local_bib = tk.Button(buttons_frame, text="Aggiungi local bib", command=self._add_local_bib)
+        button_add_local_bib.grid(row=0, column=0)
+
+        button_remove_all = tk.Button(buttons_frame, text="Rimuovi tutto", command=self._remove_all)
+        button_remove_all.grid(row=0, column=1)
+
+        button_remove_local_bib = tk.Button(buttons_frame, text="Rimuovi local bib selezionati", command=self._remove_selected)
+        button_remove_local_bib.grid(row=0, column=2)
+
+        button_update_record = tk.Button(buttons_frame, text="Aggiorna local bib", command=self._update_local_bib)
+        button_update_record.grid(row=0, column=3)
+
+        self.table_local_bibs.bind("<Double-1>", self._clicker)
+        self.table_local_bibs.bind("<ButtonRelease-1>", self._clicker)
 
     def _add_local_bib(self):
-        ModalDialog(self)
+        local_bib = LocalBIB()
+        for item in self.table_geo_coord.get_children():
+            values = self.table_geo_coord.item(item, 'values')
+            local_bib.add_geo_coord(values[0])
+        for item in self.table_not_date.get_children():
+            values = self.table_geo_coord.item(item, 'values')
+            local_bib.add_not_date(values[0])
 
-    def _modify_local_bib(self):
-        selected_item = self.local_bibs_tree.selection()
-        if not selected_item:
-            messagebox.showwarning("Warning", "Per favore, seleziona un local bib da modificare.")
-            return
+        row = (local_bib.print_geo_coords(), local_bib.print_not_dates())
+        self.table_local_bibs.insert(parent='', index=tk.END, text="Parent", values=row, iid=self.count)
+        self.local_bibs.append(local_bib)
+        self.count += 1
+        self.table_geo_coord.delete(*self.table_geo_coord.get_children())
+        self.table_not_date.delete(*self.table_not_date.get_children())
 
-        item = self.local_bibs_tree.item(selected_item)
-        values = item['values']
+    def _add_geo_coord(self):
+        geo_coord = simpledialog.askstring("Input", "Inserisci Geo Coord:")
+        self.table_geo_coord.insert(parent='', index=tk.END, values=(geo_coord))
 
-        # Find the holding object based on holding ID
-        local_bib_id = str(values[0])
-        local_bib_obj = self.local_bibs.get(local_bib_id)
-        if local_bib_obj:
-            ModalDialog(self, local_bib_obj, selected_item)
+    def _add_not_date(self):
+        not_date = simpledialog.askstring("Input", "Inserisci Not Date:")
+        self.table_not_date.insert(parent='', index=tk.END, values=(not_date))
 
-    def add_local_bib_to_treeview(self, local_bib_obj):
-        self.local_bibs[local_bib_obj.local_bib_id] = local_bib_obj
-        self.local_bibs_tree.insert("", "end", values=(
-            holding_obj.holding_id, holding_obj.library, holding_obj.inventory_number,
-            ", ".join([str(shelfmark) for shelfmark in holding_obj.shelfmark_values])
-        ))
+    def _remove_all(self):
+        for record in self.table_local_bibs.get_children():
+            self.table_local_bibs.delete(record)
+        self.controller.session[Utils.KEY_SESSION_HOLDING] = []
 
-    def update_local_bib_in_treeview(self, local_bib_obj, item):
-        self.local_bibs[local_bib_obj.local_bib_id] = local_bib_obj
-        self.local_bibs_tree.item(
-            item,
-            values=(
-                local_bib_obj.local_bib_id, ", ".join([str() for shelfmark in .geo_coords], local_bib_obj.not_dates
-            )
+    def _remove_selected(self):
+        selected = self.table_local_bibs.selection()
+        for holding in selected:
+            self.table_local_bibs.delete(holding)
+
+    def check_data(self):
+        super().save_to_session(
+            (Utils.KEY_SESSION_LOCAL_BIB, self.local_bibs)
         )
+        return True
 
-    class ModalDialog(tk.Toplevel):
-        def __init__(self, parent, holding=None, treeview_item=None):
-            super().__init__(parent)
-            self.parent = parent
-            self.holding = holding
-            self.treeview_item = treeview_item
-            self.title("Add Holding" if holding is None else "Modify Holding")
-            self.transient(parent)
-            self.grab_set()
+    def _update_local_bib(self):
+        item_id = self.table_local_bibs.focus()
+        selected_index = self.table_local_bibs.index(item_id)
+        selected_local_bib = self.local_bibs[selected_index]
+        self.table_local_bibs.item(item_id, text="", values=(selected_local_bib.print_geo_coords(), selected_local_bib.print_not_dates()))
 
-            holding_frame = tk.Frame(self)
-            holding_frame.pack(fill=tk.X, padx=5, pady=5)
-            scrollable_frame = self._init_scrollbar(holding_frame)
+    def _select_local_bib(self):
+        self.table_geo_coord.delete(*self.table_geo_coord.get_children())
+        self.table_not_date.delete(*self.table_not_date.get_children())
 
-            self.holding_id_var = tk.StringVar()
-            self.library_var = tk.StringVar()
-            self.inventory_number_var = tk.StringVar()
-            self.shelfmark_vars = []
+        item_id = self.table_local_bibs.focus()
+        selected_index = self.table_local_bibs.index(item_id)  # Ottieni l'indice dell'elemento
+        selected_local_bib = self.local_bibs[selected_index]
+        if selected_local_bib is not None:
+            for geo_coord in selected_local_bib.get_geo_coords():
+                self.table_geo_coord.insert(parent='', index=tk.END, values=(geo_coord))
+            for not_date in selected_local_bib.get_not_dates():
+                self.table_not_date.insert(parent='', index=tk.END, values=(not_date))
 
-            tk.Label(scrollable_frame, text="Holding ID:").grid(row=0, column=0, padx=5, pady=2)
-            tk.Entry(scrollable_frame, textvariable=self.holding_id_var).grid(row=0, column=1, padx=5, pady=2)
+    def _clicker(self, event):
+        self._select_local_bib()
 
-            tk.Label(scrollable_frame, text="Library:").grid(row=1, column=0, padx=5, pady=2)
-            tk.Entry(scrollable_frame, textvariable=self.library_var).grid(row=1, column=1, padx=5, pady=2)
 
-            tk.Label(scrollable_frame, text="Inventory Number:").grid(row=2, column=0, padx=5, pady=2)
-            tk.Entry(scrollable_frame, textvariable=self.inventory_number_var).grid(row=2, column=1, padx=5, pady=2)
 
-            self.shelfmarks_container = tk.Frame(scrollable_frame)
-            self.shelfmarks_container.grid(row=3, column=0, columnspan=2, padx=5, pady=5)
-
-            self.shelfmark_entries = []
-            self._populate_shelfmarks_entries()
-
-            add_shelfmark_button = tk.Button(scrollable_frame, text="Add Shelfmark", command=self._add_shelfmark)
-            add_shelfmark_button.grid(row=4, column=0, columnspan=2, pady=5)
-
-            save_button = tk.Button(scrollable_frame, text="Save", command=self._save_holding)
-            save_button.grid(row=4, column=1, columnspan=2, pady=5)
-
-            # Populate fields if holding is provided
-            if holding:
-                self.holding_id_var.set(holding.holding_id)
-                self.library_var.set(holding.library)
-                self.inventory_number_var.set(holding.inventory_number)
-
-                # Populate shelfmarks entries
-                for index, shelfmark in enumerate(holding.shelfmark_values):
-                    if index < len(self.shelfmark_entries):
-                        self.shelfmark_entries[index][0].set(shelfmark.type)
-                        self.shelfmark_entries[index][1].set(shelfmark.value)
-                    else:
-                        # If more shelfmarks are present in holding than in UI, add new entries
-                        shelfmark_type_var = tk.StringVar()
-                        shelfmark_value_var = tk.StringVar()
-                        shelfmark_type_var.set(shelfmark.type)
-                        shelfmark_value_var.set(shelfmark.value)
-                        self.shelfmark_vars.append((shelfmark_type_var, shelfmark_value_var))
-                        self._add_shelfmark(shelfmark_type_var, shelfmark_value_var)
-
-        def _populate_shelfmarks_entries(self):
-            self._clear_frame(self.shelfmarks_container)
-            for index, (type_var, value_var) in enumerate(self.shelfmark_vars):
-                shelfmark_frame = tk.Frame(self.shelfmarks_container)
-                shelfmark_frame.pack(fill=tk.X, padx=5, pady=2)
-
-                tk.Label(shelfmark_frame, text="Type:").pack(side=tk.LEFT)
-                type_entry = tk.Entry(shelfmark_frame, textvariable=type_var)
-                type_entry.pack(side=tk.LEFT, padx=5)
-
-                tk.Label(shelfmark_frame, text="Value:").pack(side=tk.LEFT)
-                value_entry = tk.Entry(shelfmark_frame, textvariable=value_var)
-                value_entry.pack(side=tk.LEFT, padx=5)
-
-                self.shelfmark_entries.append((type_var, value_var))
-
-        def _clear_frame(self, frame):
-            for widget in frame.winfo_children():
-                widget.destroy()
-
-        def _add_shelfmark(self, type_var=None, value_var=None):
-            if not type_var:
-                type_var = tk.StringVar()
-            if not value_var:
-                value_var = tk.StringVar()
-            self.shelfmark_vars.append((type_var, value_var))
-            self._populate_shelfmarks_entries()
-
-        def _save_holding(self):
-            holding_id = self.holding_id_var.get()
-            library = self.library_var.get()
-            inventory_number = self.inventory_number_var.get()
-            shelfmarks = [Shelfmark(type_var.get(), value_var.get()) for type_var, value_var in self.shelfmark_vars]
-
-            if not (holding_id or library or inventory_number):
-                messagebox.showwarning("Warning", "Stai aggiungendo un holding non valorizzato")
-                return
-
-            new_holding = Holding(holding_id, library, inventory_number, shelfmarks)
-
-            if self.holding:
-                # Modify existing holding
-                self.holding.set_holding_id(holding_id)
-                self.holding.set_library(library)
-                self.holding.set_inventory_number(inventory_number)
-                self.holding.set_shelfmark_values(shelfmarks)
-
-                # Update Treeview
-                self.parent.update_holding_in_treeview(self.holding, self.treeview_item)
-                messagebox.showinfo("Success", "Holding modificato con successo")
-            else:
-                # Add new holding
-                self.parent.add_local_bib_to_treeview(new_holding)
-                messagebox.showinfo("Success", "Holding aggiunto con successo")
-
-            self.destroy()
-
-        def _init_scrollbar(self, container_frame):
-            canvas = tk.Canvas(container_frame)
-            scrollable_frame = tk.Frame(canvas, bg='red')
-            scrollable_frame.columnconfigure(0, weight=1)
-            scrollable_frame.rowconfigure(0, weight=1)
-            self.scrollable_window = canvas.create_window((0, 0), window=scrollable_frame, anchor=tk.NW)
-
-            def configure_scroll_region(event):
-                canvas.configure(scrollregion=canvas.bbox("all"))
-
-            def configure_window_size(event):
-                canvas.itemconfig(self.scrollable_window, width=canvas.winfo_width())
-
-            scrollable_frame.bind("<Configure>", configure_scroll_region)
-            canvas.bind("<Configure>", configure_window_size)
-
-            scrollbar = tk.Scrollbar(container_frame, orient=tk.VERTICAL, command=canvas.yview)
-            canvas.configure(yscrollcommand=scrollbar.set)
-            canvas.grid(row=0, column=0, sticky=tk.NSEW)
-
-            scrollbar.grid(row=0, column=1, sticky=tk.NS)
-            canvas.yview_moveto(1.0)
-            return scrollable_frame

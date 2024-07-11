@@ -1,9 +1,9 @@
 class Holding:
-    def __init__(self, holding_id, library, inventory_number, shelfmark_values):
+    def __init__(self, holding_id, library, inventory_number, shelfmarks):
         self.holding_id = holding_id
         self.library = library
         self.inventory_number = inventory_number
-        self.shelfmark_values = shelfmark_values
+        self.shelfmarks = shelfmarks
 
     def get_holding_id(self):
         return self.holding_id
@@ -23,15 +23,23 @@ class Holding:
     def set_inventory_number(self, inventory_number):
         self.inventory_number = inventory_number
 
-    def get_shelfmark_values(self):
-        return self.shelfmark_values
+    def get_shelfmarks(self):
+        return self.shelfmarks
 
-    def set_shelfmark_values(self, shelfmark_values):
-        self.shelfmark_values = shelfmark_values
+    def set_shelfmarks(self, shelfmarks):
+        self.shelfmarks = shelfmarks
+
+    def add_shelfmark(self, shelfmark):
+        self.shelfmarks.append(shelfmark)
+
+    def get_string_shelfmarks(self):
+        shelfmarks_str = ''
+        for shelfmark in self.shelfmarks:
+            shelfmarks_str += (str(shelfmark) + " - ")
+        return shelfmarks_str
 
     def __str__(self):
-        shelfmarks_str = ", ".join(str(shelfmark) for shelfmark in self.shelfmark_values)
-        return f"Holding(ID: {self.holding_id}, Library: {self.library}, Inventory Number: {self.inventory_number}, Shelfmarks: [{shelfmarks_str}])"
+        return f"Holding(ID: {self.holding_id}, Library: {self.library}, Inventory Number: {self.inventory_number}, Shelfmarks: [{self.get_string_shelfmarks()}])"
 
 
 class Shelfmark:
@@ -51,5 +59,6 @@ class Shelfmark:
     def set_type(self, type):
         self.type = type
 
+
     def __str__(self):
-        return f"Shelfmark(Value: {self.value}, Type: {self.type})"
+        return f"(Value: {self.value}, Type: {self.type})"

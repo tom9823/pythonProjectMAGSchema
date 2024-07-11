@@ -48,49 +48,49 @@ class FrameGEN(CustomFrame):
         self.entry_identifier.master.destroy()
 
     def _init_widgets(self):
-        tk.Label(self.container_frame, text="Progetto di Digitalizzazione (*):").grid(row=0, column=0)
+        tk.Label(self.container_frame, text="Progetto di Digitalizzazione (*):").pack(pady=(10,5))
         self.entry_stprog_var = tk.StringVar()
         entry_stprog = tk.Entry(self.container_frame, width=50, textvariable=self.entry_stprog_var)
         entry_stprog.focus()
-        entry_stprog.grid(row=0, column=1, sticky=tk.EW)
+        entry_stprog.pack()
         ToolTip(entry_stprog, "Contiene la URI dove è possibile trovare la documentazione relativa la progetto di digitalizzazione. \nTipicamente si tratta della pagina web in cui sono specificate le scelte relative alla \ndigitalizzazione del progetto; in alternativa si suggerisce di puntare alla home page \ndell'istituzione responsabile del progetto. Il suo contenuto è xsd:anyURI. L'elemento è \nobbligatorio, non ripetibile e non sono definiti attributi.")
 
-        tk.Label(self.container_frame, text="Collezione:").grid(row=1, column=0)
+        tk.Label(self.container_frame, text="Collezione:").pack(pady=(10,5))
         self.entry_collection_var = tk.StringVar()
         entry_collection = tk.Entry(self.container_frame, width=50, textvariable=self.entry_collection_var)
-        entry_collection.grid(row=1, column=1, sticky=tk.EW)
+        entry_collection.pack()
         ToolTip(entry_collection, "Contiene la URI (tipicamente l'indirizzo di una pagina web) di un documento in cui viene specificata \nla collezione cui fa parte la risorsa o le risorse digitalizzate. Il suo contenuto è xsd:anyURI. \nL'elemento è opzionale, non ripetibile e non sono definiti attributi.")
 
-        tk.Label(self.container_frame, text="Agenzia (*):").grid(row=2, column=0)
+        tk.Label(self.container_frame, text="Agenzia (*):").pack(pady=(10,5))
         self.entry_agency_var = tk.StringVar()
         entry_agency = tk.Entry(self.container_frame, width=50, textvariable=self.entry_agency_var)
-        entry_agency.grid(row=2, column=1, sticky=tk.EW)
+        entry_agency.pack()
         ToolTip(entry_agency, "Contiene il nome dell'istituzione responsabile del progetto di digitalizzazione. Il suo contenuto è \nxsd:string, ma si raccomanda di usare la sintassi UNIMARC definita per il campo 801, cioè cod. paese \n(due caratteri):codice Agenzia per intero, per esempio: IT:BNCF. In alternativa è possibile usare \nuna sigla riconosciuta, per esempio dall'Anagrafe biblioteche italiane: http://anagrafe.iccu.sbn.it/ \n, per esempio: IT:VE0049 o IT:RM1316. L'elemento è obbligatorio, non ripetibile e non sono definiti \nattributi.")
 
-        tk.Label(self.container_frame, text="Condizioni di Accesso (*):").grid(row=3, column=0)
+        tk.Label(self.container_frame, text="Condizioni di Accesso (*):").pack(pady=(10,5))
         self.access_rights_var = tk.StringVar()
         self.access_rights_menu_options = {"0 : uso riservato all'interno dell'istituzione": 0, "1 : uso pubblico": 1}
         access_rights_menu = tk.OptionMenu(self.container_frame, self.access_rights_var, *self.access_rights_menu_options)
-        access_rights_menu.grid(row=3, column=1, sticky=tk.EW)
+        access_rights_menu.pack()
         ToolTip(access_rights_menu, "Dichiara le condizioni di accessibilità dell'oggetto descritto nella sezione BIB. Il suo contenuto \ndeve assumere uno dei seguenti valori:\n- 0 : uso riservato all'interno dell'istituzione\n- 1 : uso pubblico\nL'elemento è obbligatorio, non ripetibile e non sono definiti attributi.")
 
-        tk.Label(self.container_frame, text="Completezza (*):").grid(row=4, column=0)
+        tk.Label(self.container_frame, text="Completezza (*):").pack(pady=(10,5))
         self.completeness_var = tk.StringVar()
         self.completeness_menu_options = {"0 : digitalizzazione completa": 0, "1 : digitalizzazione incompleta": 1}
         completeness_menu = tk.OptionMenu(self.container_frame, self.completeness_var, *self.completeness_menu_options.keys())
-        completeness_menu.grid(row=4, column=1, sticky=tk.EW)
+        completeness_menu.pack()
         ToolTip(completeness_menu, "Dichiara la completezza della digitalizzazione. Il suo contenuto deve assumere uno dei seguenti \nvalori:\n- 0 : digitalizzazione completa\n- 1 : digitalizzazione incompleta\nL'elemento è obbligatorio, non ripetibile e non sono definiti attributi.")
 
-        tk.Label(self.container_frame, text="Creation (opzionale):").grid(row=5, column=0)
+        tk.Label(self.container_frame, text="Creation (opzionale):").pack(pady=(10,5))
         self.entry_creation_var = tk.StringVar()
         entry_creation = tk.Entry(self.container_frame, width=50, textvariable=self.entry_creation_var)
-        entry_creation.grid(row=5, column=1, sticky=tk.EW)
+        entry_creation.pack()
         ToolTip(entry_creation, "Data di creazione della sezione nel formato aaaa-mm-ggThh:mm:ss. L'elemento è opzionale, non ripetibile.")
 
-        tk.Label(self.container_frame, text="Last Update (opzionale):").grid(row=6, column=0)
+        tk.Label(self.container_frame, text="Last Update (opzionale):").pack(pady=(10,5))
         self.entry_last_update_var = tk.StringVar()
         entry_last_update = tk.Entry(self.container_frame, width=50, textvariable=self.entry_last_update_var)
-        entry_last_update.grid(row=6, column=1, sticky=tk.EW)
+        entry_last_update.pack()
         ToolTip(entry_last_update, "Data dell'ultimo aggiornamento della sezione nel formato aaaa-mm-ggThh:mm:ss. L'elemento è opzionale, non ripetibile.")
 
     def check_data(self):
