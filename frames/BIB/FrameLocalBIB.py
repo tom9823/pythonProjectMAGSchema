@@ -64,8 +64,9 @@ class FrameLocalBIB(CustomFrame):
 
         # table geo coord
         frame_geo_coord = tk.Frame(add_frame)
-        tree_frame_geo_cord = tk.Frame(frame_geo_coord)
-        tree_frame_geo_coord.grid(row=0, column=0)
+        frame_geo_coord.grid(row=0, column=0)
+        tree_frame_geo_coord = tk.Frame(frame_geo_coord)
+        tree_frame_geo_coord.pack()
         tree_vertical_scroll_geo_coord = tk.Scrollbar(tree_frame_geo_coord)
         tree_vertical_scroll_geo_coord.pack(side=tk.RIGHT, fill=tk.Y)
         tree_horizontal_scroll_geo_coord = tk.Scrollbar(tree_frame_geo_coord)
@@ -84,12 +85,14 @@ class FrameLocalBIB(CustomFrame):
         self.table_geo_coord.heading("geo_coord", text="Geo Coord", anchor=tk.W)
 
         self.table_geo_coord.pack()
-        button_add_geo_coord = tk.Button(tree_frame_geo_coord, text="Aggiungi geo coord", command=self._add_geo_coord)
+        button_add_geo_coord = tk.Button(frame_geo_coord, text="Aggiungi geo coord", command=self._add_geo_coord)
         button_add_geo_coord.pack(pady=10)
 
         # table not date
-        tree_frame_not_date = tk.Frame(add_frame)
-        tree_frame_not_date.grid(row=0, column=1)
+        frame_not_date = tk.Frame(add_frame)
+        frame_not_date.grid(row=0, column=1)
+        tree_frame_not_date = tk.Frame(frame_not_date)
+        tree_frame_not_date.pack()
         tree_vertical_scroll_not_date = tk.Scrollbar(tree_frame_not_date)
         tree_vertical_scroll_not_date.pack(side=tk.RIGHT, fill=tk.Y)
         tree_horizontal_scroll_not_date = tk.Scrollbar(tree_frame_not_date)
@@ -108,7 +111,7 @@ class FrameLocalBIB(CustomFrame):
         self.table_not_date.heading("not_date", text="Not Date", anchor=tk.W)
 
         self.table_not_date.pack()
-        button_add_not_date = tk.Button(tree_frame_not_date, text="Aggiungi not date", command=self._add_not_date)
+        button_add_not_date = tk.Button(frame_not_date, text="Aggiungi not date", command=self._add_not_date)
         button_add_not_date.pack(pady=10)
 
         # buttons
@@ -191,6 +194,3 @@ class FrameLocalBIB(CustomFrame):
 
     def _clicker(self, event):
         self._select_local_bib()
-
-
-

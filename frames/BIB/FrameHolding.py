@@ -137,7 +137,6 @@ class FrameHolding(CustomFrame):
             shelfmark = Shelfmark(values[0],values[1])
             shelfmarks_str += (str(shelfmark) + " - ")
             shelfmarks.append(shelfmark)
-
         row = (self.id_entry.get(), self.library_entry.get(), self.inventory_entry.get(), shelfmarks_str)
         holding = Holding(self.id_entry.get(), self.library_entry.get(), self.inventory_entry.get(), shelfmarks)
         self.table_holdings.insert(parent='', index=tk.END, text="Parent", values=row, iid=self.count)
@@ -149,8 +148,8 @@ class FrameHolding(CustomFrame):
         self.table_shelfmarks.delete(*self.table_shelfmarks.get_children())
 
     def _add_shelfmark(self):
-        type = simpledialog.askstring("Input", "Enter Shelfmark Type:")
-        value = simpledialog.askstring("Input", "Enter Shelfmark Value:")
+        type = simpledialog.askstring("Input", "Inserisci Shelfmark Type:")
+        value = simpledialog.askstring("Input", "Inserisci Shelfmark Value:")
         self.table_shelfmarks.insert(parent='', index=tk.END, values=(type, value))
 
     def _remove_all(self):
