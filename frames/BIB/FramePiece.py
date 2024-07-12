@@ -2,6 +2,7 @@ from tkinter import ttk
 import tkinter as tk
 
 import Utils
+from ToolTip import ToolTip
 from frames.CustomFrame import CustomFrame
 
 
@@ -21,122 +22,72 @@ class FramePiece(CustomFrame):
         self._init_widgets()
 
     def _init_widgets(self):
-        tree_frame = tk.Frame(self.container_frame)
-        tree_frame.pack()
+        #radiobutton
+        self.var_selection = tk.IntVar()
+        self.R1 = tk.Radiobutton(self.container_frame, text="dati relativi ad una pubblicazione seriale", variable=self.var_selection, value=0, command=self._on_select_radio_button)
+        self.R1.pack(pady=10)
+        self.R2 = tk.Radiobutton(self.container_frame, text="dati relativi all'unità componente di un'opera più vasta", variable=self.var_selection, value=1, command=self._on_select_radio_button)
+        self.R2.pack(pady=10)
+        self.label_selection = tk.Label(self.container_frame)
+        self.label_selection.pack(pady=20)
 
-        tree_scroll = tk.Scrollbar(tree_frame)
-        tree_scroll.pack(side=tk.RIGHT, fill=tk.Y)
+        #frame pubblicazioni seriali
+        self.frame_pubblicazioni_seriali = tk.Frame(self.container_frame)
+        tk.Label(self.frame_pubblicazioni_seriali, text="Year:").pack(pady=(20, 5))
+        self.entry_year_var = tk.StringVar()
+        entry_year = tk.Entry(self.frame_pubblicazioni_seriali, width=50, textvariable=self.entry_year_var)
+        entry_year.focus()
+        entry_year.pack()
+        ToolTip(entry_year,
+                "contiene l'annata di copertura editoriale di una pubblicazione seriale nella forma in cui si trova sulla pubblicazione stessa; per esempio 1913-1914 o anche 1987.")
 
-        self.table_holdings = ttk.Treeview(tree_frame, yscrollcommand=tree_scroll.set)
-        tree_scroll.config(command=self.table_holdings.yview)
-        self.table_holdings['columns'] = ("id", "library", "inventory", "shelfmarks")
-        self.table_holdings.column("#0", width=0, stretch=tk.NO)
-        self.table_holdings.column("id", anchor=tk.W, width=120)
-        self.table_holdings.column("library", anchor=tk.W, width=120)
-        self.table_holdings.column("inventory", anchor=tk.W, width=120)
-        self.table_holdings.column("shelfmarks", anchor=tk.W, width=120)
+        tk.Label(self.frame_pubblicazioni_seriali, text="Issue:").pack(pady=(10, 5))
+        self.entry_issue_var = tk.StringVar()
+        entry_issue = tk.Entry(self.frame_pubblicazioni_seriali, width=50, textvariable=self.entry_issue_var)
+        entry_issue.pack()
+        ToolTip(entry_issue,"contiene gli estremi identificatori di un fascicolo di una pubblicazione seriale nella forma in cui si trova sulla pubblicazione stessa; per esempion.° 8.")
 
-        # create headings
-        self.table_holdings.heading("#0", text="Label", anchor=tk.W)
-        self.table_holdings.heading("id", text="Id", anchor=tk.W)
-        self.table_holdings.heading("library", text="Library", anchor=tk.W)
-        self.table_holdings.heading("inventory", text="Inventory", anchor=tk.W)
-        self.table_holdings.heading("shelfmarks", text="Shelfmarks", anchor=tk.W)
-        # populate table
+        tk.Label(self.frame_pubblicazioni_seriali, text="Stpiece Per:").pack(pady=(10, 5))
+        self.entry_stpiec_per_var = tk.StringVar()
+        entry_stpiec_per = tk.Entry(self.frame_pubblicazioni_seriali, width=50, textvariable=self.entry_stpiec_per_var)
+        entry_stpiec_per.pack()
+        ToolTip(entry_stpiec_per,"il campo permette di registrare in una forma normalizzata il riferimento a un fascicolo di un periodico; questo sia per poter scambiare i dati, sia per poter ordinare in modo automatico i vari record.")
 
-        self.count = 0
-        self.holdings = self.controller.session.get(Utils.KEY_SESSION_HOLDING, [])
+        #frame unità componenti
+        self.frame_unita_componenti = tk.Frame(self.container_frame)
+        tk.Label(self.frame_unita_componenti, text="Part Number:").pack(pady=(20, 5))
+        self.entry_part_number_var = tk.StringVar()
+        entry_part_number = tk.Entry(self.frame_unita_componenti, width=50, textvariable=self.entry_part_number_var)
+        entry_part_number.focus()
+        entry_part_number.pack()
+        ToolTip(entry_part_number, "numero di unità componente. Per esempio: 2, IV, 4.5.")
 
-        for holding in self.holdings:
-            row = (holding.id, holding.library, holding.inventory, holding.shelfmark_values)
-            self.table_holdings.insert(parent='', index=tk.END, text="Parent", values=row, iid=self.count)
-            self.count += 1
+        tk.Label(self.frame_unita_componenti, text="Part Name:").pack(pady=(10, 5))
+        self.entry_part_name_var = tk.StringVar()
+        entry_part_name = tk.Entry(self.frame_unita_componenti, width=50, textvariable=self.entry_part_name_var)
+        entry_part_name.pack()
+        ToolTip(entry_part_name,"nome/titolo di una unità componente. Per esempio: Volume II; Parte III,Tomo 2.")
 
-        self.table_holdings.pack()
+        tk.Label(self.frame_unita_componenti, text="Stpiece Vol:").pack(pady=(10, 5))
+        self.entry_stpiece_vol_var = tk.StringVar()
+        entry_stpiece_vol = tk.Entry(self.frame_unita_componenti, width=50, textvariable=self.entry_stpiece_vol_var)
+        entry_stpiece_vol.pack()
+        ToolTip(entry_stpiece_vol,"forma normalizzata del riferimento a una parte di una unità componente.")
 
-        add_frame = tk.Frame(self.container_frame)
-        add_frame.pack(pady=10)
-        # label
-        id_label = tk.Label(add_frame, text="Id")
-        id_label.grid(row=0, column=0)
+        self.var_selection.set(0)
+        self._on_select_radio_button()
 
-        library_label = tk.Label(add_frame, text="Library")
-        library_label.grid(row=0, column=1)
-
-        inventory_label = tk.Label(add_frame, text="Inventory")
-        inventory_label.grid(row=0, column=2)
-
-        # entry
-        self.id_entry_var = tk.StringVar()
-        self.id_entry = tk.Entry(add_frame)
-        self.id_entry.grid(row=1, column=0)
-
-        self.library_entry = tk.Entry(add_frame)
-        self.library_entry.grid(row=1, column=1)
-
-        self.inventory_entry = tk.Entry(add_frame)
-        self.inventory_entry.grid(row=1, column=2)
-
-        # buttons
-        buttons_frame = tk.Frame(self.container_frame)
-        buttons_frame.pack(pady=10)
-
-        button_add_record = tk.Button(buttons_frame, text="Aggiungi holding", command=self._add_holding)
-        button_add_record.grid(row=0, column=0)
-
-        button_remove_all = tk.Button(buttons_frame, text="Rimuovi tutto", command=self._remove_all)
-        button_remove_all.grid(row=0, column=1)
-
-        button_remove_record = tk.Button(buttons_frame, text="Rimuovi holding selezionati", command=self._remove_selected)
-        button_remove_record.grid(row=0, column=2)
-
-        button_update_record = tk.Button(buttons_frame, text="Aggiorna holding", command=self._update_holding)
-        button_update_record.grid(row=0, column=3)
-
-        self.table_holdings.bind("<Double-1>", self._clicker)
-        self.table_holdings.bind("<ButtonRelease-1>", self._clicker)
-
-    def _add_holding(self):
-        row = (self.id_entry.get(), self.library_entry.get(), self.inventory_entry.get(), "shelfmark")
-        self.table_holdings.insert(parent='', index=tk.END, text="Parent", values=row, iid=self.count)
-        self.count += 1
-        self.id_entry.delete(0, tk.END)
-        self.library_entry.delete(0, tk.END)
-        self.inventory_entry.delete(0, tk.END)
-
-    def _remove_all(self):
-        for record in self.table_holdings.get_children():
-            self.table_holdings.delete(record)
-        self.controller.session[Utils.KEY_SESSION_HOLDING] = []
-
-    def _remove_selected(self):
-        selected = self.table_holdings.selection()
-        for holding in selected:
-            self.table_holdings.delete(holding)
+    def _on_select_radio_button(self):
+        string_selection = "Hai selezionato che l'elemento piece contenga dati relativi "
+        if self.var_selection.get() == 0:
+            string_selection += "ad una pubblicazione seriale"
+            self.frame_pubblicazioni_seriali.pack()
+            self.frame_unita_componenti.pack_forget()
+        elif self.var_selection.get() == 1:
+            string_selection += "all'unità componente di un'opera più vasta"
+            self.frame_unita_componenti.pack()
+            self.frame_pubblicazioni_seriali.pack_forget()
+        self.label_selection.config(text=string_selection)
 
     def check_data(self):
-        super().save_to_session(
-            (Utils.KEY_SESSION_HOLDING, self.holdings)
-        )
-
-    def _update_holding(self):
-        selected = self.table_holdings.focus()
-        self.table_holdings.item(selected, text="Parent", values=(self.id_entry.get(), self.library_entry.get(), self.inventory_entry.get(), "update shelfmark"))
-        self.id_entry.delete(0, tk.END)
-        self.library_entry.delete(0, tk.END)
-        self.inventory_entry.delete(0, tk.END)
-
-    def _select_holding(self):
-        self.id_entry.delete(0, tk.END)
-        self.library_entry.delete(0, tk.END)
-        self.inventory_entry.delete(0, tk.END)
-
-        selected = self.table_holdings.focus()
-        values = self.table_holdings.item(selected, 'values')
-
-        self.id_entry.insert(0, values[0])
-        self.library_entry.insert(0, values[1])
-        self.inventory_entry.insert(0, values[2])
-
-    def _clicker(self, event):
-        self._select_holding()
+        return True

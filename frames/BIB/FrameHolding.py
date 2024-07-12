@@ -37,10 +37,10 @@ class FrameHolding(CustomFrame):
 
         self.table_holdings['columns'] = ("id", "library", "inventory", "shelfmarks")
         self.table_holdings.column("#0", width=0, stretch=tk.NO)
-        self.table_holdings.column("id", anchor=tk.W, width=120)
-        self.table_holdings.column("library", anchor=tk.W, width=120)
-        self.table_holdings.column("inventory", anchor=tk.W, width=120)
-        self.table_holdings.column("shelfmarks", anchor=tk.W, width=120)
+        self.table_holdings.column("id", anchor=tk.W, width=240)
+        self.table_holdings.column("library", anchor=tk.W, width=240)
+        self.table_holdings.column("inventory", anchor=tk.W, width=240)
+        self.table_holdings.column("shelfmarks", anchor=tk.W, width=240)
 
         # create headings
         self.table_holdings.heading("#0", text="Label", anchor=tk.W)

@@ -4,6 +4,7 @@ import Utils
 from frames.BIB.FrameDC import FrameDC
 from frames.BIB.FrameHolding import FrameHolding
 from frames.BIB.FrameLocalBIB import FrameLocalBIB
+from frames.BIB.FramePiece import FramePiece
 from frames.FrameGEN import FrameGEN
 from frames.FrameINIT import FrameINIT
 from frames.FrameSCAN import FrameSCAN
@@ -62,17 +63,28 @@ class MainWindow(tk.Tk):
             left_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_LOCAL_BIB, container=Utils.KEY_FRAME_HOLDING),
             left_button_title='HOLDING',
             right_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_LOCAL_BIB,
-                                                        container=Utils.KEY_FRAME_SCAN),
-            right_button_title='SCAN'
+                                                        container=Utils.KEY_FRAME_PIECE),
+            right_button_title='PIECE'
         )
         frameLocalBIB.grid(row=0, column=0, sticky=tk.NSEW)
         self.frames[Utils.KEY_FRAME_LOCAL_BIB] = frameLocalBIB
 
+        framePiece = FramePiece(
+            parent=self,
+            controller=self,
+            left_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_PIECE, container=Utils.KEY_FRAME_LOCAL_BIB),
+            left_button_title='LOCALBIB',
+            right_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_PIECE, container=Utils.KEY_FRAME_SCAN),
+            right_button_title='SCAN'
+        )
+        framePiece.grid(row=0, column=0, sticky=tk.NSEW)
+        self.frames[Utils.KEY_FRAME_PIECE] = framePiece
+
         frameSCAN = FrameSCAN(
             parent=self,
             controller=self,
-            left_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_SCAN, container=Utils.KEY_FRAME_LOCAL_BIB),
-            left_button_title="BIB",
+            left_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_SCAN, container=Utils.KEY_FRAME_PIECE),
+            left_button_title="PIECE",
             right_button_action=self.generate_file_xml,
             right_button_title="Visualizza XML",
             is_ocr_recognition=False

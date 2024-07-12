@@ -39,8 +39,8 @@ class FrameLocalBIB(CustomFrame):
 
         self.table_local_bibs['columns'] = ("geo_coords", "not_dates")
         self.table_local_bibs.column("#0", width=0, stretch=tk.NO)
-        self.table_local_bibs.column("geo_coords", anchor=tk.W, width=120)
-        self.table_local_bibs.column("not_dates", anchor=tk.W, width=120)
+        self.table_local_bibs.column("geo_coords", anchor=tk.W, width=300)
+        self.table_local_bibs.column("not_dates", anchor=tk.W, width=300)
 
         # create headings
         self.table_local_bibs.heading("#0", text="Label", anchor=tk.W)
@@ -78,7 +78,7 @@ class FrameLocalBIB(CustomFrame):
         tree_horizontal_scroll_geo_coord.config(command=self.table_geo_coord.xview)
         self.table_geo_coord['columns'] = ("geo_coord")
         self.table_geo_coord.column("#0", width=0, stretch=tk.NO)
-        self.table_geo_coord.column("geo_coord", anchor=tk.W, width=120)
+        self.table_geo_coord.column("geo_coord", anchor=tk.W, width=300)
 
         # create headings
         self.table_geo_coord.heading("#0", text="Label", anchor=tk.W)
@@ -104,7 +104,7 @@ class FrameLocalBIB(CustomFrame):
         tree_horizontal_scroll_not_date.config(command=self.table_not_date.xview)
         self.table_not_date['columns'] = ("not_date")
         self.table_not_date.column("#0", width=0, stretch=tk.NO)
-        self.table_not_date.column("not_date", anchor=tk.W, width=120)
+        self.table_not_date.column("not_date", anchor=tk.W, width=300)
 
         # create headings
         self.table_not_date.heading("#0", text="Label", anchor=tk.W)
