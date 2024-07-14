@@ -17,4 +17,3 @@ class FrameINIT(CustomFrame):
 
     def check_data(self):
         return True
-

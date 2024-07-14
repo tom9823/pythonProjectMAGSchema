@@ -1,4 +1,4 @@
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from tkinter import simpledialog
 import tkinter as tk
 import Utils
@@ -50,13 +50,11 @@ class FrameHolding(CustomFrame):
         self.table_holdings.heading("shelfmarks", text="Shelfmarks", anchor=tk.W)
         # populate table
 
-        self.count = 0
-        self.holdings = self.controller.session.get(Utils.KEY_SESSION_HOLDING, [])
+        self.holding_list = self.controller.session.get(Utils.KEY_SESSION_HOLDING, [])
 
-        for holding in self.holdings:
+        for holding in self.holding_list:
             row = (holding.id, holding.library, holding.inventory, holding.get_string_shelfmarks())
-            self.table_holdings.insert(parent='', index=tk.END, text="Parent", values=row, iid=self.count)
-            self.count += 1
+            self.table_holdings.insert(parent='', index=tk.END, text="Parent", values=row)
 
         self.table_holdings.pack()
         add_frame = tk.Frame(self.container_frame)
@@ -86,8 +84,10 @@ class FrameHolding(CustomFrame):
         self.inventory_entry.grid(row=1, column=2)
 
         #table shelfmarks
-        tree_frame_shelfmarks = tk.Frame(add_frame)
-        tree_frame_shelfmarks.grid(row=1, column=3)
+        frame_shelfmarks = tk.Frame(add_frame)
+        frame_shelfmarks.grid(row=1, column=3)
+        tree_frame_shelfmarks = tk.Frame(frame_shelfmarks)
+        tree_frame_shelfmarks.pack(pady=10)
         tree_vertical_scroll_shelfmarks = tk.Scrollbar(tree_frame_shelfmarks)
         tree_vertical_scroll_shelfmarks.pack(side=tk.RIGHT, fill=tk.Y)
         tree_horizontal_scroll_shelfmarks = tk.Scrollbar(tree_frame_shelfmarks)
@@ -107,6 +107,9 @@ class FrameHolding(CustomFrame):
         self.table_shelfmarks.heading("value", text="Value", anchor=tk.W)
         self.table_shelfmarks.pack()
 
+        button_add_shelfmark = tk.Button(frame_shelfmarks, text="Aggiungi shelfmark", command=self._add_shelfmark)
+        button_add_shelfmark.pack(pady=10)
+
         # buttons
         buttons_frame = tk.Frame(self.container_frame)
         buttons_frame.pack(pady=10)
@@ -123,25 +126,19 @@ class FrameHolding(CustomFrame):
         button_update_record = tk.Button(buttons_frame, text="Aggiorna holding", command=self._update_holding)
         button_update_record.grid(row=0, column=3)
 
-        button_add_shelfmark = tk.Button(buttons_frame, text="Aggiungi shelfmark", command=self._add_shelfmark)
-        button_add_shelfmark.grid(row=0, column=4)
-
         self.table_holdings.bind("<Double-1>", self._clicker)
         self.table_holdings.bind("<ButtonRelease-1>", self._clicker)
 
     def _add_holding(self):
         shelfmarks = []
-        shelfmarks_str = ""
         for item in self.table_shelfmarks.get_children():
             values = self.table_shelfmarks.item(item, 'values')
             shelfmark = Shelfmark(values[0],values[1])
-            shelfmarks_str += (str(shelfmark) + " - ")
             shelfmarks.append(shelfmark)
-        row = (self.id_entry.get(), self.library_entry.get(), self.inventory_entry.get(), shelfmarks_str)
         holding = Holding(self.id_entry.get(), self.library_entry.get(), self.inventory_entry.get(), shelfmarks)
-        self.table_holdings.insert(parent='', index=tk.END, text="Parent", values=row, iid=self.count)
-        self.holdings.append(holding)
-        self.count += 1
+        row = (holding.get_holding_id(), holding.get_library(), holding.get_inventory_number(), holding.get_string_shelfmarks())
+        self.table_holdings.insert(parent='', index=tk.END, text="Parent", values=row)
+        self.holding_list.append(holding)
         self.id_entry.delete(0, tk.END)
         self.library_entry.delete(0, tk.END)
         self.inventory_entry.delete(0, tk.END)
@@ -156,33 +153,51 @@ class FrameHolding(CustomFrame):
         for record in self.table_holdings.get_children():
             self.table_holdings.delete(record)
         self.controller.session[Utils.KEY_SESSION_HOLDING] = []
+        self.holding_list.clear()
 
     def _remove_selected(self):
         selected = self.table_holdings.selection()
-        for holding in selected:
-            self.table_holdings.delete(holding)
+        for item_id in selected:
+            selected_index = self.table_holdings.index(item_id)
+            self.table_holdings.delete(item_id)
+            self.holding_list.pop(selected_index)
 
     def check_data(self):
         super().save_to_session(
-            (Utils.KEY_SESSION_HOLDING, self.holdings)
+            (Utils.KEY_SESSION_HOLDING, self.holding_list)
         )
         return True
 
     def _update_holding(self):
         item_id = self.table_holdings.focus()
-        selected_index = self.table_holdings.index(item_id)  # Ottieni l'indice dell'elemento
-        selected_holding = self.holdings[selected_index]
-        self.table_holdings.item(item_id,
-                                 text="Parent",
-                                 values=(
-                                     self.id_entry.get(),
-                                     self.library_entry.get(),
-                                     self.inventory_entry.get(),
-                                     selected_holding.get_string_shelfmarks()))
-        self.id_entry.delete(0, tk.END)
-        self.library_entry.delete(0, tk.END)
-        self.inventory_entry.delete(0, tk.END)
-        self.table_shelfmarks.delete(*self.table_shelfmarks.get_children())
+        if item_id is not None and item_id != '':
+            shelfmark_list = []
+            shelfmarks_str = ''
+            for item in self.table_shelfmarks.get_children():
+                values = self.table_shelfmarks.item(item, 'values')
+                shelfmark = Shelfmark(values[0], values[1])
+                shelfmarks_str += (str(shelfmark) + " - ")
+                shelfmark_list.append(shelfmark)
+            selected_index = self.table_holdings.index(item_id)
+            selected_holding = self.holding_list[selected_index]
+            selected_holding.set_holding_id(self.id_entry.get())
+            selected_holding.set_library(self.library_entry.get())
+            selected_holding.set_inventory_number(self.inventory_entry.get())
+            selected_holding.set_shelfmarks(shelfmark_list)
+            self.table_holdings.item(item_id,
+                                     text="Parent",
+                                     values=(
+                                         self.id_entry.get(),
+                                         self.library_entry.get(),
+                                         self.inventory_entry.get(),
+                                         shelfmarks_str)
+                                     )
+            self.id_entry.delete(0, tk.END)
+            self.library_entry.delete(0, tk.END)
+            self.inventory_entry.delete(0, tk.END)
+            self.table_shelfmarks.delete(*self.table_shelfmarks.get_children())
+        else:
+            messagebox.showerror("Errore", "Seleziona una riga nella tabella degli holdings")
 
     def _select_holding(self):
         self.id_entry.delete(0, tk.END)
@@ -191,8 +206,8 @@ class FrameHolding(CustomFrame):
         self.table_shelfmarks.delete(*self.table_shelfmarks.get_children())
 
         item_id = self.table_holdings.focus()
-        selected_index = self.table_holdings.index(item_id)  # Ottieni l'indice dell'elemento
-        selected_holding = self.holdings[selected_index]
+        selected_index = self.table_holdings.index(item_id)
+        selected_holding = self.holding_list[selected_index]
         if selected_holding is not None:
             self.id_entry.insert(0, selected_holding.get_holding_id())
             self.library_entry.insert(0, selected_holding.get_library())

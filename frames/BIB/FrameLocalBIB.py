@@ -47,15 +47,13 @@ class FrameLocalBIB(CustomFrame):
         self.table_local_bibs.heading("geo_coords", text="Geo Coords", anchor=tk.W)
         self.table_local_bibs.heading("not_dates", text="Not Dates", anchor=tk.W)
         # populate table
-        self.count = 0
-        self.local_bibs = self.controller.session.get(Utils.KEY_SESSION_LOCAL_BIB, [])
+        self.local_bib_list = self.controller.session.get(Utils.KEY_SESSION_LOCAL_BIB, [])
 
-        for local_bib in self.local_bibs:
+        for local_bib in self.local_bib_list:
             geo_coords_str = local_bib.print_geo_coords()
             not_dates_str = local_bib.print_not_dates()
             row = (geo_coords_str, not_dates_str)
-            self.table_local_bibs.insert(parent='', index=tk.END, text="Parent", values=row, iid=self.count)
-            self.count += 1
+            self.table_local_bibs.insert(parent='', index=tk.END, text="Parent", values=row)
 
         self.table_local_bibs.pack()
         #add frame
@@ -143,54 +141,69 @@ class FrameLocalBIB(CustomFrame):
             local_bib.add_not_date(values[0])
 
         row = (local_bib.print_geo_coords(), local_bib.print_not_dates())
-        self.table_local_bibs.insert(parent='', index=tk.END, text="Parent", values=row, iid=self.count)
-        self.local_bibs.append(local_bib)
-        self.count += 1
+        self.table_local_bibs.insert(parent='', index=tk.END, text="Parent", values=row)
+        self.local_bib_list.append(local_bib)
         self.table_geo_coord.delete(*self.table_geo_coord.get_children())
         self.table_not_date.delete(*self.table_not_date.get_children())
 
     def _add_geo_coord(self):
         geo_coord = simpledialog.askstring("Input", "Inserisci Geo Coord:")
-        self.table_geo_coord.insert(parent='', index=tk.END, values=(geo_coord))
+        self.table_geo_coord.insert(parent='', index=tk.END, values=[geo_coord])
 
     def _add_not_date(self):
         not_date = simpledialog.askstring("Input", "Inserisci Not Date:")
-        self.table_not_date.insert(parent='', index=tk.END, values=(not_date))
+        self.table_not_date.insert(parent='', index=tk.END, values=[not_date])
 
     def _remove_all(self):
         for record in self.table_local_bibs.get_children():
             self.table_local_bibs.delete(record)
         self.controller.session[Utils.KEY_SESSION_HOLDING] = []
+        self.local_bib_list.clear()
 
     def _remove_selected(self):
         selected = self.table_local_bibs.selection()
-        for holding in selected:
-            self.table_local_bibs.delete(holding)
+        for item_id in selected:
+            selected_index = self.table_local_bibs.index(item_id)
+            self.table_local_bibs.delete(item_id)
+            self.local_bib_list.pop(selected_index)
 
     def check_data(self):
         super().save_to_session(
-            (Utils.KEY_SESSION_LOCAL_BIB, self.local_bibs)
+            (Utils.KEY_SESSION_LOCAL_BIB, self.local_bib_list)
         )
         return True
 
     def _update_local_bib(self):
         item_id = self.table_local_bibs.focus()
-        selected_index = self.table_local_bibs.index(item_id)
-        selected_local_bib = self.local_bibs[selected_index]
-        self.table_local_bibs.item(item_id, text="", values=(selected_local_bib.print_geo_coords(), selected_local_bib.print_not_dates()))
+        if item_id is not None and item_id != '':
+            selected_index = self.table_local_bibs.index(item_id)
+            selected_local_bib = self.local_bib_list[selected_index]
+            geo_coord_list = []
+            for item in self.table_geo_coord.get_children():
+                values = self.table_geo_coord.item(item, 'values')
+                geo_coord_list.append(values[0])
+            not_date_list = []
+            for item in self.table_not_date.get_children():
+                values = self.table_not_date.item(item, 'values')
+                not_date_list.append(values[0])
+            selected_local_bib.set_geo_coord(geo_coord_list)
+            selected_local_bib.set_not_dates(not_date_list)
+            self.table_local_bibs.item(item_id, text="", values=(selected_local_bib.print_geo_coords(), selected_local_bib.print_not_dates()))
+        else:
+            messagebox.showerror("Errore", "Seleziona una riga nella tabella dei local bib.")
 
     def _select_local_bib(self):
         self.table_geo_coord.delete(*self.table_geo_coord.get_children())
         self.table_not_date.delete(*self.table_not_date.get_children())
 
         item_id = self.table_local_bibs.focus()
-        selected_index = self.table_local_bibs.index(item_id)  # Ottieni l'indice dell'elemento
-        selected_local_bib = self.local_bibs[selected_index]
+        selected_index = self.table_local_bibs.index(item_id)
+        selected_local_bib = self.local_bib_list[selected_index]
         if selected_local_bib is not None:
             for geo_coord in selected_local_bib.get_geo_coords():
-                self.table_geo_coord.insert(parent='', index=tk.END, values=(geo_coord))
+                self.table_geo_coord.insert(parent='', index=tk.END, values=[geo_coord])
             for not_date in selected_local_bib.get_not_dates():
-                self.table_not_date.insert(parent='', index=tk.END, values=(not_date))
+                self.table_not_date.insert(parent='', index=tk.END, values=[not_date])
 
     def _clicker(self, event):
         self._select_local_bib()

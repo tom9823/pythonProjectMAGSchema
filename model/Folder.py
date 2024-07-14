@@ -1,14 +1,16 @@
 import ET
 
+from scanner.MetaData import MetaData
+
 
 class Folder(object):
-
 
     def __init__(self, name):
         self.children = []
         self.name = name
         self.parent = None
         self.elementTree = None
+
     def add_child(self, child):
         self.children.append(child)
         child.parent = self
@@ -59,10 +61,9 @@ class Folder(object):
             # video_group: caratteristiche comuni a gruppi omogenei di file video; l'elemento è opzionale e ripetibile
             video_group = ET.SubElement(genRootElement, 'video_group')
 
-
             # L'elemento <bib> è il secondo figlio dell'elemento root <metadigit> ed è obbligatorio. Esso contiene una serie di elementi figli che raccolgono metadati descrittivi relativamente all'oggetto analogico digitalizzato o, nel caso di documenti born digital,relativamente al documento stesso. L'elemento non è ripetibile.
             bibRootElement = ET.SubElement(self.elementTree, 'bib')
-            bibRootElement.set('level',  )
+            bibRootElement.set('level', )
 
             dc_tags = [
                 'dc:title',
@@ -89,10 +90,10 @@ class Folder(object):
             # ID : di tipo xsd:ID, serve a definire un identificatore univoco all'interno del record MAG
             # cui è possibile fare riferimento da altri luoghi del medesimo record. L'attributo trova la
             # sua utilità qualora vi sia la necessità di dichiarare diversi <holdings>
-            holdings.set('ID',)
+            holdings.set('ID', )
             # library: contiene il nome dell'istituzione proprietaria dell'oggetto analogico o di
             # parte dell'oggetto analogico. Di tipo xsd:string, è opzionale e non ripetibile.
-            library_element =  ET.SubElement(holdings, 'library')
+            library_element = ET.SubElement(holdings, 'library')
             library_element.text = 'library'
             # inventory_number: contiene il numero di inventario attribuito all'oggetto analogico
             # dall'istituzione che lo possiede. Di tipo xsd:string, è opzionale e non ripetibile.
@@ -134,20 +135,14 @@ class Folder(object):
             albero_xml.write("singola_cartella.xml")
 
 
-
 class File(Folder):
     metadata: list[MetaData]
-    def __init__(self, nome ):
+
+    def __init__(self, nome):
         super().__init__(nome)
 
     def add_metadata(self, metadata):
         self.metadata.append(metadata)
 
     def print_xml(self, xml_str, xmlGenType):
-
-
-
-
-
-
-
+        pass

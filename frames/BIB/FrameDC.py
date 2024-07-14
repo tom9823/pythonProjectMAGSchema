@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 
+import Utils
 from frames.CustomFrame import CustomFrame
 
 # Lista dei tipi di elementi DC (Dublin Core)
@@ -9,6 +10,7 @@ DC_TYPES = [
     'Subject', 'Description', 'Contributor', 'Date', 'Type',
     'Format', 'Source', 'Language', 'Relation', 'Coverage', 'Rights'
 ]
+
 
 class FrameDC(CustomFrame):
     def __init__(self, parent, controller, left_button_action, left_button_title, right_button_action,
@@ -36,7 +38,8 @@ class FrameDC(CustomFrame):
                                    "c: raccolta prodotta dall'istituzione": "c"}
         level_menu = tk.OptionMenu(level_frame, self.level_var, *self.level_menu_options.keys())
         level_menu.grid(row=0, column=1)
-        #Table DC
+
+        # Table DC
         tree_frame = tk.Frame(self.container_frame)
         tree_frame.pack()
 
@@ -97,29 +100,42 @@ class FrameDC(CustomFrame):
         self.table_dc.bind("<Double-1>", self._clicker)
         self.table_dc.bind("<ButtonRelease-1>", self._clicker)
 
+        self.dc_list = self.controller.session.get(Utils.KEY_SESSION_DC, [])
+        for dc_element in self.dc_list:
+            dc_element_key, dc_element_value = dc_element
+            row = [dc_element_key, dc_element_value]
+            self.table_dc.insert(parent='', index=tk.END, text="Parent", values=row)
+
     def _add_dc(self):
-        # Esempio di aggiunta di un nuovo elemento
         dc_type = self.dc_type_var.get()
-        value = self.value_entry.get()  # Supponendo che tu abbia un widget Entry per inserire il valore
+        value = self.value_entry.get()
         self.table_dc.insert(parent='', index=tk.END, text="Parent", values=(dc_type, value))
+        self.dc_list.append((dc_type, value))
 
     def _remove_all(self):
-        # Rimuove tutti i record dalla tabella
+        self.dc_list = []
+        self.controller.session[Utils.KEY_SESSION_DC] = []
         for record in self.table_dc.get_children():
             self.table_dc.delete(record)
 
     def _remove_selected(self):
-        # Rimuove il record selezionato dalla tabella
         selected = self.table_dc.selection()
-        for item in selected:
-            self.table_dc.delete(item)
+        for item_id in selected:
+            selected_index = self.table_dc.index(item_id)
+            self.table_dc.delete(item_id)
+            self.dc_list.pop(selected_index)
 
     def _update_dc(self):
-        # Esempio di aggiornamento del record selezionato
-        selected = self.table_dc.focus()
-        dc_type = self.dc_type_var.get()
-        value = self.value_entry.get()  # Supponendo che tu abbia un widget Entry per inserire il valore
-        self.table_dc.item(selected, values=(dc_type, value))
+        # ad esempio I001
+        item_id = self.table_dc.focus()
+        if item_id is not None and item_id != '':
+            selected_index = self.table_dc.index(item_id)
+            dc_type = self.dc_type_var.get()
+            value = self.value_entry.get()
+            self.table_dc.item(item_id, values=(dc_type, value))
+            self.dc_list[selected_index] = (dc_type, value)
+        else:
+            messagebox.showerror("Errore", "Seleziona una riga nella tabella dei dublin core elements")
 
     def _select_dc(self):
         selected = self.table_dc.focus()
@@ -140,5 +156,12 @@ class FrameDC(CustomFrame):
         if not level:
             messagebox.showwarning("Attenzione", "Per favore, compila il campo 'level'.")
             ret = False
+        if not any(dc_element[0] == 'Identifier' for dc_element in self.dc_list):
+            messagebox.showwarning("Attenzione", "Per favore, inserisci almeno un dc element che abbia come tipo "
+                                                 "'Identifier'.")
+            ret = False
+        if ret:
+            super().save_to_session(
+                (Utils.KEY_SESSION_DC, self.dc_list)
+            )
         return ret
-

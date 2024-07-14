@@ -10,6 +10,7 @@ KEY_FRAME_LOCAL_BIB = 'FrameLOCALBIB'
 KEY_FRAME_PIECE = 'FramePIECE'
 KEY_FRAME_SCAN_OCR_RECOGNITION = 'FrameSCANOCRrecognition'
 KEY_MAIN_WINDOW = 'MainWindow'
+KEY_SESSION_DC = 'DC'
 KEY_SESSION_LOCAL_BIB = 'LocalBIB'
 KEY_SESSION_HOLDING = 'Holding'
 
@@ -26,18 +27,16 @@ def validate_agency(agency):
     pattern = re.compile(r'^[A-Z]{2}:[A-Za-z0-9]+$')
     return pattern.match(agency) is not None
 
-def validate_sici_format(string):
-    # Definire i pattern regex per cronologia, numerazione, supplementi e indici
-    cronologia = r"\(\d{4}(?:\d{2}(?:\d{2})?)?(?:/\d{4}(?:\d{2}(?:\d{2})?)?)?\)"
-    cronologia_combinata = r"\((?:\d{4}(?:\d{2}(?:\d{2})?)?(?:/\d{4}(?:\d{2}(?:\d{2})?)?)?|(?:\d{4}(?:\d{2})?)?\)\d{2}/\d{2})?\)"
-    numerazione = r"(?:(?:\d+(:\d+){0,3})|\*)"
-    supplementi = r"\+"
-    indici = r"\*"
 
-    # Creare il pattern completo combinando cronologia e numerazione
-    pattern = fr"^{cronologia_combinata}({numerazione})?(:{numerazione})?(:{numerazione})?(:{numerazione})?({supplementi}|{indici})?$"
+def validate_sici(sici_string):
+    sici_pattern = re.compile(
+        r'\((\d{4}(/\d{4})?((\d{2})(/(\d{2}|\d{6}))?((\d{2})(/\d{2})?)?)?)?\)'
+        r'((\+|\*)?|(\d{1,4}(:(\d{1,4})(/\d{1,4})?(\+|\*)?)?'
+        r'(:(\d{1,4})(/\d{1,4})?(\+|\*)?)?(:(\d{1,4})(/\d{1,4})?(\+|\*)?)?)?)?'
+    )
+    return bool(sici_pattern.fullmatch(sici_string))
 
-    # Verificare se la stringa corrisponde al pattern
-    match = re.match(pattern, string)
 
-    return match is not None
+def validate_bici(bici_string):
+    bici_pattern = re.compile(r'\d{1,3}(:\d{1,4}(:\d{1,4})?)?')
+    return bool(bici_pattern.fullmatch(bici_string))

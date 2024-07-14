@@ -135,5 +135,3 @@ class FrameSCAN(CustomFrame):
 
     def check_data(self):
         return not self.scanner_running
-
-

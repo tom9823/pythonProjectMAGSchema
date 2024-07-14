@@ -189,10 +189,10 @@ class MainWindow(tk.Tk):
             "version": "2.0.1"
         })
 
-        # Creare il tag <gen>
+        # Aggiungere il sottotag <gen>
         self._attach_gen_tag(metadigit)
 
-        # Aggiungere i sottotag di <bib>
+        # Aggiungere il sottotag <bib>
         self._attach_bib_tag(metadigit)
 
         # Convertire l'albero degli elementi XML in una stringa
@@ -231,10 +231,60 @@ class MainWindow(tk.Tk):
         })
 
         # Aggiungere i sottotag di <bib> con prefisso dc:
-        for tag in ['Identifier', 'Title', 'Creator', 'Date', 'Publisher', 'Subject', 'Type', 'Format',
-                    'Source', 'Language']:
+        for dc in self.session.get(Utils.KEY_SESSION_DC, []):
+            tag, value = dc
             dc_tag = ET.SubElement(bib, f"dc:{tag.lower()}")
-            dc_tag.text = str(self.session.get(tag, ''))
+            dc_tag.text = value
+
+        #aggiungere i sottotag di <bib> holding
+        for holding in self.session.get(Utils.KEY_SESSION_HOLDING, []):
+            holdings_element = ET.SubElement(bib, "holdings", ID=holding.holding_id)
+
+            # Crea il sotto-elemento library
+            library_element = ET.SubElement(holdings_element, "library")
+            library_element.text = holding.get_library()
+
+            # Crea il sotto-elemento inventory_number
+            inventory_number_element = ET.SubElement(holdings_element, "inventory_number")
+            inventory_number_element.text = holding.get_inventory_number()
+
+            # Crea i sotto-elementi shelfmark
+            for shelfmark in holding.shelfmarks:
+                shelfmark_element = ET.SubElement(holdings_element, "shelfmark", type=shelfmark.get_type())
+                shelfmark_element.text = shelfmark.get_value()
+
+            # aggiungere i sottotag di <bib> local_bib
+            for local_bib in self.session.get(Utils.KEY_SESSION_LOCAL_BIB, []):
+                local_bib_element = ET.SubElement(bib, "local_bib")
+                for geo_coord in local_bib.get_geo_coords():
+                    geo_coord_element = ET.SubElement(local_bib_element, "geo_coord")
+                    geo_coord_element.text = geo_coord
+                for not_date in local_bib.get_not_dates():
+                    not_date_element = ET.SubElement(local_bib_element, "not_date")
+                    not_date_element.text = not_date
+
+            # aggiungere i sottotag di <bib> piece
+            piece = self.session.get(Utils.KEY_FRAME_PIECE, None)
+            piece_element = ET.SubElement(bib, "bib")
+            if piece == Utils:
+                if piece.get_pubblicazioni_seriali():
+                    year_element = ET.SubElement(piece_element, "year")
+                    year_element.text = piece.get_year()
+                    issue_element = ET.SubElement(piece_element, "issue")
+                    issue_element.text = piece.get_year()
+                    if piece.get_stpiece_per():
+                        stpiece_per_element = ET.SubElement(piece_element, "stpiece_per")
+                        stpiece_per_element.text = piece.get_stpiece_per()
+                else:
+                    part_number_element = ET.SubElement(piece_element, "part_number")
+                    part_number_element.text = piece.get_year()
+                    part_name_element = ET.SubElement(piece_element, "part_name")
+                    part_name_element.text = piece.get_year()
+                    if piece.get_stpiece_vol():
+                        stpiece_vol_element = ET.SubElement(piece_element, "stpiece_vol")
+                        stpiece_vol_element.text = piece.get_stpiece_vol()
+
+
 
 
 if __name__ == "__main__":
