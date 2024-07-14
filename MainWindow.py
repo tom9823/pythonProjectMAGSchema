@@ -51,7 +51,8 @@ class MainWindow(tk.Tk):
             controller=self,
             left_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_HOLDING, container=Utils.KEY_FRAME_DC),
             left_button_title='DC',
-            right_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_HOLDING, container=Utils.KEY_FRAME_LOCAL_BIB),
+            right_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_HOLDING,
+                                                        container=Utils.KEY_FRAME_LOCAL_BIB),
             right_button_title='LOCALBIB'
         )
         frameHolding.grid(row=0, column=0, sticky=tk.NSEW)
@@ -60,7 +61,8 @@ class MainWindow(tk.Tk):
         frameLocalBIB = FrameLocalBIB(
             parent=self,
             controller=self,
-            left_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_LOCAL_BIB, container=Utils.KEY_FRAME_HOLDING),
+            left_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_LOCAL_BIB,
+                                                       container=Utils.KEY_FRAME_HOLDING),
             left_button_title='HOLDING',
             right_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_LOCAL_BIB,
                                                         container=Utils.KEY_FRAME_PIECE),
@@ -72,7 +74,8 @@ class MainWindow(tk.Tk):
         framePiece = FramePiece(
             parent=self,
             controller=self,
-            left_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_PIECE, container=Utils.KEY_FRAME_LOCAL_BIB),
+            left_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_PIECE,
+                                                       container=Utils.KEY_FRAME_LOCAL_BIB),
             left_button_title='LOCALBIB',
             right_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_PIECE, container=Utils.KEY_FRAME_SCAN),
             right_button_title='SCAN'
@@ -110,13 +113,14 @@ class MainWindow(tk.Tk):
             controller=self,
             left_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_INIT, container=Utils.KEY_FRAME_GEN),
             left_button_title="Genera file XML",
-            right_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_INIT,container=Utils.KEY_FRAME_SCAN_OCR_RECOGNITION),
+            right_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_INIT,
+                                                        container=Utils.KEY_FRAME_SCAN_OCR_RECOGNITION),
             right_button_title="Riconoscimento OCR"
         )
         frameINIT.grid(row=0, column=0, sticky=tk.NSEW)
         self.frames[Utils.KEY_FRAME_INIT] = frameINIT
 
-        self.show_frame(caller=Utils.KEY_MAIN_WINDOW,container=Utils.KEY_FRAME_INIT)
+        self.show_frame(caller=Utils.KEY_MAIN_WINDOW, container=Utils.KEY_FRAME_INIT)
 
     def show_frame(self, caller, container):
         frame = self.frames[container]
@@ -236,7 +240,7 @@ class MainWindow(tk.Tk):
             dc_tag = ET.SubElement(bib, f"dc:{tag.lower()}")
             dc_tag.text = value
 
-        #aggiungere i sottotag di <bib> holding
+        # aggiungere i sottotag di <bib> holding
         for holding in self.session.get(Utils.KEY_SESSION_HOLDING, []):
             holdings_element = ET.SubElement(bib, "holdings", ID=holding.holding_id)
 
@@ -283,8 +287,6 @@ class MainWindow(tk.Tk):
                     if piece.get_stpiece_vol():
                         stpiece_vol_element = ET.SubElement(piece_element, "stpiece_vol")
                         stpiece_vol_element.text = piece.get_stpiece_vol()
-
-
 
 
 if __name__ == "__main__":
