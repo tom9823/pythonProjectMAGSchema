@@ -22,12 +22,13 @@ class LocalBIB:
     def set_not_dates(self, not_dates):
         self.not_dates = not_dates
 
-   # Method to print geo_coords
+    # Method to print geo_coords
     def print_geo_coords(self):
         ret = ''
         for coord in self.geo_coords:
             ret += str(coord) + ' - '
         return ret
+
     # Method to print not_dates
     def print_not_dates(self):
         ret = ''
