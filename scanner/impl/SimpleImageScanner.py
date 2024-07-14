@@ -5,6 +5,7 @@ from PIL.ExifTags import TAGS
 
 from scanner.MetaData import MetaData
 from scanner.Scanner import Scanner
+import exifread
 
 
 class SimpleImageScanner(Scanner):
@@ -20,10 +21,10 @@ class SimpleImageScanner(Scanner):
 
         return cls._instance
 
-    def scan(self, file) -> list[MetaData]:
-        metas :list[MetaData] = []
+    def scan(self, file):
+        metas  = []
         with Image.open(file) as img:
-            # TIFF             metadata = {Image.TAGS_V2[tag]: value for tag, value in img.tag_v2.items()}
+            # Pillow
             exif_data = img.getexif()
             if exif_data:
                 for tag, value in exif_data.items():
@@ -31,10 +32,9 @@ class SimpleImageScanner(Scanner):
                     if tag in TAGS:
                         meta.key = TAGS[tag]
                         meta.values = [value]
-                    # TODO("Unknown tags shall be included?")
-                    #else:
-                    #    meta.key = f'UNKNOWN_TAG_{tag}'
-                    #    meta.values = [value]
                         metas.append(meta)
-
+        #exifread
+        tags_exif_read = exifread.process_file(file)
+        for tag, value in tags_exif_read:
+            metas.append(MetaData(key=tag, values=[value]))
         return metas

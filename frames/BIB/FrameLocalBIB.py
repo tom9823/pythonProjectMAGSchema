@@ -188,7 +188,7 @@ class FrameLocalBIB(CustomFrame):
                 not_date_list.append(values[0])
             selected_local_bib.set_geo_coord(geo_coord_list)
             selected_local_bib.set_not_dates(not_date_list)
-            self.table_local_bibs.item(item_id, text="", values=(selected_local_bib.print_geo_coords(), selected_local_bib.print_not_dates()))
+            self.table_local_bibs.item(item_id, text="", values=[selected_local_bib.print_geo_coords(), selected_local_bib.print_not_dates()])
         else:
             messagebox.showerror("Errore", "Seleziona una riga nella tabella dei local bib.")
 

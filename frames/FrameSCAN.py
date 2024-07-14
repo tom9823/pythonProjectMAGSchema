@@ -1,10 +1,13 @@
 import tkinter as tk
-from tkinter import ttk, filedialog, messagebox
+from tkinter import ttk, filedialog, messagebox, simpledialog
 import os
 import pytesseract
 
 from PIL import Image
+
+import Utils
 from frames.CustomFrame import CustomFrame
+from model.IMG import IMG
 from scanner.MetaData import MetaData
 from scanner.Scanner import Scanner
 from scanner.ScannerFactory import ScannerFactory
@@ -93,7 +96,7 @@ class FrameSCAN(CustomFrame):
         # Count the total number of files
         total_files = sum([len(files) for r, d, files in os.walk(path)])
         scanned_files = 0
-
+        self.img_list = []
         for root, dirs, files in os.walk(path):
             if not self.scanner_running:
                 break
@@ -115,10 +118,22 @@ class FrameSCAN(CustomFrame):
                 else:
                     scanner: Scanner = ScannerFactory.factory(file_extension)
                     if scanner is not None:
+                        nomenclature = simpledialog.askstring("Input", f"Inserisci Nomenclature per {file_path}:")
+                        datetimecreated = Utils.get_creation_date(file_path)
+                        md5 = Utils.get_file_md5(file_path)
+                        size = Utils.get_file_size(file_path)
+                        img = IMG(
+                            nomenclature=nomenclature,
+                            file=file_path,
+                            datetimecreated=datetimecreated,
+                            md5=md5,
+                            filesize=size
+                        )
                         metas: list[MetaData] = scanner.scan(file_path)
-                        print(file_path)
                         for meta in metas:
                             print(meta)
+                        self.img_list.append(img)
+                        print(str(img))
                 scanned_files += 1
                 progress = (scanned_files / total_files) * 100
                 self.progress_bar["value"] = progress
@@ -134,4 +149,5 @@ class FrameSCAN(CustomFrame):
         self.stop_button['state'] = "disabled"
 
     def check_data(self):
-        return not self.scanner_running
+        if not self.scanner_running:
+            super().save_to_session((Utils.KEY_SESSION_IMG, self.img_list))

@@ -8,7 +8,6 @@ from frames.BIB.FramePiece import FramePiece
 from frames.FrameGEN import FrameGEN
 from frames.FrameINIT import FrameINIT
 from frames.FrameSCAN import FrameSCAN
-from SPARQLWrapper import SPARQLWrapper, JSON
 import xml.etree.ElementTree as ET
 
 
@@ -129,58 +128,6 @@ class MainWindow(tk.Tk):
             self.identifier_modal_already_shown = True
         frame.tkraise()
 
-    def query_online_resources(self, identifier_code):
-        self._query_dbpedia(identifier_code)
-
-    def _query_dbpedia(self, identifier_code):
-        # Rimuovere trattini dall'ISBN
-        identifier_code_clean = identifier_code.replace('-', '')
-
-        # Endpoint di DBpedia
-        sparql = SPARQLWrapper("http://dbpedia.org/sparql")
-
-        # Query SPARQL per ottenere i metadati di Dublin Core
-        query = f"""
-        PREFIX dc: <http://purl.org/dc/elements/1.1/>
-        PREFIX dbo: <http://dbpedia.org/ontology/>
-        PREFIX dbp: <http://dbpedia.org/property/>
-        PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-
-        SELECT ?book ?title ?creator ?subject ?description ?publisher ?contributor ?date ?type ?format ?identifier ?source ?language ?relation ?coverage ?rights WHERE {{
-          ?book (dbo:isbn|dbp:isbn) ?isbn .
-          FILTER (str(?isbn) = "{identifier_code_clean}" || str(?isbn) = "{identifier_code}")
-          OPTIONAL {{ ?book dc:title ?title . }}
-          OPTIONAL {{ ?book dc:creator ?creator . }}
-          OPTIONAL {{ ?book dc:subject ?subject . }}
-          OPTIONAL {{ ?book dc:description ?description . }}
-          OPTIONAL {{ ?book dc:publisher ?publisher . }}
-          OPTIONAL {{ ?book dc:contributor ?contributor . }}
-          OPTIONAL {{ ?book dc:date ?date . }}
-          OPTIONAL {{ ?book dc:type ?type . }}
-          OPTIONAL {{ ?book dc:format ?format . }}
-          OPTIONAL {{ ?book dc:identifier ?identifier . }}
-          OPTIONAL {{ ?book dc:source ?source . }}
-          OPTIONAL {{ ?book dc:language ?language . }}
-          OPTIONAL {{ ?book dc:relation ?relation . }}
-          OPTIONAL {{ ?book dc:coverage ?coverage . }}
-          OPTIONAL {{ ?book dc:rights ?rights . }}
-        }}
-        """
-
-        # Impostare la query e il formato di ritorno
-        sparql.setQuery(query)
-        sparql.setReturnFormat(JSON)
-
-        # Eseguire la query
-        results = sparql.query().convert()
-
-        # Estrarre i risultati
-        if results["results"]["bindings"]:
-            book_info = results["results"]["bindings"][0]
-            return {k: v['value'] for k, v in book_info.items()}
-        else:
-            return None
-
     def generate_file_xml(self):
         # Creare l'elemento principale
         metadigit = ET.Element("metadigit", attrib={
@@ -287,6 +234,49 @@ class MainWindow(tk.Tk):
                     if piece.get_stpiece_vol():
                         stpiece_vol_element = ET.SubElement(piece_element, "stpiece_vol")
                         stpiece_vol_element.text = piece.get_stpiece_vol()
+
+            for img in self.session.get(Utils.KEY_SESSION_IMG, []):
+                img_element = ET.SubElement(parent=metadigit, tag="img")
+
+                ET.SubElement(img_element, "sequence_number").text = str(img.sequence_number)
+                ET.SubElement(img_element, "nomenclature").text = img.get_nomenclature()
+
+                for usage in img.get_usage():
+                    ET.SubElement(img_element, "usage").text = usage
+
+                if img.get_scale():
+                    ET.SubElement(img_element, "side").text = img.get_side()
+                if img.get_scale():
+                    ET.SubElement(img_element, "scale").text = img.get_scale()
+                if img.get_file():
+                    ET.SubElement(img_element, "file").text = img.get_file()
+                if img.get_md5():
+                    ET.SubElement(img_element, "md5").text = img.get_md5()
+                if img.get_filesize():
+                    ET.SubElement(img_element, "filesize").text = str(img.get_filesize())
+                if img.get_imggroupID():
+                    ET.SubElement(img_element, "image_dimensions").text = img.get_image_dimensions()
+                if img.get_image_dimensions():
+                    ET.SubElement(img_element, "image_metrics").text = img.get_image_metrics()
+                if img.get_ppi():
+                    ET.SubElement(img_element, "ppi").text = str(img.get_ppi())
+                if img.get_dpi():
+                    ET.SubElement(img_element, "dpi").text = str(img.get_dpi())
+                if img.get_format():
+                    ET.SubElement(img_element, "format").text = img.get_format()
+                if img.get_scanning():
+                    ET.SubElement(img_element, "scanning").text = img.get_scanning()
+                if img.get_datetimecreated():
+                    ET.SubElement(img_element, "datetimecreated").text = img.get_datetimecreated()
+
+                for target in img.get_target():
+                    ET.SubElement(img_element, "target").text = target
+
+                for alt in img.get_altimg():
+                    ET.SubElement(img_element, "altimg").text = alt
+
+                if img.get_note():
+                    ET.SubElement(img_element, "note").text = img.get_note()
 
 
 if __name__ == "__main__":
