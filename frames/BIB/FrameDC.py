@@ -111,6 +111,7 @@ class FrameDC(CustomFrame):
         value = self.value_entry.get()
         self.table_dc.insert(parent='', index=tk.END, text="Parent", values=(dc_type, value))
         self.dc_list.append((dc_type, value))
+        self.value_entry.delete(0, tk.END)
 
     def _remove_all(self):
         self.dc_list = []

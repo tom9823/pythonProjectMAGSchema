@@ -17,12 +17,10 @@ class PdfScanner(Scanner):
 
         return cls._instance
 
-    def scan(self, file) ->  list[MetaData]:
-        with open(file, 'rb') as file:
-            reader = PdfReader(file)
+    def scan(self, file_path) ->  list[MetaData]:
+        with open(file_path, 'rb') as file_path:
+            reader = PdfReader(file_path)
             metadata = reader.metadata
-            print(metadata)
-
             metas: list = []
             for key, value in metadata.items():
                 meta: MetaData = MetaData()

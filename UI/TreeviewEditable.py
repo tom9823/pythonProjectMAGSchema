@@ -2,7 +2,7 @@ from tkinter import ttk
 import tkinter as tk
 
 
-class TreeviewEdit(ttk.Treeview):
+class TreeviewEditable(ttk.Treeview):
     def __init__(self, master, **kw):
         super().__init__(master, **kw)
         #bind double click
@@ -57,7 +57,7 @@ class TreeviewEdit(ttk.Treeview):
 if __name__ == "__main__":
     root = tk.Tk()
     column_name = ("vehicle_name" , "year", "colour")
-    treeview = TreeviewEdit(root, columns=column_name)
+    treeview = TreeviewEditable(root, columns=column_name)
     treeview.heading("#0", text="Vehicle Type")
     treeview.heading("vehicle_name", text="Vehicle Name")
     treeview.heading("year", text="Year")

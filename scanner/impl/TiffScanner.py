@@ -1,12 +1,9 @@
 
 from PIL import Image
 from PIL.TiffTags import TAGS as TIFF_TAGS
-
-# FIXME ("understand what type of tags are there, there is V2 also.. do we have to mix them?")
-from PIL.TiffTags import TAGS_V2 as TIFF_TAGS_V2
-
 from scanner.MetaData import MetaData
 from scanner.Scanner import Scanner
+from exif import Image as ImageEXIF
 
 
 class TiffScanner(Scanner):
@@ -22,29 +19,17 @@ class TiffScanner(Scanner):
 
         return cls._instance
 
-    def scan(self, file) -> list[MetaData]:
-        metas :list[MetaData] = []
-        with Image.open(file) as img:
+    def scan(self, file_path) -> list[MetaData]:
+        metas  = []
+        with Image.open(file_path) as img:
             metadata = {TIFF_TAGS[tag]: value for tag, value in img.tag.items()}
-            for key, value in metadata.items():
-                meta :MetaData = MetaData()
-
-                meta.key = key
-                meta.values = [value]
-
-                metas.append(meta)
-
-        # FIXME ("v2 not working")    
-        return metas
-
-        with Image.open(file) as img:
-            metadata = {TIFF_TAGS_V2[tag]: value for tag, value in img.tag.items()}
-            for key, value in metadata.items():
-                meta :MetaData = MetaData()
-
-                meta.key = key
-                meta.values = [value]
-
-                metas.append(meta)
-
+            for key, values in metadata.items():
+                metadata_values = []
+                for value in values:
+                    metadata_values.append(value)
+                metadata = MetaData(key=key, values=metadata_values)
+                metas.append(metadata)
+        with open(file_path, 'rb') as image_file:
+            my_image = ImageEXIF(image_file)
+            my_image.list_all()
         return metas

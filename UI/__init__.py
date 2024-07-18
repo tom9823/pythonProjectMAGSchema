@@ -1,1 +1,1 @@
-from UI import TreeviewEdit
+from UI import TreeviewEditable

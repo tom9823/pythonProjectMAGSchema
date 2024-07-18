@@ -1,5 +1,20 @@
 import xml.etree.ElementTree as ET
+from enum import Enum
 from typing import List, Optional
+
+
+# Definizione della prima enum per tipo di immagine
+class ImageType(Enum):
+    MASTER = 1
+    HIGH_RESOLUTION = 2
+    LOW_RESOLUTION = 3
+    PREVIEW = 4
+
+
+# Definizione della seconda enum per stato di copyright
+class CopyrightStatus(Enum):
+    NO_COPYRIGHT = 'a'
+    HAS_COPYRIGHT = 'b'
 
 
 class IMG:
@@ -141,6 +156,7 @@ class IMG:
             raise ValueError("target deve essere una lista di tipo niso:targetdata")
         self._target = value
 
+
 # Definizione dei tipi semplici e complessi NISO
 class NISOChecksum(str):
     def __new__(cls, value):
@@ -149,7 +165,7 @@ class NISOChecksum(str):
         return str.__new__(cls, value)
 
 
-class Dimensions:
+class ImageDimensions:
     def __init__(self, imagelength: int, imagewidth: int, source_xdimension: Optional[float] = None,
                  source_ydimension: Optional[float] = None):
         self.imagelength = imagelength
@@ -168,28 +184,28 @@ class Dimensions:
         return dimensions_elem
 
 
-class SpatialMetrics:
-    def __init__(self, samplingfrequencyunit: str, samplingfrequencyplane: str,
-                 photometricinterpretation: str, bitpersample: str,
-                 xsamplingfrequency: Optional[int] = None, ysamplingfrequency: Optional[int] = None,
+class ImageMetrics:
+    def __init__(self, sampling_frequency_unit: str, sampling_frequency_plane: str,
+                 photo_metric_interpretation: str, bit_per_sample: str,
+                 x_sampling_frequency: Optional[int] = None, y_sampling_frequency: Optional[int] = None,
                  ):
-        self.samplingfrequencyunit = samplingfrequencyunit
-        self.samplingfrequencyplane = samplingfrequencyplane
-        self.xsamplingfrequency = xsamplingfrequency
-        self.ysamplingfrequency = ysamplingfrequency
-        self.photometricinterpretation = photometricinterpretation
-        self.bitpersample = bitpersample
+        self.sampling_frequency_unit = sampling_frequency_unit
+        self.sampling_frequency_plane = sampling_frequency_plane
+        self.x_sampling_frequency = x_sampling_frequency
+        self.y_sampling_frequency = y_sampling_frequency
+        self.photo_metric_interpretation = photo_metric_interpretation
+        self.bit_per_sample = bit_per_sample
 
     def to_xml(self):
-        metrics_elem = ET.Element('spatialmetrics')
-        ET.SubElement(metrics_elem, 'samplingfrequencyunit').text = self.samplingfrequencyunit
-        ET.SubElement(metrics_elem, 'samplingfrequencyplane').text = self.samplingfrequencyplane
-        if self.xsamplingfrequency is not None:
-            ET.SubElement(metrics_elem, 'xsamplingfrequency').text = str(self.xsamplingfrequency)
-        if self.ysamplingfrequency is not None:
-            ET.SubElement(metrics_elem, 'ysamplingfrequency').text = str(self.ysamplingfrequency)
-        ET.SubElement(metrics_elem, 'photometricinterpretation').text = self.photometricinterpretation
-        ET.SubElement(metrics_elem, 'bitpersample').text = self.bitpersample
+        metrics_elem = ET.Element('image_metrics')
+        ET.SubElement(metrics_elem, 'samplingfrequencyunit').text = self.sampling_frequency_unit
+        ET.SubElement(metrics_elem, 'samplingfrequencyplane').text = self.sampling_frequency_plane
+        if self.x_sampling_frequency is not None:
+            ET.SubElement(metrics_elem, 'xsamplingfrequency').text = str(self.x_sampling_frequency)
+        if self.y_sampling_frequency is not None:
+            ET.SubElement(metrics_elem, 'ysamplingfrequency').text = str(self.y_sampling_frequency)
+        ET.SubElement(metrics_elem, 'photometricinterpretation').text = self.photo_metric_interpretation
+        ET.SubElement(metrics_elem, 'bitpersample').text = self.bit_per_sample
         return metrics_elem
 
 
@@ -237,8 +253,8 @@ class ImageCreation:
 
 # Definizione della classe ALT_IMG
 class AltImg:
-    def __init__(self, file: str, md5: NISOChecksum, image_dimensions: Dimensions, usage: Optional[List[str]] = None,
-                 filesize: Optional[int] = None, image_metrics: Optional[SpatialMetrics] = None,
+    def __init__(self, file: str, md5: NISOChecksum, image_dimensions: ImageDimensions, usage: Optional[List[str]] = None,
+                 filesize: Optional[int] = None, image_metrics: Optional[ImageMetrics] = None,
                  ppi: Optional[int] = None, dpi: Optional[int] = None, format: Optional[Format] = None,
                  scanning: Optional[ImageCreation] = None, datetimecreated: Optional[str] = None,
                  imggroupID: Optional[str] = None):

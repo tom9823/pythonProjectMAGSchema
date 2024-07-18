@@ -2,7 +2,8 @@ from tkinter import ttk, messagebox
 from tkinter import simpledialog
 import tkinter as tk
 import Utils
-from UI.TreeviewEdit import TreeviewEdit
+from UI.EntryWithPlaceHolder import EntryWithPlaceholder
+from UI.TreeviewEditable import TreeviewEditable
 from frames.CustomFrame import CustomFrame
 from model.Holding import Shelfmark, Holding
 
@@ -59,33 +60,20 @@ class FrameHolding(CustomFrame):
         self.table_holdings.pack()
         add_frame = tk.Frame(self.container_frame)
         add_frame.pack(pady=10)
-        # label
-        id_label = tk.Label(add_frame, text="Id")
-        id_label.grid(row=0, column=0)
 
-        library_label = tk.Label(add_frame, text="Library")
-        library_label.grid(row=0, column=1)
+        # entries
+        self.id_entry = EntryWithPlaceholder(add_frame, placeholder="Holding ID")
+        self.id_entry.grid(row=0, column=0)
 
-        inventory_label = tk.Label(add_frame, text="Inventory")
-        inventory_label.grid(row=0, column=2)
+        self.library_entry = EntryWithPlaceholder(add_frame, placeholder="Library")
+        self.library_entry.grid(row=0, column=1)
 
-        shelfmarks_label = tk.Label(add_frame, text="Shelfmarks")
-        shelfmarks_label.grid(row=0, column=3)
-
-        # entry
-        self.id_entry_var = tk.StringVar()
-        self.id_entry = tk.Entry(add_frame)
-        self.id_entry.grid(row=1, column=0)
-
-        self.library_entry = tk.Entry(add_frame)
-        self.library_entry.grid(row=1, column=1)
-
-        self.inventory_entry = tk.Entry(add_frame)
-        self.inventory_entry.grid(row=1, column=2)
+        self.inventory_entry = EntryWithPlaceholder(add_frame, placeholder="Inventory")
+        self.inventory_entry.grid(row=0, column=2)
 
         #table shelfmarks
         frame_shelfmarks = tk.Frame(add_frame)
-        frame_shelfmarks.grid(row=1, column=3)
+        frame_shelfmarks.grid(row=0, column=3)
         tree_frame_shelfmarks = tk.Frame(frame_shelfmarks)
         tree_frame_shelfmarks.pack(pady=10)
         tree_vertical_scroll_shelfmarks = tk.Scrollbar(tree_frame_shelfmarks)
@@ -93,7 +81,7 @@ class FrameHolding(CustomFrame):
         tree_horizontal_scroll_shelfmarks = tk.Scrollbar(tree_frame_shelfmarks)
         tree_horizontal_scroll_shelfmarks.pack(side=tk.BOTTOM, fill=tk.X)
 
-        self.table_shelfmarks = TreeviewEdit(tree_frame_shelfmarks, yscrollcommand=tree_vertical_scroll_shelfmarks.set, xscrollcommand=tree_horizontal_scroll_shelfmarks.set)
+        self.table_shelfmarks = TreeviewEditable(tree_frame_shelfmarks, yscrollcommand=tree_vertical_scroll_shelfmarks.set, xscrollcommand=tree_horizontal_scroll_shelfmarks.set)
         tree_vertical_scroll_shelfmarks.config(command=self.table_shelfmarks.yview)
         tree_horizontal_scroll_shelfmarks.config(command=self.table_shelfmarks.xview)
         self.table_shelfmarks['columns'] = ("type", "value")

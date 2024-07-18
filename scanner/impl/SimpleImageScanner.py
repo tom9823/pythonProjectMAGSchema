@@ -1,11 +1,9 @@
 
-
 from PIL import Image
-from PIL.ExifTags import TAGS
-
+from PIL.TiffTags import TAGS as TIFF_TAGS
 from scanner.MetaData import MetaData
 from scanner.Scanner import Scanner
-import exifread
+from exif import Image as ImageEXIF
 
 
 class SimpleImageScanner(Scanner):
@@ -21,20 +19,17 @@ class SimpleImageScanner(Scanner):
 
         return cls._instance
 
-    def scan(self, file):
-        metas  = []
-        with Image.open(file) as img:
-            # Pillow
-            exif_data = img.getexif()
-            if exif_data:
-                for tag, value in exif_data.items():
-                    meta :MetaData = MetaData()
-                    if tag in TAGS:
-                        meta.key = TAGS[tag]
-                        meta.values = [value]
-                        metas.append(meta)
-        #exifread
-        tags_exif_read = exifread.process_file(file)
-        for tag, value in tags_exif_read:
-            metas.append(MetaData(key=tag, values=[value]))
+    def scan(self, file_path) -> list[MetaData]:
+        metas = []
+        with Image.open(file_path) as img:
+            metadata = {TIFF_TAGS[tag]: value for tag, value in img.tag.items()}
+            for key, values in metadata.items():
+                metadata_values = []
+                for value in values:
+                    metadata_values.append(value)
+                metadata = MetaData(key=key, values=metadata_values)
+                metas.append(metadata)
+        with open(file_path, 'rb') as image_file:
+            my_image = ImageEXIF(image_file)
+            my_image.list_all()
         return metas

@@ -1,7 +1,7 @@
 from tkinter import ttk, messagebox, simpledialog
 
 import Utils
-from UI.TreeviewEdit import TreeviewEdit
+from UI.TreeviewEditable import TreeviewEditable
 from frames.CustomFrame import CustomFrame
 import tkinter as tk
 
@@ -70,8 +70,8 @@ class FrameLocalBIB(CustomFrame):
         tree_horizontal_scroll_geo_coord = tk.Scrollbar(tree_frame_geo_coord)
         tree_horizontal_scroll_geo_coord.pack(side=tk.BOTTOM, fill=tk.X)
 
-        self.table_geo_coord = TreeviewEdit(tree_frame_geo_coord, yscrollcommand=tree_vertical_scroll_geo_coord.set,
-                                            xscrollcommand=tree_horizontal_scroll_geo_coord.set)
+        self.table_geo_coord = TreeviewEditable(tree_frame_geo_coord, yscrollcommand=tree_vertical_scroll_geo_coord.set,
+                                                xscrollcommand=tree_horizontal_scroll_geo_coord.set)
         tree_vertical_scroll_geo_coord.config(command=self.table_geo_coord.yview)
         tree_horizontal_scroll_geo_coord.config(command=self.table_geo_coord.xview)
         self.table_geo_coord['columns'] = ("geo_coord")
@@ -96,8 +96,8 @@ class FrameLocalBIB(CustomFrame):
         tree_horizontal_scroll_not_date = tk.Scrollbar(tree_frame_not_date)
         tree_horizontal_scroll_not_date.pack(side=tk.BOTTOM, fill=tk.X)
 
-        self.table_not_date = TreeviewEdit(tree_frame_not_date, yscrollcommand=tree_vertical_scroll_not_date.set,
-                                            xscrollcommand=tree_horizontal_scroll_not_date.set)
+        self.table_not_date = TreeviewEditable(tree_frame_not_date, yscrollcommand=tree_vertical_scroll_not_date.set,
+                                               xscrollcommand=tree_horizontal_scroll_not_date.set)
         tree_vertical_scroll_not_date.config(command=self.table_not_date.yview)
         tree_horizontal_scroll_not_date.config(command=self.table_not_date.xview)
         self.table_not_date['columns'] = ("not_date")

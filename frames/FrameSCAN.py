@@ -1,3 +1,4 @@
+import threading
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox, simpledialog
 import os
@@ -30,33 +31,39 @@ class FrameSCAN(CustomFrame):
         self._files_scanning_job = None
         self.is_ocr_recognition = is_ocr_recognition
         self._init_widgets()
+        self.img_list = []
 
     def _init_widgets(self):
-        self.path_label = ttk.Label(self.container_frame, text="Select Path:")
+        path_frame = tk.Frame(self.container_frame)
+        path_frame.pack(pady=10)
+        self.path_label = ttk.Label(path_frame, text="Select Path:")
         self.path_label.grid(row=0, column=0, padx=5, pady=5)
 
         self.path_var = tk.StringVar()
-        self.path_entry = ttk.Entry(self.container_frame, textvariable=self.path_var, width=30)
+        self.path_entry = ttk.Entry(path_frame, textvariable=self.path_var, width=30)
         self.path_entry.focus()
         self.path_entry.grid(row=0, column=1, padx=5, pady=5)
 
-        self.browse_button = ttk.Button(self.container_frame, text="Browse", command=self.browse_path)
+        self.browse_button = ttk.Button(path_frame, text="Browse", command=self.browse_path)
         self.browse_button.grid(row=0, column=2, padx=5, pady=5)
 
-        self.start_button = ttk.Button(self.container_frame, text="Start Scanning", command=self.start_scanning)
+        button_frame = tk.Frame(self.container_frame)
+        button_frame.pack(pady=10)
+
+        self.start_button = ttk.Button(button_frame, text="Start Scanning", command=self.start_scanning)
         self.start_button.grid(row=1, column=0, padx=5, pady=10)
 
-        self.stop_button = ttk.Button(self.container_frame, text="Stop Scanning", command=self.stop_scanning, state=tk.DISABLED)
+        self.stop_button = ttk.Button(button_frame, text="Stop Scanning", command=self.stop_scanning, state=tk.DISABLED)
         self.stop_button.grid(row=1, column=1, padx=5, pady=10)
 
-        reset_button = ttk.Button(self.container_frame, text="Reset scan", command=self.reset_scanning)
-        reset_button.grid(row=1, column=3)
+        self.reset_button = ttk.Button(button_frame, text="Reset scan", command=self.reset_scanning)
+        self.reset_button.grid(row=1, column=2, padx=5, pady=10)
 
         self.progress_bar = ttk.Progressbar(self.container_frame, orient="horizontal", mode="determinate")
-        self.progress_bar.grid(row=2, columnspan=3, padx=20, pady=10, sticky="ew")
+        self.progress_bar.pack(pady=10)
 
         self.status_label = ttk.Label(self.container_frame, text="")
-        self.status_label.grid(row=3, columnspan=3, pady=5)
+        self.status_label.pack(pady=10)
 
     def browse_path(self):
         path = filedialog.askdirectory()
@@ -89,6 +96,7 @@ class FrameSCAN(CustomFrame):
             messagebox.showwarning("Attenzione", "Avvia uno scan!")
             return
         self.path_var.set("")
+        self.img_list = []
         self.stop_scanning()
 
     def scan_files(self):
@@ -118,10 +126,11 @@ class FrameSCAN(CustomFrame):
                 else:
                     scanner: Scanner = ScannerFactory.factory(file_extension)
                     if scanner is not None:
-                        nomenclature = simpledialog.askstring("Input", f"Inserisci Nomenclature per {file_path}:")
+                        #nomenclature = simpledialog.askstring("Input", f"Inserisci Nomenclature per {file_path}:")
                         datetimecreated = Utils.get_creation_date(file_path)
                         md5 = Utils.get_file_md5(file_path)
                         size = Utils.get_file_size(file_path)
+                        nomenclature = filename
                         img = IMG(
                             nomenclature=nomenclature,
                             file=file_path,
@@ -130,10 +139,13 @@ class FrameSCAN(CustomFrame):
                             filesize=size
                         )
                         metas: list[MetaData] = scanner.scan(file_path)
-                        for meta in metas:
-                            print(meta)
+                        datetimecreated = Utils.find_date_value(metas)
+                        if datetimecreated is not None:
+                            img.set_datetimecreated(datetimecreated)
+                        image_dimensions = Utils.get_image_dimensions(metas)
+                        if image_dimensions is not None:
+                            img.set_image_dimensions(image_dimensions)
                         self.img_list.append(img)
-                        print(str(img))
                 scanned_files += 1
                 progress = (scanned_files / total_files) * 100
                 self.progress_bar["value"] = progress
@@ -151,3 +163,4 @@ class FrameSCAN(CustomFrame):
     def check_data(self):
         if not self.scanner_running:
             super().save_to_session((Utils.KEY_SESSION_IMG, self.img_list))
+            return True

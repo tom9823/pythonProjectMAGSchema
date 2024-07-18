@@ -151,7 +151,7 @@ class MainWindow(tk.Tk):
         xml_declaration = '<?xml version="1.0" encoding="UTF-8"?>\n'
 
         # Salvare il file XML
-        with open("output.xml", "w", encoding="utf-8") as file:
+        with open("prova.xml", "w", encoding="utf-8") as file:
             file.write(xml_declaration)
             file.write(xml_content)
 
