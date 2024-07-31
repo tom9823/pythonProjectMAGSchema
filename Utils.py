@@ -4,6 +4,8 @@ import re
 from datetime import datetime
 from urllib.parse import urlparse
 
+from bs4 import BeautifulSoup
+
 from model.IMG import ImageDimensions, ImageMetrics
 
 KEY_FRAME_INIT = 'FrameINIT'
@@ -127,3 +129,37 @@ def get_image_metrics(metadata_list):
             sampling_frequency_plane=sampling_frequency_plane,
             photo_metric_interpretation=photo_metric_interpretation
         )
+
+
+def get_imagegroupID(file_path):
+    _, file_extension = os.path.splitext(file_path)
+    subpaths = split_path_into_subpaths(file_path)
+    ret = "ImgGrp_S"
+    if file_extension in [".tiff", ".tif"]:
+        ret = "ImgGrp_H"
+    return ret
+
+
+def split_path_into_subpaths(path):
+    subpaths = []
+    path, folder = os.path.split(path)
+    while folder != "":
+        if folder != "":
+            subpaths.append(folder)
+        path, folder = os.path.split(path)
+    if path != "":
+        subpaths.append(path)
+    return subpaths
+
+
+def extract_xmp_metadata(metadata_list):
+    # Aprire l'immagine TIFF
+    xmp = None
+    for metadata in metadata_list:
+        key = metadata.get_key()
+        if key == "XMP":
+            xmpAsXML = BeautifulSoup(metadata.get_values())
+            print(xmpAsXML.prettify())
+        return xmp
+
+

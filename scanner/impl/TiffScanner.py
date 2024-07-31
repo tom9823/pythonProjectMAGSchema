@@ -29,7 +29,4 @@ class TiffScanner(Scanner):
                     metadata_values.append(value)
                 metadata = MetaData(key=key, values=metadata_values)
                 metas.append(metadata)
-        with open(file_path, 'rb') as image_file:
-            my_image = ImageEXIF(image_file)
-            my_image.list_all()
         return metas
