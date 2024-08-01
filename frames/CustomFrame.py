@@ -20,11 +20,11 @@ class CustomFrame(tk.Frame):
         button_page_frame.grid(sticky=tk.EW, padx=10)
         button_page_frame.columnconfigure((0, 1), weight=1)
 
-        self.left_button = tk.Button(button_page_frame, text=left_button_title, command=left_button_action)
+        self.left_button = ttk.Button(button_page_frame, text=left_button_title, command=left_button_action)
         self.left_button.grid(row=0, column=0, pady=10)
 
-        self.right_button = tk.Button(button_page_frame, text=right_button_title,
-                                 command=lambda: right_button_action() if self.check_data() else None)
+        self.right_button = ttk.Button(button_page_frame, text=right_button_title,
+                                       command=lambda: right_button_action() if self.check_data() else None)
         self.right_button.grid(row=0, column=1, pady=10)
 
     def check_data(self):

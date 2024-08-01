@@ -55,9 +55,6 @@ class FrameSCAN(CustomFrame):
         self.stop_button = ttk.Button(button_frame, text="Stop Scanning", command=self.stop_scanning, state=tk.DISABLED)
         self.stop_button.grid(row=1, column=1, padx=5, pady=10)
 
-        self.reset_button = ttk.Button(button_frame, text="Reset scan", command=self.reset_scanning)
-        self.reset_button.grid(row=1, column=2, padx=5, pady=10)
-
         self.progress_bar = ttk.Progressbar(
             self.container_frame,
             orient="horizontal",
@@ -75,6 +72,7 @@ class FrameSCAN(CustomFrame):
             self.path_var.set(path)
 
     def start_scanning(self):
+        super().disable_right_button()
         if not self.path_var.get():
             messagebox.showwarning("Attenzione", "Seleziona un path!")
             return
@@ -91,23 +89,12 @@ class FrameSCAN(CustomFrame):
         self.scanner_running = False
         self.controller.after(0, self.update_ui_after_stop)
 
-    def reset_scanning(self):
-        if self.scanner_running:
-            self.stop_scanning()
-        self.path_var.set("")
-        self.img_list = []
-        self.controller.after(0, self.update_ui_after_reset())
-
     def update_ui_after_stop(self):
-        self.stop_button['state'] = "disabled"
-        self.start_button['state'] = "enabled"
-        self.controller.update_idletasks()
-
-    def update_ui_after_reset(self):
         self.progress_bar["value"] = 0
         self.status_label.config(text="stato scannerizzazione")
         self.start_button['state'] = "enabled"
         self.stop_button['state'] = "disabled"
+        super().disable_right_button()
         self.controller.update_idletasks()
 
     def scan_files(self):
@@ -136,16 +123,18 @@ class FrameSCAN(CustomFrame):
                         md5 = Utils.get_file_md5(file_path)
                         size = Utils.get_file_size(file_path)
                         nomenclature = filename
+                        imagegroupID = Utils.get_imagegroupID(file_path)
                         img = IMG(
-                            imggroupID=Utils.get_imagegroupID(file_path),
+                            imggroupID=imagegroupID,
                             nomenclature=nomenclature,
                             file=file_path,
                             datetimecreated=datetimecreated,
                             md5=md5,
                             filesize=size
                         )
-                        print(img)
+                        print(filename)
                         metas: list[MetaData] = scanner.scan(file_path)
+                        print(metas)
                         datetimecreated = Utils.find_date_value(metas)
                         if datetimecreated is not None:
                             img.set_datetimecreated(datetimecreated)
@@ -164,14 +153,11 @@ class FrameSCAN(CustomFrame):
             super().enable_right_button()
         self.scanner_running = False
 
-
     def update_progress(self, progress, scanned_files, total_files):
-        self.progress_bar["value"] = progress
-        if total_files == 0:
-            self.status_label.config(text="stato scannerizzazione")
-        else:
+        if self.scanner_running:
+            self.progress_bar["value"] = progress
             self.status_label.config(text=f"Scanned {scanned_files} of {total_files} files")
-        self.controller.update_idletasks()
+            self.controller.update_idletasks()
 
     def update_status(self, status_text):
         self.status_label.config(text=status_text)

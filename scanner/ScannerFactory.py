@@ -1,7 +1,6 @@
 from scanner.Scanner import Scanner
 from scanner.impl.PdfScanner import PdfScanner
-from scanner.impl.SimpleImageScanner import SimpleImageScanner
-from scanner.impl.TiffScanner import TiffScanner
+from scanner.impl.ImageScanner import ImageScanner
 
 
 class ScannerFactory:
@@ -12,9 +11,6 @@ class ScannerFactory:
             return PdfScanner.getInstance()
 
         if extension.lower() in [
-            '.jpeg', '.jpg', '.png', '.gif',
+            '.jpeg', '.jpg', '.png', '.gif','.tif','.tiff',
         ]:
-            return SimpleImageScanner.getInstance()
-
-        if extension.lower() in ['.tif','.tiff']:
-            return TiffScanner.getInstance()
+            return ImageScanner.getInstance()

@@ -78,11 +78,13 @@ def get_file_size(file_path):
     # Restituisce la dimensione del file in byte
     return os.path.getsize(file_path)
 
+
 def find_date_value(metadata_list):
     for metadata in metadata_list:
         if metadata.get_key() in ("DateTime", "CreationDate"):
             return metadata.get_values()[0]
     return None
+
 
 def get_image_dimensions(metadata_list):
     image_length = None
@@ -96,6 +98,7 @@ def get_image_dimensions(metadata_list):
             image_length = metadata.get_values()[0]
     if image_length and image_width:
         return ImageDimensions(imagewidth=image_width, imagelength=image_length)
+
 
 def get_image_metrics(metadata_list):
     x_sampling_frequency = None
@@ -133,9 +136,17 @@ def get_image_metrics(metadata_list):
 
 def get_imagegroupID(file_path):
     _, file_extension = os.path.splitext(file_path)
-    subpaths = split_path_into_subpaths(file_path)
+    definition_letter = ''
+    string_parts = file_path.split('_')
+    if string_parts is not None and len(string_parts) >= 1:
+        definition_letter = string_parts[-1][0]
+
     ret = "ImgGrp_S"
-    if file_extension in [".tiff", ".tif"]:
+    if definition_letter in ["s", "t"]:
+        ret = "ImgGrp_S"
+    elif definition_letter == "m":
+        ret = "ImgGrp_M"
+    elif definition_letter == "h":
         ret = "ImgGrp_H"
     return ret
 
@@ -163,3 +174,9 @@ def extract_xmp_metadata(metadata_list):
         return xmp
 
 
+def is_iterable(obj):
+    try:
+        iter(obj)
+        return True
+    except TypeError:
+        return False
