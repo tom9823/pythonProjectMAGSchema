@@ -6,10 +6,7 @@ from scanner.impl.ImageScanner import ImageScanner
 class ScannerFactory:
 
     @staticmethod
-    def factory(extension) -> Scanner:
-        if extension.lower() == '.pdf':
-            return PdfScanner.getInstance()
-
+    def factory(extension):
         if extension.lower() in [
             '.jpeg', '.jpg', '.png', '.gif','.tif','.tiff',
         ]:

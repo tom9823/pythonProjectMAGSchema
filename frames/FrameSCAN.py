@@ -102,6 +102,7 @@ class FrameSCAN(CustomFrame):
         total_files = sum([len(files) for r, d, files in os.walk(path)])
         scanned_files = 0
         self.img_list = []
+        old_dir = ''
         for root, dirs, files in os.walk(path):
             if not self.scanner_running:
                 break
@@ -111,6 +112,7 @@ class FrameSCAN(CustomFrame):
 
                 _, file_extension = os.path.splitext(filename)
                 file_path = os.path.join(root, filename)
+                current_dir = os.path.dirname(file_path)
                 if self.is_ocr_recognition:
                     if file_extension in [".jpg", ".jpeg", ".png", ".tiff"]:
                         image = Image.open(file_path)
@@ -118,23 +120,39 @@ class FrameSCAN(CustomFrame):
                         print(text + '\n\n')
                 else:
                     scanner: Scanner = ScannerFactory.factory(file_extension)
+                    imagegroupID = "ImgGrp_S"
+                    usage = "1"
                     if scanner is not None:
+                        if current_dir != old_dir:
+                            imagegroupID, usage = self.ask_imgroupID_usage_value(
+                                field_imagegroupID=f'imagegroupID della cartella {current_dir}',
+                                field_usage=f'usage della cartella {current_dir}',
+                                values=['ImgGrp_S', 'ImgGrp_M', 'ImgGrp_H'],
+                                options=[
+                                    ('1', 'Master'),
+                                    ('2', 'Alta risoluzione'),
+                                    ('3', 'Bassa risoluzione'),
+                                    ('4', 'Preview'),
+                                    ('a', 'Il repository non ha il copyright dell\'oggetto digitale'),
+                                    ('b', 'Il repository ha il copyright dell\'oggetto digitale')
+                                ]
+                            )
+
                         datetimecreated = Utils.get_creation_date(file_path)
                         md5 = Utils.get_file_md5(file_path)
                         size = Utils.get_file_size(file_path)
                         nomenclature = filename
-                        imagegroupID = Utils.get_imagegroupID(file_path)
                         img = IMG(
                             imggroupID=imagegroupID,
                             nomenclature=nomenclature,
                             file=file_path,
                             datetimecreated=datetimecreated,
                             md5=md5,
-                            filesize=size
+                            filesize=size,
+                            usage=usage
                         )
                         print(filename)
                         metas: list[MetaData] = scanner.scan(file_path)
-                        print(metas)
                         datetimecreated = Utils.find_date_value(metas)
                         if datetimecreated is not None:
                             img.set_datetimecreated(datetimecreated)
@@ -145,7 +163,11 @@ class FrameSCAN(CustomFrame):
                         if xmp_object is not None:
                             print(xmp_object)
                         self.img_list.append(img)
+                        old_usage = usage
+                        old_imggroupID = imagegroupID
                 scanned_files += 1
+                old_dir = current_dir
+
                 progress = (scanned_files / total_files) * 100
                 self.update_progress(progress, scanned_files, total_files)
 
@@ -167,3 +189,24 @@ class FrameSCAN(CustomFrame):
         if not self.scanner_running:
             super().save_to_session((Utils.KEY_SESSION_IMG, self.img_list))
             return True
+
+    def ask_imgroupID_usage_value(self, field_imagegroupID, field_usage, values, options):
+        top = tk.Toplevel()
+        tk.Label(top, text=f'Seleziona il valore per {field_imagegroupID}').pack()
+        imggroupID_value = tk.StringVar(value='ImgGrp_S')
+        combo = ttk.Combobox(top, textvariable=imggroupID_value, values=values)
+        combo.pack(pady=(5, 20))
+
+        tk.Label(top, text=f'Seleziona il valore per {field_usage}').pack(pady=10)
+        usage_value = tk.StringVar(value='1')
+        for value, text in options:
+            radio = ttk.Radiobutton(top, text=text, variable=usage_value, value=value)
+            radio.pack(pady=5)
+
+        confirm_button = ttk.Button(top, text="Conferma", command=lambda: top.destroy())
+        confirm_button.pack(pady=20)
+
+        top.grab_set()
+        top.wait_window(top)
+
+        return imggroupID_value.get(), usage_value.get()
