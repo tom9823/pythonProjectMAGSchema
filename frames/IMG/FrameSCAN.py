@@ -60,7 +60,7 @@ class FrameSCAN(CustomFrame):
             self.container_frame,
             orient="horizontal",
             mode="determinate",
-            length=300  # Increase the length of the progress bar
+            length=300
         )
         self.progress_bar.pack(pady=10)
 

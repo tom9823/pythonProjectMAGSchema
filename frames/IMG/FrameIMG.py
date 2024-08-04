@@ -178,7 +178,7 @@ class FrameIMG(CustomFrame):
         self.init_frame_scanning_system()
 
     def init_frame_scanning_system(self):
-        self.frame_scanning_system = ttk.Frame(self.container_frame)
+        self.frame_scanning_system = ttk.Frame(self.frame_scanning)
 
         # Create a label and entry for <niso:scanner_manufacturer>
         scanner_manufacturer_label = ttk.Label(self.frame_scanning_system, text="<niso:scanner_manufacturer>:")
@@ -213,12 +213,11 @@ class FrameIMG(CustomFrame):
             self.frame_scanning.pack(expand=True, fill=tk.BOTH)
         else:
             self.frame_scanning.pack_forget()
-        self.var_is_scanning_system_enabled.set(0)
         self.container_frame.update_idletasks()
 
     def on_checkbox_scanning_system_selection(self):
         if self.var_is_scanning_system_enabled.get() == 1:
-            self.frame_scanning_system.pack(expand=True, fill=tk.BOTH)
+            self.frame_scanning_system.grid()
         else:
-            self.frame_scanning_system.pack_forget()
+            self.frame_scanning_system.grid_forget()
         self.container_frame.update_idletasks()
