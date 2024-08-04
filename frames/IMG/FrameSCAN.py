@@ -18,6 +18,7 @@ class FrameSCAN(CustomFrame):
         super().__init__(
             parent=parent,
             controller=controller,
+            title_frame=Utils.KEY_FRAME_SCAN,
             left_button_action=left_button_action,
             left_button_title=left_button_title,
             right_button_action=right_button_action,
@@ -103,6 +104,8 @@ class FrameSCAN(CustomFrame):
         scanned_files = 0
         self.img_list = []
         old_dir = ''
+        imagegroupID = None
+        usage = None
         for root, dirs, files in os.walk(path):
             if not self.scanner_running:
                 break
@@ -120,8 +123,6 @@ class FrameSCAN(CustomFrame):
                         print(text + '\n\n')
                 else:
                     scanner: Scanner = ScannerFactory.factory(file_extension)
-                    imagegroupID = "ImgGrp_S"
-                    usage = "1"
                     if scanner is not None:
                         if current_dir != old_dir:
                             imagegroupID, usage = self.ask_imgroupID_usage_value(
@@ -143,13 +144,13 @@ class FrameSCAN(CustomFrame):
                         size = Utils.get_file_size(file_path)
                         nomenclature = filename
                         img = IMG(
-                            imggroupID=imagegroupID,
+                            imggroupID=imagegroupID if imagegroupID is not None else 'ImgGrp_S',
                             nomenclature=nomenclature,
                             file=file_path,
                             datetimecreated=datetimecreated,
                             md5=md5,
                             filesize=size,
-                            usage=usage
+                            usage=usage if usage is not None else '1'
                         )
                         print(filename)
                         metas: list[MetaData] = scanner.scan(file_path)
@@ -163,8 +164,6 @@ class FrameSCAN(CustomFrame):
                         if xmp_object is not None:
                             print(xmp_object)
                         self.img_list.append(img)
-                        old_usage = usage
-                        old_imggroupID = imagegroupID
                 scanned_files += 1
                 old_dir = current_dir
 

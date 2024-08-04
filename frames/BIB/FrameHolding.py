@@ -14,6 +14,8 @@ class FrameHolding(CustomFrame):
         super().__init__(
             parent=parent,
             controller=controller,
+            title_frame="""La sezione BIB prevede l'elemento <holdings> :raccoglie le informazioni relative all'Istituzione che possiede l'oggetto
+analogico. L'elemento è opzionale e ripetibile.""",
             left_button_action=left_button_action,
             left_button_title=left_button_title,
             right_button_action=right_button_action,

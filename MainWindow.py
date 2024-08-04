@@ -7,7 +7,8 @@ from frames.BIB.FrameLocalBIB import FrameLocalBIB
 from frames.BIB.FramePiece import FramePiece
 from frames.FrameGEN import FrameGEN
 from frames.FrameINIT import FrameINIT
-from frames.FrameSCAN import FrameSCAN
+from frames.IMG.FrameIMG import FrameIMG
+from frames.IMG.FrameSCAN import FrameSCAN
 import xml.etree.ElementTree as ET
 
 
@@ -76,11 +77,23 @@ class MainWindow(tk.Tk):
             left_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_PIECE,
                                                        container=Utils.KEY_FRAME_LOCAL_BIB),
             left_button_title='LOCALBIB',
-            right_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_PIECE, container=Utils.KEY_FRAME_SCAN),
-            right_button_title='SCAN'
+            right_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_PIECE, container=Utils.KEY_FRAME_IMG),
+            right_button_title='IMG'
         )
         framePiece.grid(row=0, column=0, sticky=tk.NSEW)
         self.frames[Utils.KEY_FRAME_PIECE] = framePiece
+
+        frameIMG = FrameIMG(
+            parent=self,
+            controller=self,
+            left_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_IMG,
+                                                       container=Utils.KEY_FRAME_PIECE),
+            left_button_title='PIECE',
+            right_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_IMG, container=Utils.KEY_FRAME_SCAN),
+            right_button_title='SCAN'
+        )
+        frameIMG.grid(row=0, column=0, sticky=tk.NSEW)
+        self.frames[Utils.KEY_FRAME_IMG] = frameIMG
 
         frameSCAN = FrameSCAN(
             parent=self,

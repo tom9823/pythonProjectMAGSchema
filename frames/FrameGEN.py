@@ -12,6 +12,15 @@ class FrameGEN(CustomFrame):
         super().__init__(
             parent=parent,
             controller=controller,
+            title_frame=
+            """
+                L'elemento <gen> è il primo figlio dell'elemento root <metadigit> ed è obbligatorio.
+                Esso contiene una serie di elementi figli che contengono informazioni relative all'istituzione
+                responsabile del progetto di digitalizzazione, al progetto stesso, alla completezza o integrità
+                del file, all'accessibilità dell'oggetto (o gli oggetti) descritto nella sezione BIB.
+                L'elemento, inoltre, può contenere informazioni tecniche condivise da più oggetti
+                descritti dal documento MAG. L'elemento non è ripetibile.
+            """,
             left_button_action=left_button_action,
             left_button_title=left_button_title,
             right_button_action=right_button_action,

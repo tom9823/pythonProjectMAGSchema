@@ -18,6 +18,9 @@ class FrameDC(CustomFrame):
         super().__init__(
             parent=parent,
             controller=controller,
+            title_frame="""La sezione BIB prevede un set di elementi Dublin Core (<dc:*>): raccoglie i metadati descrittivi dell'oggetto
+analogico alla base della digitalizzazione; tutti gli elementi sono opzionali (tranne
+<dc:identifier> che è obbligatorio) e ripetibili.""",
             left_button_action=left_button_action,
             left_button_title=left_button_title,
             right_button_action=right_button_action,

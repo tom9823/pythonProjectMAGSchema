@@ -3,16 +3,16 @@ from tkinter import ttk
 
 
 class CustomFrame(tk.Frame):
-    def __init__(self, parent, controller, left_button_action, left_button_title, right_button_action,
+    def __init__(self, parent, controller, title_frame, left_button_action, left_button_title, right_button_action,
                  right_button_title, **kwargs):
         super().__init__(parent, **kwargs)
         self.controller = controller
         self.container_frame = tk.Frame(self)
-
         self.container_frame.grid(row=0, column=0, sticky=tk.NSEW, padx=10, pady=10)
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
-
+        ttk.Label(self.container_frame, text=title_frame).pack()
+        ttk.Separator(self.container_frame, orient='horizontal').pack(fill='x', padx=20, pady=20)
         self.__init_frame_buttons(left_button_action, left_button_title, right_button_action, right_button_title)
 
     def __init_frame_buttons(self, left_button_action, left_button_title, right_button_action, right_button_title):

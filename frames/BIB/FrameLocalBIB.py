@@ -14,6 +14,8 @@ class FrameLocalBIB(CustomFrame):
         super().__init__(
             parent=parent,
             controller=controller,
+            title_frame="""La sezione BIB prevede l'elemento <local_bib>: viene inteso come contenitore per il trasporto di informazioni
+specialistiche raccolte durante il processo di digitalizzazione. L'elemento è opzionale e ripetibile.""",
             left_button_action=left_button_action,
             left_button_title=left_button_title,
             right_button_action=right_button_action,

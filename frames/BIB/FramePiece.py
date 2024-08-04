@@ -13,6 +13,8 @@ class FramePiece(CustomFrame):
         super().__init__(
             parent=parent,
             controller=controller,
+            title_frame="""La sezione BIB prevede l'elemento <piece>: contiene dati relativi a un'unità fisica componente di un'unità superiore (es.:
+fascicolo di un seriale, parte di una unità bibliografica). L'elemento è opzionale e non ripetibile.""",
             left_button_action=left_button_action,
             left_button_title=left_button_title,
             right_button_action=right_button_action,
