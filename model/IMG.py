@@ -307,3 +307,89 @@ class AltImg:
             altimg_elem.set('imggroupID', self.imggroupID)
 
         return altimg_elem
+
+class Scanning:
+    def __init__(self, source_type, scanning_agency, device_source, scanner_manufacturer, scanner_model, capture_software):
+        # Elementi opzionali e non ripetibili con valori di default None
+        self.sourcetype = source_type
+        self.scanningagency = scanning_agency
+        self.devicesource = device_source
+        self.scanner_manufacturer = scanner_manufacturer
+        self.scanner_model = scanner_model
+        self.capture_software = capture_software
+
+    def set_sourcetype(self, sourcetype):
+        # Settaggio di sourcetype con valori suggeriti
+        allowed_values = [
+            "negativo",
+            "positivo",
+            "diapositiva",
+            "unicum",
+            "fotografia virtuale",
+            "vario: .../...",
+        ]
+        if sourcetype in allowed_values:
+            self.sourcetype = sourcetype
+        else:
+            raise ValueError(f"Valore di sourcetype non valido. Scegli uno tra: {', '.join(allowed_values)}")
+
+    def set_scanningagency(self, scanningagency):
+        # Imposta il nome dell'ente o della persona responsabile della scansione
+        self.scanningagency = scanningagency
+
+    def set_devicesource(self, devicesource):
+        # Imposta il tipo di apparecchiatura di scansione
+        self.devicesource = devicesource
+
+    def set_scanning_system(self, scanner_manufacturer, scanner_model, capture_software):
+        # Imposta i dettagli del sistema di scansione
+        self.scanner_manufacturer = scanner_manufacturer
+        self.scanner_model = scanner_model
+        self.capture_software = capture_software
+
+    def get_scanning_details(self):
+        # Ritorna una rappresentazione stringa dei dettagli di scansione
+        return f"""
+        Scanning Details:
+        Source Type: {self.sourcetype}
+        Scanning Agency: {self.scanningagency}
+        Device Source: {self.devicesource}
+        Scanning System:
+            Manufacturer: {self.scanner_manufacturer}
+            Model: {self.scanner_model}
+            Capture Software: {self.capture_software}
+        """
+
+    def to_xml(self):
+        # Crea un elemento radice <scanning>
+        scanning_element = ET.Element('scanning')
+
+        # Aggiunge l'elemento <niso:sourcetype> se esiste
+        if self.sourcetype:
+            sourcetype_element = ET.SubElement(scanning_element, 'niso:sourcetype')
+            sourcetype_element.text = self.sourcetype
+
+        # Aggiunge l'elemento <niso:scanningagency> se esiste
+        if self.scanningagency:
+            scanningagency_element = ET.SubElement(scanning_element, 'niso:scanningagency')
+            scanningagency_element.text = self.scanningagency
+
+        # Aggiunge l'elemento <niso:devicesource> se esiste
+        if self.devicesource:
+            devicesource_element = ET.SubElement(scanning_element, 'niso:devicesource')
+            devicesource_element.text = self.devicesource
+
+        # Aggiunge il sistema di scansione come elemento complesso <niso:scanningsystem>
+        if self.scanner_manufacturer and self.scanner_model and self.capture_software:
+            scanningsystem_element = ET.SubElement(scanning_element, 'niso:scanningsystem')
+
+            scanner_manufacturer_element = ET.SubElement(scanningsystem_element, 'niso:scanner_manufacturer')
+            scanner_manufacturer_element.text = self.scanner_manufacturer
+
+            scanner_model_element = ET.SubElement(scanningsystem_element, 'niso:scanner_model')
+            scanner_model_element.text = self.scanner_model
+
+            capture_software_element = ET.SubElement(scanningsystem_element, 'niso:capture_software')
+            capture_software_element.text = self.capture_software
+
+        return scanning_element
