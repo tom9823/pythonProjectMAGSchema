@@ -47,15 +47,6 @@ class FrameIMG(CustomFrame):
         dropdown_side.pack(pady=(5, 20))
 
         ttk.Separator(self.container_frame, orient='horizontal').pack(fill='x', padx=20, pady=20)
-
-        self.var_selected_millimetric_scale = tk.IntVar(value=0)
-        checkbox_millimetric_scale = tk.Checkbutton(self.container_frame,
-                                                    text="è presente una scala millimetrica",
-                                                    variable=self.var_selected_millimetric_scale, onvalue=1, offvalue=0,
-                                                    )
-        checkbox_millimetric_scale.pack(pady=(5, 20))
-
-        ttk.Separator(self.container_frame, orient='horizontal').pack(fill='x', padx=20, pady=20)
         self.var_is_scanning_enabled = tk.IntVar()
 
         checkbox_scanning = tk.Checkbutton(self.container_frame,
@@ -71,8 +62,6 @@ class FrameIMG(CustomFrame):
             description_side = self.selected_side.get()
             key_side = self.options_side.get(description_side, None)
             super().save_to_session((Utils.KEY_SESSION_SIDE, key_side))
-        if self.var_selected_millimetric_scale.get() is not None and self.var_selected_millimetric_scale.get() == 1:
-            super().save_to_session((Utils.KEY_SESSION_SCALE, self.var_selected_millimetric_scale.get()))
         if self.var_is_scanning_enabled.get() is not None and self.var_is_scanning_enabled.get() == 1:
             source_type = None
             scanning_agency = None
@@ -173,7 +162,6 @@ class FrameIMG(CustomFrame):
                                            command=self.on_checkbox_scanning_system_selection)
         checkbox_scanning.grid()
 
-        # Configure grid to allow column resizing
         self.frame_scanning.columnconfigure(1, weight=1)
         self.init_frame_scanning_system()
 

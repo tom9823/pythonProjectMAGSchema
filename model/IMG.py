@@ -393,3 +393,93 @@ class Scanning:
             capture_software_element.text = self.capture_software
 
         return scanning_element
+
+class Target:
+    def __init__(self, target_type=None, target_id=None, image_data=None, performance_data=None, profiles=None):
+        # Initialize with default values
+        self.target_type = target_type  # 0 for external, 1 for internal
+        self.target_id = target_id      # Name or ID of the target
+        self.image_data = image_data    # Path to image data (only for external targets)
+        self.performance_data = performance_data  # Path to performance data file
+        self.profiles = profiles        # Path to ICC color profile or management profile
+
+    def set_target_type(self, target_type):
+        # Validate and set target type
+        allowed_values = [0, 1]  # 0: external, 1: internal
+        if target_type in allowed_values:
+            self.target_type = target_type
+        else:
+            raise ValueError(f"Valore di targetType non valido. Scegli 0 (esterno) o 1 (interno).")
+
+    def set_target_id(self, target_id):
+        # Set the target ID
+        if isinstance(target_id, str) and target_id:
+            self.target_id = target_id
+        else:
+            raise ValueError("targetID deve essere una stringa non vuota.")
+
+    def set_image_data(self, image_data):
+        # Set the image data path (only for external targets)
+        if self.target_type == 0:
+            if isinstance(image_data, str):
+                self.image_data = image_data
+            else:
+                raise ValueError("imageData deve essere una stringa valida (path).")
+        else:
+            raise ValueError("imageData può essere impostato solo per target esterni (targetType = 0).")
+
+    def set_performance_data(self, performance_data):
+        # Set the performance data path
+        if isinstance(performance_data, str):
+            self.performance_data = performance_data
+        else:
+            raise ValueError("performanceData deve essere una stringa valida (path).")
+
+    def set_profiles(self, profiles):
+        # Set the profiles path
+        if isinstance(profiles, str):
+            self.profiles = profiles
+        else:
+            raise ValueError("profiles deve essere una stringa valida (path).")
+
+    def get_target_details(self):
+        # Return a string representation of the target details
+        return f"""
+        Target Details:
+        Target Type: {'Esterno' if self.target_type == 0 else 'Interno'}
+        Target ID: {self.target_id}
+        Image Data: {self.image_data or 'N/A'}
+        Performance Data: {self.performance_data or 'N/A'}
+        Profiles: {self.profiles or 'N/A'}
+        """
+
+    def to_xml(self):
+        # Create a root element <target>
+        target_element = ET.Element('target')
+
+        # Add the element <niso:targetType> if it exists
+        if self.target_type is not None:
+            target_type_element = ET.SubElement(target_element, 'niso:targetType')
+            target_type_element.text = str(self.target_type)
+
+        # Add the element <niso:targetID> if it exists
+        if self.target_id:
+            target_id_element = ET.SubElement(target_element, 'niso:targetID')
+            target_id_element.text = self.target_id
+
+        # Add the element <niso:imageData> if it exists
+        if self.image_data:
+            image_data_element = ET.SubElement(target_element, 'niso:imageData')
+            image_data_element.text = self.image_data
+
+        # Add the element <niso:performanceData> if it exists
+        if self.performance_data:
+            performance_data_element = ET.SubElement(target_element, 'niso:performanceData')
+            performance_data_element.text = self.performance_data
+
+        # Add the element <niso:profiles> if it exists
+        if self.profiles:
+            profiles_element = ET.SubElement(target_element, 'niso:profiles')
+            profiles_element.text = self.profiles
+
+        return target_element
