@@ -61,15 +61,15 @@ class FrameIMG2(CustomFrame):
             profiles = None
 
             # Validate and get target type
-            if self.targettype_var.get() in [0, 1]:
-                target_type = self.targettype_var.get()
-            else:
-                messagebox.showerror("Errore", "Devi selezionare un tipo di target valido.")
-                return
+            if self.targettype_var.get() == "Esterno":
+                target_type = 0
+            elif self.targettype_var.get() == "Interno":
+                target_type = 1
 
             # Validate and get target ID
             if self.targetid_entry.get() is not None and self.targetid_entry.get():
                 target_id = self.targetid_entry.get()
+            else:
                 ret = False
 
             if target_type == 0 and self.imagedata_entry.get() is not None and self.imagedata_entry.get():
@@ -99,13 +99,13 @@ class FrameIMG2(CustomFrame):
         targettype_label = ttk.Label(self.frame_target, text="<niso:targetType>:")
         targettype_label.grid(row=0, column=0, sticky=tk.W, pady=5)
 
-        targettype_options = {"Esterno": 0, "Interno": 1}
-        self.targettype_var = tk.IntVar()
+        targettype_options = ["Esterno", "Interno"]
+        self.targettype_var = tk.StringVar()
 
         targettype_dropdown = ttk.OptionMenu(
             self.frame_target,
             self.targettype_var,
-            *targettype_options.keys()
+            *targettype_options
         )
         targettype_dropdown.grid(row=0, column=1, pady=5, sticky=tk.EW)
         ToolTip(targettype_dropdown, "Opzionale e non ripetibile, dichiara se il target è interno o esterno.")

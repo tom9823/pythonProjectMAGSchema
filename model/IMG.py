@@ -3,6 +3,11 @@ from enum import Enum
 from typing import List, Optional
 
 
+class ObjectToXML:
+    def to_xml(self):
+        raise NotImplementedError("Devi implementare il metodo nella sottoclasse")
+
+
 # Definizione della prima enum per tipo di immagine
 class ImageType(Enum):
     MASTER = 1
@@ -17,7 +22,7 @@ class CopyrightStatus(Enum):
     HAS_COPYRIGHT = 'b'
 
 
-class IMG:
+class IMG(ObjectToXML):
     _sequence_counter = 0  # Variabile di classe per mantenere il conteggio delle istanze
 
     def __init__(self, nomenclature=None, usage=None, side=None, scale=None,
@@ -253,7 +258,8 @@ class ImageCreation:
 
 # Definizione della classe ALT_IMG
 class AltImg:
-    def __init__(self, file: str, md5: NISOChecksum, image_dimensions: ImageDimensions, usage: Optional[List[str]] = None,
+    def __init__(self, file: str, md5: NISOChecksum, image_dimensions: ImageDimensions,
+                 usage: Optional[List[str]] = None,
                  filesize: Optional[int] = None, image_metrics: Optional[ImageMetrics] = None,
                  ppi: Optional[int] = None, dpi: Optional[int] = None, format: Optional[Format] = None,
                  scanning: Optional[ImageCreation] = None, datetimecreated: Optional[str] = None,
@@ -308,8 +314,10 @@ class AltImg:
 
         return altimg_elem
 
+
 class Scanning:
-    def __init__(self, source_type, scanning_agency, device_source, scanner_manufacturer, scanner_model, capture_software):
+    def __init__(self, source_type, scanning_agency, device_source, scanner_manufacturer, scanner_model,
+                 capture_software):
         # Elementi opzionali e non ripetibili con valori di default None
         self.sourcetype = source_type
         self.scanningagency = scanning_agency
@@ -394,14 +402,15 @@ class Scanning:
 
         return scanning_element
 
-class Target:
+
+class Target(ObjectToXML):
     def __init__(self, target_type=None, target_id=None, image_data=None, performance_data=None, profiles=None):
         # Initialize with default values
         self.target_type = target_type  # 0 for external, 1 for internal
-        self.target_id = target_id      # Name or ID of the target
-        self.image_data = image_data    # Path to image data (only for external targets)
+        self.target_id = target_id  # Name or ID of the target
+        self.image_data = image_data  # Path to image data (only for external targets)
         self.performance_data = performance_data  # Path to performance data file
-        self.profiles = profiles        # Path to ICC color profile or management profile
+        self.profiles = profiles  # Path to ICC color profile or management profile
 
     def set_target_type(self, target_type):
         # Validate and set target type

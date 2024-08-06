@@ -106,6 +106,10 @@ class FrameSCAN(CustomFrame):
         old_dir = ''
         imagegroupID = None
         usage = None
+        side = self.controller.session.get(Utils.KEY_SESSION_SIDE, None)
+        scanning = self.controller.session.get(Utils.KEY_SESSION_SCANNING, None)
+        target = self.controller.session.get(Utils.KEY_SESSION_TARGET, None)
+        scale = self.controller.session.get(Utils.KEY_SESSION_SCALE, None)
         for root, dirs, files in os.walk(path):
             if not self.scanner_running:
                 break
@@ -150,7 +154,11 @@ class FrameSCAN(CustomFrame):
                             datetimecreated=datetimecreated,
                             md5=md5,
                             filesize=size,
-                            usage=usage if usage is not None else '1'
+                            usage=usage if usage is not None else '1',
+                            side=side,
+                            target=target,
+                            scanning=scanning,
+                            scale=scale
                         )
                         print(filename)
                         metas: list[MetaData] = scanner.scan(file_path)
