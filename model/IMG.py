@@ -170,9 +170,11 @@ class IMG(ObjectToXML):
         for use in self._usage:
             self.append_element(img_elem, 'usage', use)
 
+        self.append_element(img_elem, 'sequence_number', self.sequence_number)
         self.append_element(img_elem, 'side', self._side)
         self.append_element(img_elem, 'scale', self._scale)
         self.append_element(img_elem, 'file', self._file)
+        ET.SubElement(parent=img_elem, tag='file', attrib={'Location': "URL", 'xlink': self._file})
         self.append_element(img_elem, 'md5', self._md5)
         self.append_element(img_elem, 'filesize', self._filesize)
         self.append_element(img_elem, 'ppi', self._ppi)
