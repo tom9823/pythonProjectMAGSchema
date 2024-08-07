@@ -168,9 +168,6 @@ class FrameSCAN(CustomFrame):
                         image_dimensions = Utils.get_image_dimensions(metas)
                         if image_dimensions is not None:
                             img.set_image_dimensions(image_dimensions)
-                        xmp_object = Utils.extract_xmp_metadata(metadata_list=metas)
-                        if xmp_object is not None:
-                            print(xmp_object)
                         self.img_list.append(img)
                 scanned_files += 1
                 old_dir = current_dir

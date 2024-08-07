@@ -98,9 +98,9 @@ def get_image_dimensions(metadata_list):
     source_xdimension = None
     source_ydimension = None
     for metadata in metadata_list:
-        if metadata.get_key() in ("ImageWidth"):
+        if metadata.get_key() in ["ImageWidth", "XResolution"]:
             image_width = metadata.get_values()[0]
-        if metadata.get_key() in ("ImageLength"):
+        if metadata.get_key() in ["ImageLength", "YResolution"]:
             image_length = metadata.get_values()[0]
     if image_length and image_width:
         return ImageDimensions(imagewidth=image_width, imagelength=image_length)

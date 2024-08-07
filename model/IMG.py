@@ -163,17 +163,14 @@ class IMG(ObjectToXML):
 
     def to_xml(self):
 
-        img_elem = ET.Element('IMG')
+        img_elem = ET.Element('IMG', attrib={'imggroupID': self._imggroupID})
 
-        # Process each attribute
         self.append_element(img_elem, 'nomenclature', self._nomenclature)
 
         for use in self._usage:
             self.append_element(img_elem, 'usage', use)
 
         self.append_element(img_elem, 'side', self._side)
-
-
         self.append_element(img_elem, 'scale', self._scale)
         self.append_element(img_elem, 'file', self._file)
         self.append_element(img_elem, 'md5', self._md5)
@@ -182,9 +179,7 @@ class IMG(ObjectToXML):
         self.append_element(img_elem, 'dpi', self._dpi)
         self.append_element(img_elem, 'datetimecreated', self._datetimecreated)
         self.append_element(img_elem, 'note', self._note)
-        self.append_element(img_elem, 'imggroupID', self._imggroupID)
         self.append_element(img_elem, 'holdingsID', self._holdingsID)
-
 
         # Process ObjectToXML properties
         self.append_element(img_elem, 'image_dimensions', self._image_dimensions)

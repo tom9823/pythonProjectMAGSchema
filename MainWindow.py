@@ -1,4 +1,5 @@
 import tkinter as tk
+from urllib.parse import urlparse
 
 import Utils
 from frames.BIB.FrameDC import FrameDC
@@ -179,7 +180,7 @@ class MainWindow(tk.Tk):
         xml_declaration = '<?xml version="1.0" encoding="UTF-8"?>\n'
 
         # Salvare il file XML
-        with open("prova.xml", "w", encoding="utf-8") as file:
+        with open(f"{self.get_last_segment(self.session.get('Progetto di Digitalizzazione', 'output'))}.xml", "w", encoding="utf-8") as file:
             file.write(xml_declaration)
             file.write(xml_content)
 
@@ -269,6 +270,14 @@ class MainWindow(tk.Tk):
     def _attach_img_tag(self, metadigit):
         for img in self.session.get(Utils.KEY_SESSION_IMG, []):
             metadigit.append(img.to_xml())
+
+    def get_last_segment(self, url):
+        # Analizza l'URL
+        parsed_url = urlparse(url)
+        # Ottiene il percorso dell'URL e lo pulisce
+        path = parsed_url.path.rstrip('/')
+        # Divide il percorso e restituisce l'ultimo segmento
+        return path.split('/')[-1]
 
 
 
