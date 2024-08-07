@@ -172,6 +172,8 @@ class MainWindow(tk.Tk):
         # Aggiungere il sottotag <bib>
         self._attach_bib_tag(metadigit)
 
+        self._attach_img_tag(metadigit)
+
         # Convertire l'albero degli elementi XML in una stringa
         xml_content = ET.tostring(metadigit, encoding="unicode", method="xml")
         xml_declaration = '<?xml version="1.0" encoding="UTF-8"?>\n'
@@ -261,48 +263,13 @@ class MainWindow(tk.Tk):
                         stpiece_vol_element = ET.SubElement(piece_element, "stpiece_vol")
                         stpiece_vol_element.text = piece.get_stpiece_vol()
 
-            for img in self.session.get(Utils.KEY_SESSION_IMG, []):
-                img_element = ET.SubElement(parent=metadigit, tag="img")
 
-                ET.SubElement(img_element, "sequence_number").text = str(img.sequence_number)
-                ET.SubElement(img_element, "nomenclature").text = img.get_nomenclature()
 
-                for usage in img.get_usage():
-                    ET.SubElement(img_element, "usage").text = usage
 
-                if img.get_scale():
-                    ET.SubElement(img_element, "side").text = img.get_side()
-                if img.get_scale():
-                    ET.SubElement(img_element, "scale").text = img.get_scale()
-                if img.get_file():
-                    ET.SubElement(img_element, "file").text = img.get_file()
-                if img.get_md5():
-                    ET.SubElement(img_element, "md5").text = img.get_md5()
-                if img.get_filesize():
-                    ET.SubElement(img_element, "filesize").text = str(img.get_filesize())
-                if img.get_imggroupID():
-                    ET.SubElement(img_element, "image_dimensions").text = img.get_image_dimensions()
-                if img.get_image_dimensions():
-                    ET.SubElement(img_element, "image_metrics").text = img.get_image_metrics()
-                if img.get_ppi():
-                    ET.SubElement(img_element, "ppi").text = str(img.get_ppi())
-                if img.get_dpi():
-                    ET.SubElement(img_element, "dpi").text = str(img.get_dpi())
-                if img.get_format():
-                    ET.SubElement(img_element, "format").text = img.get_format()
-                if img.get_scanning():
-                    ET.SubElement(img_element, "scanning").text = img.get_scanning()
-                if img.get_datetimecreated():
-                    ET.SubElement(img_element, "datetimecreated").text = img.get_datetimecreated()
+    def _attach_img_tag(self, metadigit):
+        for img in self.session.get(Utils.KEY_SESSION_IMG, []):
+            metadigit.append(img.to_xml())
 
-                for target in img.get_target():
-                    ET.SubElement(img_element, "target").text = target
-
-                for alt in img.get_altimg():
-                    ET.SubElement(img_element, "altimg").text = alt
-
-                if img.get_note():
-                    ET.SubElement(img_element, "note").text = img.get_note()
 
 
 if __name__ == "__main__":

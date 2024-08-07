@@ -160,7 +160,7 @@ class FrameSCAN(CustomFrame):
                             scanning=scanning,
                             scale=scale
                         )
-                        print(filename)
+                        xml = img.to_xml()
                         metas: list[MetaData] = scanner.scan(file_path)
                         datetimecreated = Utils.find_date_value(metas)
                         if datetimecreated is not None:

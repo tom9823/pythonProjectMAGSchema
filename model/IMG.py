@@ -161,6 +161,51 @@ class IMG(ObjectToXML):
             raise ValueError("target deve essere una lista di tipo niso:targetdata")
         self._target = value
 
+    def to_xml(self):
+
+        img_elem = ET.Element('IMG')
+
+        # Process each attribute
+        self.append_element(img_elem, 'nomenclature', self._nomenclature)
+
+        for use in self._usage:
+            self.append_element(img_elem, 'usage', use)
+
+        self.append_element(img_elem, 'side', self._side)
+
+
+        self.append_element(img_elem, 'scale', self._scale)
+        self.append_element(img_elem, 'file', self._file)
+        self.append_element(img_elem, 'md5', self._md5)
+        self.append_element(img_elem, 'filesize', self._filesize)
+        self.append_element(img_elem, 'ppi', self._ppi)
+        self.append_element(img_elem, 'dpi', self._dpi)
+        self.append_element(img_elem, 'datetimecreated', self._datetimecreated)
+        self.append_element(img_elem, 'note', self._note)
+        self.append_element(img_elem, 'imggroupID', self._imggroupID)
+        self.append_element(img_elem, 'holdingsID', self._holdingsID)
+
+
+        # Process ObjectToXML properties
+        self.append_element(img_elem, 'image_dimensions', self._image_dimensions)
+        self.append_element(img_elem, 'image_metrics', self._image_metrics)
+        self.append_element(img_elem, 'format', self._format)
+        self.append_element(img_elem, 'scanning', self._scanning)
+        self.append_element(img_elem, 'target', self._target)
+
+        # Process lists of ObjectToXML
+        for alt_img in self._altimg:
+            self.append_element(img_elem, 'altimg', alt_img)
+
+        return img_elem
+
+    def append_element(self, parent, tag, value):
+        if value is not None:
+            if isinstance(value, ObjectToXML):
+                parent.append(value.to_xml())
+            else:
+                ET.SubElement(parent, tag).text = str(value)
+
 
 # Definizione dei tipi semplici e complessi NISO
 class NISOChecksum(str):
