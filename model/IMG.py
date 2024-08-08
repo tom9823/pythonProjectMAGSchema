@@ -22,6 +22,14 @@ class CopyrightStatus(Enum):
     HAS_COPYRIGHT = 'b'
 
 
+def append_element(parent, tag, value):
+    if value is not None:
+        if isinstance(value, ObjectToXML):
+            parent.append(value.to_xml())
+        else:
+            ET.SubElement(parent, tag).text = str(value)
+
+
 class IMG(ObjectToXML):
     _sequence_counter = 0  # Variabile di classe per mantenere il conteggio delle istanze
 
@@ -46,7 +54,7 @@ class IMG(ObjectToXML):
         self._scanning = scanning
         self._datetimecreated = datetimecreated
         self._target = target if target is not None else []
-        self._altimg = altimg if altimg is not None else []
+        self.alt_imgs = altimg if altimg is not None else []
         self._note = note
         self._imggroupID = imggroupID
         self._holdingsID = holdingsID
@@ -161,47 +169,43 @@ class IMG(ObjectToXML):
             raise ValueError("target deve essere una lista di tipo niso:targetdata")
         self._target = value
 
+    def add_alt_img(self, alt_img):
+        self.alt_imgs.add(alt_img)
+
     def to_xml(self):
 
         img_elem = ET.Element('IMG', attrib={'imggroupID': self._imggroupID})
 
-        self.append_element(img_elem, 'nomenclature', self._nomenclature)
+        append_element(img_elem, 'nomenclature', self._nomenclature)
 
         for use in self._usage:
-            self.append_element(img_elem, 'usage', use)
+            append_element(img_elem, 'usage', use)
 
-        self.append_element(img_elem, 'sequence_number', self.sequence_number)
-        self.append_element(img_elem, 'side', self._side)
-        self.append_element(img_elem, 'scale', self._scale)
-        self.append_element(img_elem, 'file', self._file)
+        append_element(img_elem, 'sequence_number', self.sequence_number)
+        append_element(img_elem, 'side', self._side)
+        append_element(img_elem, 'scale', self._scale)
+        append_element(img_elem, 'file', self._file)
         ET.SubElement(parent=img_elem, tag='file', attrib={'Location': "URL", 'xlink': self._file})
-        self.append_element(img_elem, 'md5', self._md5)
-        self.append_element(img_elem, 'filesize', self._filesize)
-        self.append_element(img_elem, 'ppi', self._ppi)
-        self.append_element(img_elem, 'dpi', self._dpi)
-        self.append_element(img_elem, 'datetimecreated', self._datetimecreated)
-        self.append_element(img_elem, 'note', self._note)
-        self.append_element(img_elem, 'holdingsID', self._holdingsID)
+        append_element(img_elem, 'md5', self._md5)
+        append_element(img_elem, 'filesize', self._filesize)
+        append_element(img_elem, 'ppi', self._ppi)
+        append_element(img_elem, 'dpi', self._dpi)
+        append_element(img_elem, 'datetimecreated', self._datetimecreated)
+        append_element(img_elem, 'note', self._note)
+        append_element(img_elem, 'holdingsID', self._holdingsID)
 
         # Process ObjectToXML properties
-        self.append_element(img_elem, 'image_dimensions', self._image_dimensions)
-        self.append_element(img_elem, 'image_metrics', self._image_metrics)
-        self.append_element(img_elem, 'format', self._format)
-        self.append_element(img_elem, 'scanning', self._scanning)
-        self.append_element(img_elem, 'target', self._target)
+        append_element(img_elem, 'image_dimensions', self._image_dimensions)
+        append_element(img_elem, 'image_metrics', self._image_metrics)
+        append_element(img_elem, 'format', self._format)
+        append_element(img_elem, 'scanning', self._scanning)
+        append_element(img_elem, 'target', self._target)
 
         # Process lists of ObjectToXML
-        for alt_img in self._altimg:
-            self.append_element(img_elem, 'altimg', alt_img)
+        for alt_img in self.alt_imgs:
+            append_element(img_elem, 'altimg', alt_img)
 
         return img_elem
-
-    def append_element(self, parent, tag, value):
-        if value is not None:
-            if isinstance(value, ObjectToXML):
-                parent.append(value.to_xml())
-            else:
-                ET.SubElement(parent, tag).text = str(value)
 
 
 # Definizione dei tipi semplici e complessi NISO
@@ -269,92 +273,6 @@ class Format:
         if self.compression is not None:
             ET.SubElement(format_elem, 'compression').text = self.compression
         return format_elem
-
-
-class ImageCreation:
-    def __init__(self, sourcetype: Optional[str] = None, scanningagency: Optional[str] = None,
-                 devicesource: Optional[str] = None, scanner_manufacturer: Optional[str] = None,
-                 scanner_model: Optional[str] = None, capture_software: Optional[str] = None):
-        self.sourcetype = sourcetype
-        self.scanningagency = scanningagency
-        self.devicesource = devicesource
-        self.scanner_manufacturer = scanner_manufacturer
-        self.scanner_model = scanner_model
-        self.capture_software = capture_software
-
-    def to_xml(self):
-        scanning_elem = ET.Element('scanning')
-        if self.sourcetype is not None:
-            ET.SubElement(scanning_elem, 'sourcetype').text = self.sourcetype
-        if self.scanningagency is not None:
-            ET.SubElement(scanning_elem, 'scanningagency').text = self.scanningagency
-        if self.devicesource is not None:
-            ET.SubElement(scanning_elem, 'devicesource').text = self.devicesource
-        if self.scanner_manufacturer or self.scanner_model or self.capture_software:
-            system_elem = ET.SubElement(scanning_elem, 'scanningsystem')
-            ET.SubElement(system_elem, 'scanner_manufacturer').text = self.scanner_manufacturer
-            ET.SubElement(system_elem, 'scanner_model').text = self.scanner_model
-            ET.SubElement(system_elem, 'capture_software').text = self.capture_software
-        return scanning_elem
-
-
-# Definizione della classe ALT_IMG
-class AltImg:
-    def __init__(self, file: str, md5: NISOChecksum, image_dimensions: ImageDimensions,
-                 usage: Optional[List[str]] = None,
-                 filesize: Optional[int] = None, image_metrics: Optional[ImageMetrics] = None,
-                 ppi: Optional[int] = None, dpi: Optional[int] = None, format: Optional[Format] = None,
-                 scanning: Optional[ImageCreation] = None, datetimecreated: Optional[str] = None,
-                 imggroupID: Optional[str] = None):
-        self.file = file
-        self.md5 = md5
-        self.image_dimensions = image_dimensions
-        self.usage = usage if usage else []
-        self.filesize = filesize
-        self.image_metrics = image_metrics
-        self.ppi = ppi
-        self.dpi = dpi
-        self.format = format
-        self.scanning = scanning
-        self.datetimecreated = datetimecreated
-        self.imggroupID = imggroupID
-
-    def to_xml(self):
-        altimg_elem = ET.Element('altimg')
-
-        for use in self.usage:
-            ET.SubElement(altimg_elem, 'usage').text = use
-
-        ET.SubElement(altimg_elem, 'file').text = self.file
-        ET.SubElement(altimg_elem, 'md5').text = str(self.md5)
-
-        if self.filesize is not None:
-            ET.SubElement(altimg_elem, 'filesize').text = str(self.filesize)
-
-        altimg_elem.append(self.image_dimensions.to_xml())
-
-        if self.image_metrics is not None:
-            altimg_elem.append(self.image_metrics.to_xml())
-
-        if self.ppi is not None:
-            ET.SubElement(altimg_elem, 'ppi').text = str(self.ppi)
-
-        if self.dpi is not None:
-            ET.SubElement(altimg_elem, 'dpi').text = str(self.dpi)
-
-        if self.format is not None:
-            altimg_elem.append(self.format.to_xml())
-
-        if self.scanning is not None:
-            altimg_elem.append(self.scanning.to_xml())
-
-        if self.datetimecreated is not None:
-            ET.SubElement(altimg_elem, 'datetimecreated').text = self.datetimecreated
-
-        if self.imggroupID is not None:
-            altimg_elem.set('imggroupID', self.imggroupID)
-
-        return altimg_elem
 
 
 class Scanning:
@@ -443,6 +361,65 @@ class Scanning:
             capture_software_element.text = self.capture_software
 
         return scanning_element
+
+
+# Definizione della classe ALT_IMG
+class AltImg:
+    def __init__(self, file: str, md5: NISOChecksum, image_dimensions: ImageDimensions,
+                 usage: Optional[List[str]] = None,
+                 filesize: Optional[int] = None, image_metrics: Optional[ImageMetrics] = None,
+                 ppi: Optional[int] = None, dpi: Optional[int] = None, format: Optional[Format] = None,
+                 scanning: Optional[Scanning] = None, datetimecreated: Optional[str] = None,
+                 imggroupID: Optional[str] = None):
+        self.file = file
+        self.md5 = md5
+        self.image_dimensions = image_dimensions
+        self.usage = usage if usage else []
+        self.filesize = filesize
+        self.image_metrics = image_metrics
+        self.ppi = ppi
+        self.dpi = dpi
+        self.format = format
+        self.scanning = scanning
+        self.datetimecreated = datetimecreated
+        self.imggroupID = imggroupID
+
+    def to_xml(self):
+        altimg_elem = ET.Element('altimg')
+
+        for use in self.usage:
+            ET.SubElement(altimg_elem, 'usage').text = use
+
+        ET.SubElement(parent=altimg_elem, tag='file', attrib={'Location': "URL", 'xlink': self.file})
+        ET.SubElement(altimg_elem, 'md5').text = str(self.md5)
+
+        if self.filesize is not None:
+            ET.SubElement(altimg_elem, 'filesize').text = str(self.filesize)
+
+        altimg_elem.append(self.image_dimensions.to_xml())
+
+        if self.image_metrics is not None:
+            altimg_elem.append(self.image_metrics.to_xml())
+
+        if self.ppi is not None:
+            ET.SubElement(altimg_elem, 'ppi').text = str(self.ppi)
+
+        if self.dpi is not None:
+            ET.SubElement(altimg_elem, 'dpi').text = str(self.dpi)
+
+        if self.format is not None:
+            altimg_elem.append(self.format.to_xml())
+
+        if self.scanning is not None:
+            altimg_elem.append(self.scanning.to_xml())
+
+        if self.datetimecreated is not None:
+            ET.SubElement(altimg_elem, 'datetimecreated').text = self.datetimecreated
+
+        if self.imggroupID is not None:
+            altimg_elem.set('imggroupID', self.imggroupID)
+
+        return altimg_elem
 
 
 class Target(ObjectToXML):

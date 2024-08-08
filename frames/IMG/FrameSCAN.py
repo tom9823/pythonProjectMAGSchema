@@ -6,7 +6,7 @@ import pytesseract
 from PIL import Image
 import Utils
 from frames.CustomFrame import CustomFrame
-from model.IMG import IMG
+from model.IMG import IMG, AltImg
 from scanner.MetaData import MetaData
 from scanner.Scanner import Scanner
 from scanner.ScannerFactory import ScannerFactory
@@ -29,7 +29,7 @@ class FrameSCAN(CustomFrame):
         self.scanner_running = False
         self.is_ocr_recognition = is_ocr_recognition
         self._init_widgets()
-        self.img_list = []
+        self.img_dict = dict()
 
     def _init_widgets(self):
         super().disable_right_button()
@@ -102,7 +102,7 @@ class FrameSCAN(CustomFrame):
         path = self.path_var.get()
         total_files = sum([len(files) for r, d, files in os.walk(path)])
         scanned_files = 0
-        self.img_list = []
+        self.img_dict = dict()
         old_dir = ''
         imagegroupID = None
         usage = None
@@ -117,7 +117,7 @@ class FrameSCAN(CustomFrame):
                 if not self.scanner_running:
                     break
 
-                _, file_extension = os.path.splitext(filename)
+                filename_without_extension, file_extension = os.path.splitext(filename)
                 file_path = os.path.join(root, filename)
                 current_dir = os.path.dirname(file_path)
                 if self.is_ocr_recognition:
@@ -142,33 +142,45 @@ class FrameSCAN(CustomFrame):
                                     ('b', 'Il repository ha il copyright dell\'oggetto digitale')
                                 ]
                             )
-
-                        datetimecreated = Utils.get_creation_date(file_path)
                         md5 = Utils.get_file_md5(file_path)
                         size = Utils.get_file_size(file_path)
-                        nomenclature = filename
-                        img = IMG(
-                            imggroupID=imagegroupID if imagegroupID is not None else 'ImgGrp_S',
-                            nomenclature=nomenclature,
-                            file=file_path,
-                            datetimecreated=datetimecreated,
-                            md5=md5,
-                            filesize=size,
-                            usage=usage if usage is not None else '1',
-                            side=side,
-                            target=target,
-                            scanning=scanning,
-                            scale=scale
-                        )
-                        xml = img.to_xml()
+
                         metas: list[MetaData] = scanner.scan(file_path)
                         datetimecreated = Utils.find_date_value(metas)
-                        if datetimecreated is not None:
-                            img.set_datetimecreated(datetimecreated)
+                        if datetimecreated is None:
+                            datetimecreated = Utils.get_creation_date(file_path)
                         image_dimensions = Utils.get_image_dimensions(metas)
                         if image_dimensions is not None:
-                            img.set_image_dimensions(image_dimensions)
-                        self.img_list.append(img)
+                            datetimecreated.set_image_dimensions(image_dimensions)
+                        if file_extension in ['.tiff', '.tif']:
+                            img = IMG(
+                                imggroupID=imagegroupID if imagegroupID is not None else 'ImgGrp_S',
+                                nomenclature=filename_without_extension,
+                                file=file_path,
+                                datetimecreated=datetimecreated,
+                                md5=md5,
+                                filesize=size,
+                                usage=usage if usage is not None else '1',
+                                side=side,
+                                target=target,
+                                scanning=scanning,
+                                scale=scale,
+                                image_dimensions=image_dimensions
+                            )
+                            self.img_dict[filename_without_extension] = img
+                        else:
+                            alt_img = AltImg(
+                                imggroupID=imagegroupID if imagegroupID is not None else 'ImgGrp_S',
+                                file=file_path,
+                                datetimecreated=datetimecreated,
+                                md5=md5,
+                                filesize=size,
+                                usage=usage if usage is not None else ['1'],
+                                scanning=scanning,
+                                image_dimensions=image_dimensions,
+                            )
+                            self.img_dict[filename_without_extension].add_alt_img(alt_img)
+
                 scanned_files += 1
                 old_dir = current_dir
 
@@ -191,7 +203,7 @@ class FrameSCAN(CustomFrame):
 
     def check_data(self):
         if not self.scanner_running:
-            super().save_to_session((Utils.KEY_SESSION_IMG, self.img_list))
+            super().save_to_session((Utils.KEY_SESSION_IMG, self.img_dict.values()))
             return True
 
     def ask_imgroupID_usage_value(self, field_imagegroupID, field_usage, values, options):
