@@ -6,7 +6,9 @@ from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup
 
-from model.IMG import ImageDimensions, ImageMetrics
+import Utils
+from model.IMG import ImageDimensions, ImageMetrics, PhotometricInterpretation, SamplingFrequencyPlane, \
+    SamplingFrequencyUnit
 
 KEY_FRAME_INIT = 'FrameINIT'
 KEY_FRAME_SCAN = 'FrameSCAN'
@@ -109,10 +111,10 @@ def get_image_dimensions(metadata_list):
 def get_image_metrics(metadata_list):
     x_sampling_frequency = None
     y_sampling_frequency = None
-    sampling_frequency_unit = None
-    sampling_frequency_plane = None
-    bits_per_sample = None
-    photo_metric_interpretation = None
+    sampling_frequency_unit = SamplingFrequencyUnit.CENTIMETER
+    bits_per_sample = 24
+    photo_metric_interpretation = PhotometricInterpretation.RGB
+    sampling_frequency_plane = SamplingFrequencyPlane.CAMERA_SCANNER_FOCAL_PLANE
 
     for metadata in metadata_list:
         key = metadata.get_key()
@@ -123,11 +125,12 @@ def get_image_metrics(metadata_list):
         if key == "FocalPlaneYResolution":
             y_sampling_frequency = metadata.get_values()[0]
 
-        if key == "FocalPlaneResolutionUnit":
-            sampling_frequency_unit = metadata.get_values()[0]
+        if key in ["ResolutionUnit"]:
+            if metadata.get_values()[0]:
+                pass
 
         if key == "BitsPerSample":
-            bits_per_sample = metadata.get_values()
+            bits_per_sample = sum(metadata.get_values())
 
     if photo_metric_interpretation and bits_per_sample and sampling_frequency_unit and sampling_frequency_plane:
         return ImageMetrics(

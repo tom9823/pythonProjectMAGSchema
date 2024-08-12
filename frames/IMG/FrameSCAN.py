@@ -150,8 +150,7 @@ class FrameSCAN(CustomFrame):
                         if datetimecreated is None:
                             datetimecreated = Utils.get_creation_date(file_path)
                         image_dimensions = Utils.get_image_dimensions(metas)
-                        if image_dimensions is not None:
-                            datetimecreated.set_image_dimensions(image_dimensions)
+                        image_metrics = Utils.get_image_metrics(metas)
                         if file_extension in ['.tiff', '.tif']:
                             img = IMG(
                                 imggroupID=imagegroupID if imagegroupID is not None else 'ImgGrp_S',
@@ -165,7 +164,8 @@ class FrameSCAN(CustomFrame):
                                 target=target,
                                 scanning=scanning,
                                 scale=scale,
-                                image_dimensions=image_dimensions
+                                image_dimensions=image_dimensions,
+                                image_metrics=image_metrics
                             )
                             self.img_dict[filename_without_extension] = img
                         else:
@@ -178,6 +178,7 @@ class FrameSCAN(CustomFrame):
                                 usage=usage if usage is not None else ['1'],
                                 scanning=scanning,
                                 image_dimensions=image_dimensions,
+                                image_metrics=image_metrics
                             )
                             self.img_dict[filename_without_extension].add_alt_img(alt_img)
 

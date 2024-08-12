@@ -115,7 +115,7 @@ class MainWindow(tk.Tk):
             left_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_SCAN, container=Utils.KEY_FRAME_IMG_2),
             left_button_title="IMG 2",
             right_button_action=self.generate_file_xml,
-            right_button_title="Visualizza XML",
+            right_button_title="Genera file XML",
             is_ocr_recognition=False
         )
 
@@ -183,6 +183,8 @@ class MainWindow(tk.Tk):
         with open(f"{self.get_last_segment(self.session.get('Progetto di Digitalizzazione', 'output'))}.xml", "w", encoding="utf-8") as file:
             file.write(xml_declaration)
             file.write(xml_content)
+
+        self.destroy()
 
     def _attach_gen_tag(self, metadigit):
         gen = ET.SubElement(metadigit, "gen", attrib={

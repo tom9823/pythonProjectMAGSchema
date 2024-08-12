@@ -22,6 +22,29 @@ class CopyrightStatus(Enum):
     HAS_COPYRIGHT = 'b'
 
 
+class SamplingFrequencyPlane(Enum):
+    CAMERA_SCANNER_FOCAL_PLANE = "1"  # quando non sono definite le dimensioni dell'oggetto
+    OBJECT_PLANE = "2"  # quando l'oggetto e la riproduzione hanno la stessa dimensione
+    SOURCE_OBJECT_PLANE = "3"  # quando la dimensione della riproduzione è maggiore dell'oggetto originale
+
+
+class PhotometricInterpretation(Enum):
+    WHITE_IS_ZERO = "WhiteIsZero"
+    BLACK_IS_ZERO = "BlackIsZero"
+    RGB = "RGB"
+    PALETTE_COLOR = "Palette color"
+    TRANSPARENCY_MASK = "Transparency Mask"
+    CMYK = "CMYK"
+    YCBCR = "YcbCr"
+    CIELAB = "CIELab"
+
+
+class SamplingFrequencyUnit(Enum):
+    NO_UNIT = "1"  # nessuna unità di misura definita
+    INCH = "2"  # inch, pollice
+    CENTIMETER = "3"  # centimetro
+
+
 def append_element(parent, tag, value):
     if value is not None:
         if isinstance(value, ObjectToXML):
@@ -170,7 +193,7 @@ class IMG(ObjectToXML):
         self._target = value
 
     def add_alt_img(self, alt_img):
-        self.alt_imgs.add(alt_img)
+        self.alt_imgs.append(alt_img)
 
     def to_xml(self):
 
@@ -216,7 +239,7 @@ class NISOChecksum(str):
         return str.__new__(cls, value)
 
 
-class ImageDimensions:
+class ImageDimensions(ObjectToXML):
     def __init__(self, imagelength: int, imagewidth: int, source_xdimension: Optional[float] = None,
                  source_ydimension: Optional[float] = None):
         self.imagelength = imagelength
@@ -235,9 +258,9 @@ class ImageDimensions:
         return dimensions_elem
 
 
-class ImageMetrics:
-    def __init__(self, sampling_frequency_unit: str, sampling_frequency_plane: str,
-                 photo_metric_interpretation: str, bit_per_sample: str,
+class ImageMetrics(ObjectToXML):
+    def __init__(self, sampling_frequency_unit: SamplingFrequencyUnit, sampling_frequency_plane: SamplingFrequencyPlane,
+                 photo_metric_interpretation: PhotometricInterpretation, bit_per_sample: str,
                  x_sampling_frequency: Optional[int] = None, y_sampling_frequency: Optional[int] = None,
                  ):
         self.sampling_frequency_unit = sampling_frequency_unit
@@ -249,18 +272,18 @@ class ImageMetrics:
 
     def to_xml(self):
         metrics_elem = ET.Element('image_metrics')
-        ET.SubElement(metrics_elem, 'samplingfrequencyunit').text = self.sampling_frequency_unit
-        ET.SubElement(metrics_elem, 'samplingfrequencyplane').text = self.sampling_frequency_plane
+        ET.SubElement(metrics_elem, 'samplingfrequencyunit').text = self.sampling_frequency_unit.value
+        ET.SubElement(metrics_elem, 'samplingfrequencyplane').text = self.sampling_frequency_plane.value
         if self.x_sampling_frequency is not None:
             ET.SubElement(metrics_elem, 'xsamplingfrequency').text = str(self.x_sampling_frequency)
         if self.y_sampling_frequency is not None:
             ET.SubElement(metrics_elem, 'ysamplingfrequency').text = str(self.y_sampling_frequency)
-        ET.SubElement(metrics_elem, 'photometricinterpretation').text = self.photo_metric_interpretation
+        ET.SubElement(metrics_elem, 'photometricinterpretation').text = self.photo_metric_interpretation.value
         ET.SubElement(metrics_elem, 'bitpersample').text = self.bit_per_sample
         return metrics_elem
 
 
-class Format:
+class Format(ObjectToXML):
     def __init__(self, name: str, mime: str, compression: Optional[str] = None):
         self.name = name
         self.mime = mime
@@ -275,7 +298,7 @@ class Format:
         return format_elem
 
 
-class Scanning:
+class Scanning(ObjectToXML):
     def __init__(self, source_type, scanning_agency, device_source, scanner_manufacturer, scanner_model,
                  capture_software):
         # Elementi opzionali e non ripetibili con valori di default None
@@ -364,7 +387,7 @@ class Scanning:
 
 
 # Definizione della classe ALT_IMG
-class AltImg:
+class AltImg(ObjectToXML):
     def __init__(self, file: str, md5: NISOChecksum, image_dimensions: ImageDimensions,
                  usage: Optional[List[str]] = None,
                  filesize: Optional[int] = None, image_metrics: Optional[ImageMetrics] = None,
