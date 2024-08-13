@@ -2,10 +2,7 @@ import xml.etree.ElementTree as ET
 from enum import Enum
 from typing import List, Optional
 
-
-class ObjectToXML:
-    def to_xml(self):
-        raise NotImplementedError("Devi implementare il metodo nella sottoclasse")
+from model.ObjectXMLSerializable import ObjectXMLSerializable
 
 
 # Definizione della prima enum per tipo di immagine
@@ -47,13 +44,13 @@ class SamplingFrequencyUnit(Enum):
 
 def append_element(parent, tag, value):
     if value is not None:
-        if isinstance(value, ObjectToXML):
+        if isinstance(value, ObjectXMLSerializable):
             parent.append(value.to_xml())
         else:
             ET.SubElement(parent, tag).text = str(value)
 
 
-class IMG(ObjectToXML):
+class IMG(ObjectXMLSerializable):
     _sequence_counter = 0  # Variabile di classe per mantenere il conteggio delle istanze
 
     def __init__(self, nomenclature=None, usage=None, side=None, scale=None,
@@ -197,7 +194,7 @@ class IMG(ObjectToXML):
 
     def to_xml(self):
 
-        img_elem = ET.Element('IMG', attrib={'imggroupID': self._imggroupID})
+        img_elem = ET.Element('img', attrib={'imggroupID': self._imggroupID})
 
         append_element(img_elem, 'nomenclature', self._nomenclature)
 
@@ -207,8 +204,7 @@ class IMG(ObjectToXML):
         append_element(img_elem, 'sequence_number', self.sequence_number)
         append_element(img_elem, 'side', self._side)
         append_element(img_elem, 'scale', self._scale)
-        append_element(img_elem, 'file', self._file)
-        ET.SubElement(parent=img_elem, tag='file', attrib={'Location': "URL", 'xlink': self._file})
+        ET.SubElement(img_elem, 'file', {'Location': "URL", 'xlink': self._file})
         append_element(img_elem, 'md5', self._md5)
         append_element(img_elem, 'filesize', self._filesize)
         append_element(img_elem, 'ppi', self._ppi)
@@ -217,14 +213,14 @@ class IMG(ObjectToXML):
         append_element(img_elem, 'note', self._note)
         append_element(img_elem, 'holdingsID', self._holdingsID)
 
-        # Process ObjectToXML properties
+        # Process ObjectXMLSerializable properties
         append_element(img_elem, 'image_dimensions', self._image_dimensions)
         append_element(img_elem, 'image_metrics', self._image_metrics)
         append_element(img_elem, 'format', self._format)
         append_element(img_elem, 'scanning', self._scanning)
         append_element(img_elem, 'target', self._target)
 
-        # Process lists of ObjectToXML
+        # Process lists of ObjectXMLSerializable
         for alt_img in self.alt_imgs:
             append_element(img_elem, 'altimg', alt_img)
 
@@ -239,7 +235,7 @@ class NISOChecksum(str):
         return str.__new__(cls, value)
 
 
-class ImageDimensions(ObjectToXML):
+class ImageDimensions(ObjectXMLSerializable):
     def __init__(self, imagelength: int, imagewidth: int, source_xdimension: Optional[float] = None,
                  source_ydimension: Optional[float] = None):
         self.imagelength = imagelength
@@ -258,7 +254,7 @@ class ImageDimensions(ObjectToXML):
         return dimensions_elem
 
 
-class ImageMetrics(ObjectToXML):
+class ImageMetrics(ObjectXMLSerializable):
     def __init__(self, sampling_frequency_unit: SamplingFrequencyUnit, sampling_frequency_plane: SamplingFrequencyPlane,
                  photo_metric_interpretation: PhotometricInterpretation, bit_per_sample: str,
                  x_sampling_frequency: Optional[int] = None, y_sampling_frequency: Optional[int] = None,
@@ -283,7 +279,7 @@ class ImageMetrics(ObjectToXML):
         return metrics_elem
 
 
-class Format(ObjectToXML):
+class Format(ObjectXMLSerializable):
     def __init__(self, name: str, mime: str, compression: Optional[str] = None):
         self.name = name
         self.mime = mime
@@ -298,7 +294,7 @@ class Format(ObjectToXML):
         return format_elem
 
 
-class Scanning(ObjectToXML):
+class Scanning(ObjectXMLSerializable):
     def __init__(self, source_type, scanning_agency, device_source, scanner_manufacturer, scanner_model,
                  capture_software):
         # Elementi opzionali e non ripetibili con valori di default None
@@ -387,7 +383,7 @@ class Scanning(ObjectToXML):
 
 
 # Definizione della classe ALT_IMG
-class AltImg(ObjectToXML):
+class AltImg(ObjectXMLSerializable):
     def __init__(self, file: str, md5: NISOChecksum, image_dimensions: ImageDimensions,
                  usage: Optional[List[str]] = None,
                  filesize: Optional[int] = None, image_metrics: Optional[ImageMetrics] = None,
@@ -413,7 +409,7 @@ class AltImg(ObjectToXML):
         for use in self.usage:
             ET.SubElement(altimg_elem, 'usage').text = use
 
-        ET.SubElement(parent=altimg_elem, tag='file', attrib={'Location': "URL", 'xlink': self.file})
+        ET.SubElement(altimg_elem, 'file', {'Location': "URL", 'xlink': self.file})
         ET.SubElement(altimg_elem, 'md5').text = str(self.md5)
 
         if self.filesize is not None:
@@ -445,7 +441,7 @@ class AltImg(ObjectToXML):
         return altimg_elem
 
 
-class Target(ObjectToXML):
+class Target(ObjectXMLSerializable):
     def __init__(self, target_type=None, target_id=None, image_data=None, performance_data=None, profiles=None):
         # Initialize with default values
         self.target_type = target_type  # 0 for external, 1 for internal
@@ -534,3 +530,38 @@ class Target(ObjectToXML):
             profiles_element.text = self.profiles
 
         return target_element
+
+
+class ImageGroup(ObjectXMLSerializable):
+    def __init__(self, image_metrics: Optional[ImageMetrics] = None,
+                 ppi: Optional[int] = None, dpi: Optional[int] = None, format: Optional[Format] = None,
+                 scanning: Optional[Scanning] = None, imggroupID: Optional[str] = None):
+        self.image_metrics = image_metrics
+        self.ppi = ppi
+        self.dpi = dpi
+        self.format = format
+        self.scanning = scanning
+        self.imggroupID = imggroupID
+
+    def to_xml(self):
+        imgroup_elem = ET.Element('img_group')
+
+        if self.image_metrics is not None:
+            imgroup_elem.append(self.image_metrics.to_xml())
+
+        if self.ppi is not None:
+            ET.SubElement(imgroup_elem, 'ppi').text = str(self.ppi)
+
+        if self.dpi is not None:
+            ET.SubElement(imgroup_elem, 'dpi').text = str(self.dpi)
+
+        if self.format is not None:
+            imgroup_elem.append(self.format.to_xml())
+
+        if self.scanning is not None:
+            imgroup_elem.append(self.scanning.to_xml())
+
+        if self.imggroupID is not None:
+            imgroup_elem.set('ID', self.imggroupID)
+
+        return imgroup_elem

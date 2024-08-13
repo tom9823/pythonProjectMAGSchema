@@ -180,7 +180,8 @@ class MainWindow(tk.Tk):
         xml_declaration = '<?xml version="1.0" encoding="UTF-8"?>\n'
 
         # Salvare il file XML
-        with open(f"{self.get_last_segment(self.session.get('Progetto di Digitalizzazione', 'output'))}.xml", "w", encoding="utf-8") as file:
+        with open(f"{self.get_last_segment(self.session.get('Progetto di Digitalizzazione', 'output'))}.xml", "w",
+                  encoding="utf-8") as file:
             file.write(xml_declaration)
             file.write(xml_content)
 
@@ -205,6 +206,9 @@ class MainWindow(tk.Tk):
 
         completeness = ET.SubElement(gen, "completeness")
         completeness.text = str(self.session.get('Completezza', ''))
+
+        for img_group in self.session.get(Utils.KEY_SESSION_IMG_GROUPS, []):
+            gen.append(img_group.to_xml())
 
     def _attach_bib_tag(self, metadigit):
         # Creare il tag <bib>
@@ -266,9 +270,6 @@ class MainWindow(tk.Tk):
                         stpiece_vol_element = ET.SubElement(piece_element, "stpiece_vol")
                         stpiece_vol_element.text = piece.get_stpiece_vol()
 
-
-
-
     def _attach_img_tag(self, metadigit):
         for img in self.session.get(Utils.KEY_SESSION_IMG, []):
             metadigit.append(img.to_xml())
@@ -280,7 +281,6 @@ class MainWindow(tk.Tk):
         path = parsed_url.path.rstrip('/')
         # Divide il percorso e restituisce l'ultimo segmento
         return path.split('/')[-1]
-
 
 
 if __name__ == "__main__":

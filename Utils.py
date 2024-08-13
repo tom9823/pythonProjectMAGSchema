@@ -6,7 +6,6 @@ from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup
 
-import Utils
 from model.IMG import ImageDimensions, ImageMetrics, PhotometricInterpretation, SamplingFrequencyPlane, \
     SamplingFrequencyUnit
 
@@ -25,6 +24,7 @@ KEY_SESSION_DC = 'DC'
 KEY_SESSION_LOCAL_BIB = 'LocalBIB'
 KEY_SESSION_HOLDING = 'Holding'
 KEY_SESSION_IMG = 'IMG'
+KEY_SESSION_IMG_GROUPS = 'IMG_GROUPS'
 KEY_SESSION_SIDE = 'SIDE'
 KEY_SESSION_SCALE = 'SCALE'
 KEY_SESSION_SCANNING = 'SCANNING'
@@ -104,13 +104,13 @@ def get_image_dimensions(metadata_list):
             image_width = metadata.get_values()[0]
         if metadata.get_key() in ["ImageLength", "YResolution"]:
             image_length = metadata.get_values()[0]
-    if image_length and image_width:
+    if image_length is not None and image_width is not None:
         return ImageDimensions(imagewidth=image_width, imagelength=image_length)
 
 
 def get_image_metrics(metadata_list):
-    x_sampling_frequency = None
-    y_sampling_frequency = None
+    x_sampling_frequency = 400
+    y_sampling_frequency = 400
     sampling_frequency_unit = SamplingFrequencyUnit.CENTIMETER
     bits_per_sample = 24
     photo_metric_interpretation = PhotometricInterpretation.RGB
@@ -137,10 +137,35 @@ def get_image_metrics(metadata_list):
             x_sampling_frequency=x_sampling_frequency,
             y_sampling_frequency=y_sampling_frequency,
             sampling_frequency_unit=sampling_frequency_unit,
-            bit_per_sample=bits_per_sample,
+            bit_per_sample=str(bits_per_sample),
             sampling_frequency_plane=sampling_frequency_plane,
             photo_metric_interpretation=photo_metric_interpretation
         )
+
+def get_image_metrics(img_groupID):
+    x_sampling_frequency = None
+    y_sampling_frequency = None
+    sampling_frequency_unit = SamplingFrequencyUnit.CENTIMETER
+    bits_per_sample = 24
+    photo_metric_interpretation = PhotometricInterpretation.RGB
+    sampling_frequency_plane = SamplingFrequencyPlane.CAMERA_SCANNER_FOCAL_PLANE
+    if img_groupID == "ImgGrp_H" or img_groupID == "ImgGrp_M":
+        x_sampling_frequency = 400
+        y_sampling_frequency = 400
+    elif img_groupID == "ImgGrp_S":
+        x_sampling_frequency = 300
+        y_sampling_frequency = 300
+    elif img_groupID == "ImgGrp_T":
+        x_sampling_frequency = 150
+        y_sampling_frequency = 150
+    return ImageMetrics(
+        x_sampling_frequency=x_sampling_frequency,
+        y_sampling_frequency=y_sampling_frequency,
+        sampling_frequency_unit=sampling_frequency_unit,
+        bit_per_sample=str(bits_per_sample),
+        sampling_frequency_plane=sampling_frequency_plane,
+        photo_metric_interpretation=photo_metric_interpretation
+    )
 
 
 def get_imagegroupID(file_path):

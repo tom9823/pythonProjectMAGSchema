@@ -6,7 +6,7 @@ import pytesseract
 from PIL import Image
 import Utils
 from frames.CustomFrame import CustomFrame
-from model.IMG import IMG, AltImg
+from model.IMG import IMG, AltImg, ImageGroup, Format
 from scanner.MetaData import MetaData
 from scanner.Scanner import Scanner
 from scanner.ScannerFactory import ScannerFactory
@@ -25,6 +25,7 @@ class FrameSCAN(CustomFrame):
             right_button_title=right_button_title,
             **kwargs
         )
+        self.img_groups = []
         self.controller = controller
         self.scanner_running = False
         self.is_ocr_recognition = is_ocr_recognition
@@ -103,6 +104,7 @@ class FrameSCAN(CustomFrame):
         total_files = sum([len(files) for r, d, files in os.walk(path)])
         scanned_files = 0
         self.img_dict = dict()
+        self.img_groups = []
         old_dir = ''
         imagegroupID = None
         usage = None
@@ -130,9 +132,9 @@ class FrameSCAN(CustomFrame):
                     if scanner is not None:
                         if current_dir != old_dir:
                             imagegroupID, usage = self.ask_imgroupID_usage_value(
-                                field_imagegroupID=f'imagegroupID della cartella {current_dir}',
-                                field_usage=f'usage della cartella {current_dir}',
-                                values=['ImgGrp_S', 'ImgGrp_M', 'ImgGrp_H'],
+                                field_imagegroupID=f'imagegroupID della cartella \"{current_dir}\"',
+                                field_usage=f'usage della cartella \"{current_dir}\"',
+                                values=['ImgGrp_S', 'ImgGrp_M', 'ImgGrp_H', 'ImgGrp_T'],
                                 options=[
                                     ('1', 'Master'),
                                     ('2', 'Alta risoluzione'),
@@ -140,8 +142,20 @@ class FrameSCAN(CustomFrame):
                                     ('4', 'Preview'),
                                     ('a', 'Il repository non ha il copyright dell\'oggetto digitale'),
                                     ('b', 'Il repository ha il copyright dell\'oggetto digitale')
-                                ]
+                                    ]
+                                )
+                            image_metrics = Utils.get_image_metrics(imagegroupID)
+                            format = Format(name='TIF', mime='image/tiff', compression='LZW') if imagegroupID == 'ImgGrp_H' else Format(name='JPG', mime='image/jpeg', compression='JPG')
+                            img_group = ImageGroup(
+                                imggroupID=imagegroupID,
+                                image_metrics=image_metrics,
+                                dpi=None,
+                                ppi=None,
+                                scanning=scanning,
+                                format=format
                             )
+                            self.img_groups.append(img_group)
+
                         md5 = Utils.get_file_md5(file_path)
                         size = Utils.get_file_size(file_path)
 
@@ -150,7 +164,7 @@ class FrameSCAN(CustomFrame):
                         if datetimecreated is None:
                             datetimecreated = Utils.get_creation_date(file_path)
                         image_dimensions = Utils.get_image_dimensions(metas)
-                        image_metrics = Utils.get_image_metrics(metas)
+
                         if file_extension in ['.tiff', '.tif']:
                             img = IMG(
                                 imggroupID=imagegroupID if imagegroupID is not None else 'ImgGrp_S',
@@ -162,10 +176,8 @@ class FrameSCAN(CustomFrame):
                                 usage=usage if usage is not None else '1',
                                 side=side,
                                 target=target,
-                                scanning=scanning,
                                 scale=scale,
                                 image_dimensions=image_dimensions,
-                                image_metrics=image_metrics
                             )
                             self.img_dict[filename_without_extension] = img
                         else:
@@ -176,9 +188,7 @@ class FrameSCAN(CustomFrame):
                                 md5=md5,
                                 filesize=size,
                                 usage=usage if usage is not None else ['1'],
-                                scanning=scanning,
                                 image_dimensions=image_dimensions,
-                                image_metrics=image_metrics
                             )
                             self.img_dict[filename_without_extension].add_alt_img(alt_img)
 
@@ -204,7 +214,8 @@ class FrameSCAN(CustomFrame):
 
     def check_data(self):
         if not self.scanner_running:
-            super().save_to_session((Utils.KEY_SESSION_IMG, self.img_dict.values()))
+            super().save_to_session((Utils.KEY_SESSION_IMG, list(self.img_dict.values())))
+            super().save_to_session((Utils.KEY_SESSION_IMG_GROUPS, self.img_groups))
             return True
 
     def ask_imgroupID_usage_value(self, field_imagegroupID, field_usage, values, options):
