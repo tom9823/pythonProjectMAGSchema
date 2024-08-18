@@ -24,7 +24,7 @@ class MainWindow(tk.Tk):
         self.columnconfigure(0, weight=1)
         self.frames = dict()
         self.session = dict()
-        self.identifier_modal_already_shown = False
+        self.identifier_modal_already_shown = True
 
         frameGEN = FrameGEN(
             parent=self,
