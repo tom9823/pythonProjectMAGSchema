@@ -13,9 +13,9 @@ class CustomFrame(tk.Frame):
         self.rowconfigure(0, weight=1)
         ttk.Label(self.container_frame, text=title_frame).pack()
         ttk.Separator(self.container_frame, orient='horizontal').pack(fill='x', padx=20, pady=20)
-        self.__init_frame_buttons(left_button_action, left_button_title, right_button_action, right_button_title)
+        self._init_frame_buttons(left_button_action, left_button_title, right_button_action, right_button_title)
 
-    def __init_frame_buttons(self, left_button_action, left_button_title, right_button_action, right_button_title):
+    def _init_frame_buttons(self, left_button_action, left_button_title, right_button_action, right_button_title):
         button_page_frame = tk.Frame(self)
         button_page_frame.grid(sticky=tk.EW, padx=10)
         button_page_frame.columnconfigure((0, 1), weight=1)

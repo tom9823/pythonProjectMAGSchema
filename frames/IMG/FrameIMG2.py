@@ -43,7 +43,7 @@ class FrameIMG2(CustomFrame):
         checkbox_target = tk.Checkbutton(self.container_frame,
                                          text="Desidero valorizzare il campo <niso:target> ossia l'eventuale "
                                               "presenza, la tipologia e le modalità d'utilizzo di un target (o scala "
-                                              "cromatica) durante la scansione dell'oggetto analogico",
+                                              "cromatica) \n durante la scansione dell'oggetto analogico",
                                          variable=self.var_is_target_enabled, onvalue=1, offvalue=0,
                                          command=self.on_checkbox_target_selection)
         checkbox_target.pack()

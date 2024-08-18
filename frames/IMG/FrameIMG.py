@@ -161,8 +161,6 @@ class FrameIMG(CustomFrame):
                                            variable=self.var_is_scanning_system_enabled, onvalue=1, offvalue=0,
                                            command=self.on_checkbox_scanning_system_selection)
         checkbox_scanning.grid()
-
-        self.frame_scanning.columnconfigure(1, weight=1)
         self.init_frame_scanning_system()
 
     def init_frame_scanning_system(self):
@@ -194,18 +192,17 @@ class FrameIMG(CustomFrame):
         self.capture_software_entry.grid(row=5, column=1, pady=5, sticky=tk.EW)
         ToolTip(self.capture_software_entry, "obbligatorio e non ripetibile, contiene il nome del software usato per "
                                              "l'acquisizione dell'immagine. È di tipo xsd:string.")
-        self.frame_scanning_system.columnconfigure(1, weight=1)
 
     def on_checkbox_scanning_selection(self):
         if self.var_is_scanning_enabled.get() == 1:
-            self.frame_scanning.pack(expand=True, fill=tk.BOTH)
+            self.frame_scanning.pack(fill=tk.BOTH)
         else:
             self.frame_scanning.pack_forget()
         self.container_frame.update_idletasks()
 
     def on_checkbox_scanning_system_selection(self):
         if self.var_is_scanning_system_enabled.get() == 1:
-            self.frame_scanning_system.grid()
+            self.frame_scanning_system.grid(sticky=tk.EW)
         else:
             self.frame_scanning_system.grid_forget()
         self.container_frame.update_idletasks()

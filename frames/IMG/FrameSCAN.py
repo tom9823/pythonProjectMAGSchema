@@ -61,9 +61,8 @@ class FrameSCAN(CustomFrame):
             self.container_frame,
             orient="horizontal",
             mode="determinate",
-            length=300
         )
-        self.progress_bar.pack(pady=10)
+        self.progress_bar.pack(pady=10, padx=100, fill=tk.X)
 
         self.status_label = ttk.Label(self.container_frame, text="stato scannerizzazione")
         self.status_label.pack(pady=10)

@@ -98,11 +98,11 @@ analogico. L'elemento è opzionale e ripetibile.""",
         self.table_shelfmarks.pack()
 
         button_add_shelfmark = tk.Button(frame_shelfmarks, text="Aggiungi shelfmark", command=self._add_shelfmark)
-        button_add_shelfmark.pack(pady=10)
+        button_add_shelfmark.pack(pady=5)
 
         # buttons
         buttons_frame = tk.Frame(self.container_frame)
-        buttons_frame.pack(pady=10)
+        buttons_frame.pack(pady=5)
 
         button_add_holding = tk.Button(buttons_frame, text="Aggiungi holding", command=self._add_holding)
         button_add_holding.grid(row=0, column=0)

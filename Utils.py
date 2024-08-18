@@ -4,8 +4,6 @@ import re
 from datetime import datetime
 from urllib.parse import urlparse
 
-from bs4 import BeautifulSoup
-
 from model.IMG import ImageDimensions, ImageMetrics, PhotometricInterpretation, SamplingFrequencyPlane, \
     SamplingFrequencyUnit
 
@@ -195,17 +193,6 @@ def split_path_into_subpaths(path):
     if path != "":
         subpaths.append(path)
     return subpaths
-
-
-def extract_xmp_metadata(metadata_list):
-    # Aprire l'immagine TIFF
-    xmp = None
-    for metadata in metadata_list:
-        key = metadata.get_key()
-        if key == "XMP":
-            xmpAsXML = BeautifulSoup(metadata.get_values())
-            print(xmpAsXML.prettify())
-        return xmp
 
 
 def is_iterable(obj):
