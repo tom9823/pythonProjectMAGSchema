@@ -80,12 +80,9 @@ analogico. L'elemento è opzionale e ripetibile.""",
         tree_frame_shelfmarks.pack(pady=10)
         tree_vertical_scroll_shelfmarks = tk.Scrollbar(tree_frame_shelfmarks)
         tree_vertical_scroll_shelfmarks.pack(side=tk.RIGHT, fill=tk.Y)
-        tree_horizontal_scroll_shelfmarks = tk.Scrollbar(tree_frame_shelfmarks)
-        tree_horizontal_scroll_shelfmarks.pack(side=tk.BOTTOM, fill=tk.X)
 
-        self.table_shelfmarks = TreeviewEditable(tree_frame_shelfmarks, yscrollcommand=tree_vertical_scroll_shelfmarks.set, xscrollcommand=tree_horizontal_scroll_shelfmarks.set)
+        self.table_shelfmarks = TreeviewEditable(tree_frame_shelfmarks, yscrollcommand=tree_vertical_scroll_shelfmarks.set)
         tree_vertical_scroll_shelfmarks.config(command=self.table_shelfmarks.yview)
-        tree_horizontal_scroll_shelfmarks.config(command=self.table_shelfmarks.xview)
         self.table_shelfmarks['columns'] = ("type", "value")
         self.table_shelfmarks.column("#0", width=0, stretch=tk.NO)
         self.table_shelfmarks.column("type", anchor=tk.W, width=120)

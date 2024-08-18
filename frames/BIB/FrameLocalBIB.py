@@ -31,13 +31,9 @@ specialistiche raccolte durante il processo di digitalizzazione. L'elemento è o
 
         tree_vertical_scroll_local_bibs = tk.Scrollbar(tree_frame)
         tree_vertical_scroll_local_bibs.pack(side=tk.RIGHT, fill=tk.Y)
-        tree_horizontal_scroll_local_bibs = tk.Scrollbar(tree_frame)
-        tree_horizontal_scroll_local_bibs.pack(side=tk.BOTTOM, fill=tk.X)
 
-        self.table_local_bibs = ttk.Treeview(tree_frame, yscrollcommand=tree_vertical_scroll_local_bibs.set,
-                                             xscrollcommand=tree_horizontal_scroll_local_bibs.set)
+        self.table_local_bibs = ttk.Treeview(tree_frame, yscrollcommand=tree_vertical_scroll_local_bibs.set)
         tree_vertical_scroll_local_bibs.config(command=self.table_local_bibs.yview)
-        tree_horizontal_scroll_local_bibs.config(command=self.table_local_bibs.xview)
 
         self.table_local_bibs['columns'] = ("geo_coords", "not_dates")
         self.table_local_bibs.column("#0", width=0, stretch=tk.NO)
@@ -58,7 +54,7 @@ specialistiche raccolte durante il processo di digitalizzazione. L'elemento è o
             self.table_local_bibs.insert(parent='', index=tk.END, text="Parent", values=row)
 
         self.table_local_bibs.pack()
-        #add frame
+        # add frame
         add_frame = tk.Frame(self.container_frame)
         add_frame.pack(pady=10)
 
@@ -69,13 +65,9 @@ specialistiche raccolte durante il processo di digitalizzazione. L'elemento è o
         tree_frame_geo_coord.pack()
         tree_vertical_scroll_geo_coord = tk.Scrollbar(tree_frame_geo_coord)
         tree_vertical_scroll_geo_coord.pack(side=tk.RIGHT, fill=tk.Y)
-        tree_horizontal_scroll_geo_coord = tk.Scrollbar(tree_frame_geo_coord)
-        tree_horizontal_scroll_geo_coord.pack(side=tk.BOTTOM, fill=tk.X)
 
-        self.table_geo_coord = TreeviewEditable(tree_frame_geo_coord, yscrollcommand=tree_vertical_scroll_geo_coord.set,
-                                                xscrollcommand=tree_horizontal_scroll_geo_coord.set)
+        self.table_geo_coord = TreeviewEditable(tree_frame_geo_coord, yscrollcommand=tree_vertical_scroll_geo_coord.set)
         tree_vertical_scroll_geo_coord.config(command=self.table_geo_coord.yview)
-        tree_horizontal_scroll_geo_coord.config(command=self.table_geo_coord.xview)
         self.table_geo_coord['columns'] = ("geo_coord")
         self.table_geo_coord.column("#0", width=0, stretch=tk.NO)
         self.table_geo_coord.column("geo_coord", anchor=tk.W, width=300)
@@ -95,13 +87,9 @@ specialistiche raccolte durante il processo di digitalizzazione. L'elemento è o
         tree_frame_not_date.pack()
         tree_vertical_scroll_not_date = tk.Scrollbar(tree_frame_not_date)
         tree_vertical_scroll_not_date.pack(side=tk.RIGHT, fill=tk.Y)
-        tree_horizontal_scroll_not_date = tk.Scrollbar(tree_frame_not_date)
-        tree_horizontal_scroll_not_date.pack(side=tk.BOTTOM, fill=tk.X)
 
-        self.table_not_date = TreeviewEditable(tree_frame_not_date, yscrollcommand=tree_vertical_scroll_not_date.set,
-                                               xscrollcommand=tree_horizontal_scroll_not_date.set)
+        self.table_not_date = TreeviewEditable(tree_frame_not_date, yscrollcommand=tree_vertical_scroll_not_date.set)
         tree_vertical_scroll_not_date.config(command=self.table_not_date.yview)
-        tree_horizontal_scroll_not_date.config(command=self.table_not_date.xview)
         self.table_not_date['columns'] = ("not_date")
         self.table_not_date.column("#0", width=0, stretch=tk.NO)
         self.table_not_date.column("not_date", anchor=tk.W, width=300)
@@ -124,7 +112,8 @@ specialistiche raccolte durante il processo di digitalizzazione. L'elemento è o
         button_remove_all = tk.Button(buttons_frame, text="Rimuovi tutto", command=self._remove_all)
         button_remove_all.grid(row=0, column=1)
 
-        button_remove_local_bib = tk.Button(buttons_frame, text="Rimuovi local bib selezionati", command=self._remove_selected)
+        button_remove_local_bib = tk.Button(buttons_frame, text="Rimuovi local bib selezionati",
+                                            command=self._remove_selected)
         button_remove_local_bib.grid(row=0, column=2)
 
         button_update_record = tk.Button(buttons_frame, text="Aggiorna local bib", command=self._update_local_bib)
@@ -190,7 +179,8 @@ specialistiche raccolte durante il processo di digitalizzazione. L'elemento è o
                 not_date_list.append(values[0])
             selected_local_bib.set_geo_coord(geo_coord_list)
             selected_local_bib.set_not_dates(not_date_list)
-            self.table_local_bibs.item(item_id, text="", values=[selected_local_bib.print_geo_coords(), selected_local_bib.print_not_dates()])
+            self.table_local_bibs.item(item_id, text="", values=[selected_local_bib.print_geo_coords(),
+                                                                 selected_local_bib.print_not_dates()])
         else:
             messagebox.showerror("Errore", "Seleziona una riga nella tabella dei local bib.")
 
