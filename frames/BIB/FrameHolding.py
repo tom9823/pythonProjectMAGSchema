@@ -31,12 +31,9 @@ analogico. L'elemento è opzionale e ripetibile.""",
 
         tree_vertical_scroll_holdings = tk.Scrollbar(tree_frame)
         tree_vertical_scroll_holdings.pack(side=tk.RIGHT, fill=tk.Y)
-        tree_horizontal_scroll_holdings = tk.Scrollbar(tree_frame)
-        tree_horizontal_scroll_holdings.pack(side=tk.BOTTOM, fill=tk.X)
 
-        self.table_holdings = ttk.Treeview(tree_frame, yscrollcommand=tree_vertical_scroll_holdings.set, xscrollcommand=tree_horizontal_scroll_holdings.set)
+        self.table_holdings = ttk.Treeview(tree_frame, yscrollcommand=tree_vertical_scroll_holdings.set)
         tree_vertical_scroll_holdings.config(command=self.table_holdings.yview)
-        tree_horizontal_scroll_holdings.config(command=self.table_holdings.xview)
 
         self.table_holdings['columns'] = ("id", "library", "inventory", "shelfmarks")
         self.table_holdings.column("#0", width=0, stretch=tk.NO)
@@ -73,7 +70,7 @@ analogico. L'elemento è opzionale e ripetibile.""",
         self.inventory_entry = EntryWithPlaceholder(add_frame, placeholder="Inventory")
         self.inventory_entry.grid(row=0, column=2)
 
-        #table shelfmarks
+        # table shelfmarks
         frame_shelfmarks = tk.Frame(add_frame)
         frame_shelfmarks.grid(row=0, column=3)
         tree_frame_shelfmarks = tk.Frame(frame_shelfmarks)
@@ -81,7 +78,8 @@ analogico. L'elemento è opzionale e ripetibile.""",
         tree_vertical_scroll_shelfmarks = tk.Scrollbar(tree_frame_shelfmarks)
         tree_vertical_scroll_shelfmarks.pack(side=tk.RIGHT, fill=tk.Y)
 
-        self.table_shelfmarks = TreeviewEditable(tree_frame_shelfmarks, yscrollcommand=tree_vertical_scroll_shelfmarks.set)
+        self.table_shelfmarks = TreeviewEditable(tree_frame_shelfmarks,
+                                                 yscrollcommand=tree_vertical_scroll_shelfmarks.set)
         tree_vertical_scroll_shelfmarks.config(command=self.table_shelfmarks.yview)
         self.table_shelfmarks['columns'] = ("type", "value")
         self.table_shelfmarks.column("#0", width=0, stretch=tk.NO)
@@ -107,7 +105,8 @@ analogico. L'elemento è opzionale e ripetibile.""",
         button_remove_all = tk.Button(buttons_frame, text="Rimuovi tutto", command=self._remove_all)
         button_remove_all.grid(row=0, column=1)
 
-        button_remove_holding = tk.Button(buttons_frame, text="Rimuovi holding selezionati", command=self._remove_selected)
+        button_remove_holding = tk.Button(buttons_frame, text="Rimuovi holding selezionati",
+                                          command=self._remove_selected)
         button_remove_holding.grid(row=0, column=2)
 
         button_update_record = tk.Button(buttons_frame, text="Aggiorna holding", command=self._update_holding)
@@ -120,10 +119,11 @@ analogico. L'elemento è opzionale e ripetibile.""",
         shelfmarks = []
         for item in self.table_shelfmarks.get_children():
             values = self.table_shelfmarks.item(item, 'values')
-            shelfmark = Shelfmark(values[0],values[1])
+            shelfmark = Shelfmark(values[0], values[1])
             shelfmarks.append(shelfmark)
         holding = Holding(self.id_entry.get(), self.library_entry.get(), self.inventory_entry.get(), shelfmarks)
-        row = (holding.get_holding_id(), holding.get_library(), holding.get_inventory_number(), holding.get_string_shelfmarks())
+        row = (holding.get_holding_id(), holding.get_library(), holding.get_inventory_number(),
+               holding.get_string_shelfmarks())
         self.table_holdings.insert(parent='', index=tk.END, text="Parent", values=row)
         self.holding_list.append(holding)
         self.id_entry.delete(0, tk.END)
@@ -201,7 +201,6 @@ analogico. L'elemento è opzionale e ripetibile.""",
             self.inventory_entry.insert(0, selected_holding.get_inventory_number())
             for shelfmark in selected_holding.get_shelfmarks():
                 self.table_shelfmarks.insert(parent='', index=tk.END, values=(shelfmark.type, shelfmark.value))
-
 
     def _clicker(self, event):
         self._select_holding()
