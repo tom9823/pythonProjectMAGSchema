@@ -12,6 +12,7 @@ from frames.IMG.FrameIMG import FrameIMG
 from frames.IMG.FrameIMG2 import FrameIMG2
 from frames.IMG.FrameSCAN import FrameSCAN
 import xml.etree.ElementTree as ET
+from platformdirs import user_desktop_dir
 
 
 class MainWindow(tk.Tk):
@@ -179,8 +180,11 @@ class MainWindow(tk.Tk):
         xml_content = ET.tostring(metadigit, encoding="unicode", method="xml")
         xml_declaration = '<?xml version="1.0" encoding="UTF-8"?>\n'
 
+        desktop_path = user_desktop_dir()
+        file_path = f"{desktop_path}/metaDigit.xml"
+        print(f"Writing to {file_path}")
         # Salvare il file XML
-        with open(f"{self.get_last_segment(self.session.get('Progetto di Digitalizzazione', 'output'))}.xml", "w",
+        with open(file_path, "w",
                   encoding="utf-8") as file:
             file.write(xml_declaration)
             file.write(xml_content)
