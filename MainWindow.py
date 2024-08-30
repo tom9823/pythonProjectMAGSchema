@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import filedialog
 from urllib.parse import urlparse
 
 import Utils
@@ -180,16 +181,17 @@ class MainWindow(tk.Tk):
         xml_content = ET.tostring(metadigit, encoding="unicode", method="xml")
         xml_declaration = '<?xml version="1.0" encoding="UTF-8"?>\n'
 
-        desktop_path = user_desktop_dir()
-        file_path = f"{desktop_path}/metaDigit.xml"
-        print(f"Writing to {file_path}")
-        # Salvare il file XML
-        with open(file_path, "w",
-                  encoding="utf-8") as file:
-            file.write(xml_declaration)
-            file.write(xml_content)
-
-        self.destroy()
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".xml",
+            filetypes=[("XML files", "*.xml"), ("All files", "*.*")]
+        )
+        # Controlla se l'utente ha scelto un percorso
+        if file_path:
+            with open(file_path, "w",
+                      encoding="utf-8") as file:
+                file.write(xml_declaration)
+                file.write(xml_content)
+            self.destroy()
 
     def _attach_gen_tag(self, metadigit):
         gen = ET.SubElement(metadigit, "gen", attrib={
@@ -277,15 +279,6 @@ class MainWindow(tk.Tk):
     def _attach_img_tag(self, metadigit):
         for img in self.session.get(Utils.KEY_SESSION_IMG, []):
             metadigit.append(img.to_xml())
-
-    def get_last_segment(self, url):
-        # Analizza l'URL
-        parsed_url = urlparse(url)
-        # Ottiene il percorso dell'URL e lo pulisce
-        path = parsed_url.path.rstrip('/')
-        # Divide il percorso e restituisce l'ultimo segmento
-        return path.split('/')[-1]
-
 
 if __name__ == "__main__":
     root = MainWindow()
