@@ -159,8 +159,8 @@ class FrameSCAN(CustomFrame):
                 if scanner is not None:
                     if current_dir != old_dir:
                         imagegroupID, usage = self.ask_imgroupID_usage_value(
-                            field_imagegroupID=f'imagegroupID della cartella \"{current_dir}\"',
-                            field_usage=f'usage della cartella \"{current_dir}\"',
+                            field_imagegroupID=f'imagegroupID della cartella \"{current_dir.split('/')[-1]}\"',
+                            field_usage=f'usage della cartella \"{current_dir.split('/')[-1]}\"',
                             values=['ImgGrp_S', 'ImgGrp_M', 'ImgGrp_H', 'ImgGrp_T'],
                             options=[
                                 ('1', 'Master'),

@@ -172,7 +172,7 @@ analogico alla base della digitalizzazione; tutti gli elementi sono opzionali (t
         for i in range(len(self.dc_list)):
             dc = self.dc_list[i]
             list_tuple = list(dc)
-            list_tuple[0] = DC_TYPES[list_tuple[0]]
+            list_tuple[0] = DC_TYPES[dc[0]]
             self.dc_list[i] = tuple(list_tuple)
         if not level:
             messagebox.showwarning("Attenzione", "Per favore, compila il campo 'level'.")

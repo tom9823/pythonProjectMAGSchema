@@ -37,7 +37,7 @@ class FrameNomenclature(CustomFrame):
 
         self.label_options = [
             "Piatto anteriore", "Contropiatto anteriore", "Carta di guardia recto", "Carta di guardia verso",
-            "Carta 1 recto", "Taglio laterale", "Dorso", "Taglio inferiore", "Taglio superiore"
+            "Carta 1 recto", "Taglio laterale", "Dorso", "Taglio inferiore", "Taglio superiore", "Tavola fuori testo recto", "tavola fuori testo verso"
         ]
 
         self.selected_label = StringVar(self.master)
