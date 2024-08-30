@@ -117,7 +117,8 @@ class FrameIMG2(CustomFrame):
         self.targetid_entry = ttk.Entry(self.frame_target)
         self.targetid_entry.grid(row=1, column=1, pady=5, sticky=tk.EW)
         ToolTip(self.targetid_entry,
-                "Obbligatorio e non ripetibile, identifica il nome del target, produttore o organizzazione, il numero della versione o il media.")
+                "Obbligatorio e non ripetibile, identifica il nome del target, produttore o organizzazione, "
+                "il numero della versione o il media.")
 
         # Create a label and entry for <niso:imageData>
         imagedata_label = ttk.Label(self.frame_target, text="<niso:imageData>:")
@@ -126,7 +127,8 @@ class FrameIMG2(CustomFrame):
         self.imagedata_entry = ttk.Entry(self.frame_target)
         self.imagedata_entry.grid(row=2, column=1, pady=5, sticky=tk.EW)
         ToolTip(self.imagedata_entry,
-                "Opzionale e non ripetibile, identifica il path dell'immagine digitale che funge da target esterno. Si usa solo se <niso:targetType> è uguale a 0 (esterno).")
+                "Opzionale e non ripetibile, identifica il percorso dell'immagine digitale che funge da target "
+                "esterno. Si usa solo se <niso:targetType> è uguale a 0 (esterno).")
 
         # Create a label and entry for <niso:performanceData>
         performancedata_label = ttk.Label(self.frame_target, text="<niso:performanceData>:")
@@ -135,7 +137,8 @@ class FrameIMG2(CustomFrame):
         self.performancedata_entry = ttk.Entry(self.frame_target)
         self.performancedata_entry.grid(row=3, column=1, pady=5, sticky=tk.EW)
         ToolTip(self.performancedata_entry,
-                "Opzionale e non ripetibile, identifica il path del file che contiene i dati dell'immagine performance relativa al target identificato da <niso:targetID>.")
+                "Opzionale e non ripetibile, identifica il percorso del file che contiene i dati dell'immagine "
+                "performance relativa al target identificato da <niso:targetID>.")
 
         # Create a label and entry for <niso:profiles>
         profiles_label = ttk.Label(self.frame_target, text="<niso:profiles>:")
@@ -144,7 +147,8 @@ class FrameIMG2(CustomFrame):
         self.profiles_entry = ttk.Entry(self.frame_target)
         self.profiles_entry.grid(row=4, column=1, pady=5, sticky=tk.EW)
         ToolTip(self.profiles_entry,
-                "Opzionale e non ripetibile, identifica il path del file che contiene il profilo dei colori ICC o un altro profilo di gestione.")
+                "Opzionale e non ripetibile, identifica il percorso del file che contiene il profilo dei colori ICC o "
+                "un altro profilo di gestione.")
 
         # Configure grid to allow column resizing
         self.frame_target.columnconfigure(1, weight=1)

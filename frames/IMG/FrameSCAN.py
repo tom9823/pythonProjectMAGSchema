@@ -37,7 +37,7 @@ class FrameSCAN(CustomFrame):
 
         path_frame = tk.Frame(self.container_frame)
         path_frame.pack(pady=10)
-        self.path_label = ttk.Label(path_frame, text="Select Path:")
+        self.path_label = ttk.Label(path_frame, text="Seleziona un percorso:")
         self.path_label.grid(row=0, column=0, padx=5, pady=5)
 
         self.path_var = tk.StringVar()
@@ -45,16 +45,16 @@ class FrameSCAN(CustomFrame):
         self.path_entry.focus()
         self.path_entry.grid(row=0, column=1, padx=5, pady=5)
 
-        self.browse_button = ttk.Button(path_frame, text="Browse", command=self.browse_path)
+        self.browse_button = ttk.Button(path_frame, text="Naviga", command=self.browse_path)
         self.browse_button.grid(row=0, column=2, padx=5, pady=5)
 
         button_frame = tk.Frame(self.container_frame)
         button_frame.pack(pady=10)
 
-        self.start_button = ttk.Button(button_frame, text="Start Scanning", command=self.start_scanning)
+        self.start_button = ttk.Button(button_frame, text="Avvia scannerizzazione", command=self.start_scanning)
         self.start_button.grid(row=1, column=0, padx=5, pady=10)
 
-        self.stop_button = ttk.Button(button_frame, text="Stop Scanning", command=self.stop_scanning, state=tk.DISABLED)
+        self.stop_button = ttk.Button(button_frame, text="Ferma scannerizzazione", command=self.stop_scanning, state=tk.DISABLED)
         self.stop_button.grid(row=1, column=1, padx=5, pady=10)
 
         self.progress_bar = ttk.Progressbar(
@@ -75,11 +75,11 @@ class FrameSCAN(CustomFrame):
     def start_scanning(self):
         super().disable_right_button()
         if not self.path_var.get():
-            messagebox.showwarning("Attenzione", "Seleziona un path!")
+            messagebox.showwarning("Attenzione", "Seleziona un percorso!")
             return
 
         self.progress_bar["value"] = 0
-        self.status_label.config(text="Scanning...")
+        self.status_label.config(text="Scannerizzazione...")
         self.scanner_running = True
         self.start_button['state'] = "disabled"
         self.stop_button['state'] = "enabled"
@@ -233,7 +233,7 @@ class FrameSCAN(CustomFrame):
     def update_progress(self, progress, scanned_files, total_files):
         if self.scanner_running:
             self.progress_bar["value"] = progress
-            self.status_label.config(text=f"Scanned {scanned_files} of {total_files} files")
+            self.status_label.config(text=f"Scannerizzati {scanned_files} su {total_files} files")
             self.controller.update_idletasks()
 
     def update_status(self, status_text):
