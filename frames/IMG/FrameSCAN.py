@@ -111,95 +111,124 @@ class FrameSCAN(CustomFrame):
         scanning = self.controller.session.get(Utils.KEY_SESSION_SCANNING, None)
         target = self.controller.session.get(Utils.KEY_SESSION_TARGET, None)
         scale = self.controller.session.get(Utils.KEY_SESSION_SCALE, None)
+
+        # Primo passaggio: scansiona solo le cartelle con file .tiff o .tif
         for root, dirs, files in os.walk(path):
             if not self.scanner_running:
                 break
-            for filename in files:
-                if not self.scanner_running:
-                    break
 
-                filename_without_extension, file_extension = os.path.splitext(filename)
-                file_path = os.path.join(root, filename)
-                current_dir = os.path.dirname(file_path)
-                if self.is_ocr_recognition:
-                    if file_extension in [".jpg", ".jpeg", ".png", ".tiff"]:
-                        image = Image.open(file_path)
-                        text = pytesseract.image_to_string(image)
-                        print(text + '\n\n')
-                else:
-                    scanner: Scanner = ScannerFactory.factory(file_extension)
-                    if scanner is not None:
-                        if current_dir != old_dir:
-                            imagegroupID, usage = self.ask_imgroupID_usage_value(
-                                field_imagegroupID=f'imagegroupID della cartella \"{current_dir}\"',
-                                field_usage=f'usage della cartella \"{current_dir}\"',
-                                values=['ImgGrp_S', 'ImgGrp_M', 'ImgGrp_H', 'ImgGrp_T'],
-                                options=[
-                                    ('1', 'Master'),
-                                    ('2', 'Alta risoluzione'),
-                                    ('3', 'Bassa risoluzione'),
-                                    ('4', 'Preview'),
-                                    ('a', 'Il repository non ha il copyright dell\'oggetto digitale'),
-                                    ('b', 'Il repository ha il copyright dell\'oggetto digitale')
-                                    ]
-                                )
-                            image_metrics = Utils.get_image_metrics(imagegroupID)
-                            format = Format(name='TIF', mime='image/tiff', compression='LZW') if imagegroupID == 'ImgGrp_H' else Format(name='JPG', mime='image/jpeg', compression='JPG')
-                            img_group = ImageGroup(
-                                imggroupID=imagegroupID,
-                                image_metrics=image_metrics,
-                                dpi=None,
-                                ppi=None,
-                                scanning=scanning,
-                                format=format
-                            )
-                            self.img_groups.append(img_group)
+            # Verifica se la cartella contiene file .tiff o .tif
+            tiff_files = [f for f in files if f.lower().endswith(('.tiff', '.tif'))]
+            if tiff_files:
+                scanned_files = self.scan_folder(root, files, side, scanning, target, scale, imagegroupID,
+                                                 usage, scanned_files, total_files)
 
-                        md5 = Utils.get_file_md5(file_path)
-                        size = Utils.get_file_size(file_path)
+        # Secondo passaggio: scansiona tutte le altre cartelle
+        for root, dirs, files in os.walk(path):
+            if not self.scanner_running:
+                break
 
-                        metas: list[MetaData] = scanner.scan(file_path)
-                        datetimecreated = Utils.find_date_value(metas)
-                        if datetimecreated is None:
-                            datetimecreated = Utils.get_creation_date(file_path)
-                        image_dimensions = Utils.get_image_dimensions(metas)
+            # Salta le cartelle già scansionate nel primo passaggio
+            tiff_files = [f for f in files if f.lower().endswith(('.tiff', '.tif'))]
+            if tiff_files:
+                continue
 
-                        if file_extension in ['.tiff', '.tif']:
-                            img = IMG(
-                                imggroupID=imagegroupID if imagegroupID is not None else 'ImgGrp_S',
-                                nomenclature=filename_without_extension,
-                                file=file_path,
-                                datetimecreated=datetimecreated,
-                                md5=md5,
-                                filesize=size,
-                                usage=usage if usage is not None else '1',
-                                side=side,
-                                target=target,
-                                scale=scale,
-                                image_dimensions=image_dimensions,
-                            )
-                            self.img_dict[filename_without_extension] = img
-                        else:
-                            alt_img = AltImg(
-                                imggroupID=imagegroupID if imagegroupID is not None else 'ImgGrp_S',
-                                file=file_path,
-                                datetimecreated=datetimecreated,
-                                md5=md5,
-                                filesize=size,
-                                usage=usage if usage is not None else ['1'],
-                                image_dimensions=image_dimensions,
-                            )
-                            self.img_dict[filename_without_extension].add_alt_img(alt_img)
-
-                scanned_files += 1
-                old_dir = current_dir
-
-                progress = (scanned_files / total_files) * 100
-                self.update_progress(progress, scanned_files, total_files)
+            scanned_files = self.scan_folder(root, files, side, scanning, target, scale, imagegroupID, usage,
+                                             scanned_files, total_files)
 
         if self.scanner_running:
             super().enable_right_button()
         self.scanner_running = False
+
+    def scan_folder(self, root, files, side, scanning, target, scale, imagegroupID, usage, scanned_files,
+                    total_files):
+        old_dir = ""
+        for filename in files:
+            if not self.scanner_running:
+                break
+
+            filename_without_extension, file_extension = os.path.splitext(filename)
+            file_path = os.path.join(root, filename)
+            current_dir = os.path.dirname(file_path)
+            if self.is_ocr_recognition:
+                if file_extension.lower() in [".jpg", ".jpeg", ".png", ".tiff", ".tif"]:
+                    image = Image.open(file_path)
+                    text = pytesseract.image_to_string(image)
+                    print(text + '\n\n')
+            else:
+                scanner: Scanner = ScannerFactory.factory(file_extension)
+                if scanner is not None:
+                    if current_dir != old_dir:
+                        imagegroupID, usage = self.ask_imgroupID_usage_value(
+                            field_imagegroupID=f'imagegroupID della cartella \"{current_dir}\"',
+                            field_usage=f'usage della cartella \"{current_dir}\"',
+                            values=['ImgGrp_S', 'ImgGrp_M', 'ImgGrp_H', 'ImgGrp_T'],
+                            options=[
+                                ('1', 'Master'),
+                                ('2', 'Alta risoluzione'),
+                                ('3', 'Bassa risoluzione'),
+                                ('4', 'Preview'),
+                                ('a', 'Il repository non ha il copyright dell\'oggetto digitale'),
+                                ('b', 'Il repository ha il copyright dell\'oggetto digitale')
+                            ]
+                        )
+                        image_metrics = Utils.get_image_metrics(imagegroupID)
+                        format = Format(name='TIF', mime='image/tiff',
+                                        compression='LZW') if imagegroupID == 'ImgGrp_H' else Format(name='JPG',
+                                                                                                     mime='image/jpeg',
+                                                                                                     compression='JPG')
+                        img_group = ImageGroup(
+                            imggroupID=imagegroupID,
+                            image_metrics=image_metrics,
+                            dpi=None,
+                            ppi=None,
+                            scanning=scanning,
+                            format=format
+                        )
+                        self.img_groups.append(img_group)
+
+                    md5 = Utils.get_file_md5(file_path)
+                    size = Utils.get_file_size(file_path)
+
+                    metas: list[MetaData] = scanner.scan(file_path)
+                    datetimecreated = Utils.find_date_value(metas)
+                    if datetimecreated is None:
+                        datetimecreated = Utils.get_creation_date(file_path)
+                    image_dimensions = Utils.get_image_dimensions(metas)
+
+                    if file_extension.lower() in ['.tiff', '.tif']:
+                        img = IMG(
+                            imggroupID=imagegroupID if imagegroupID is not None else 'ImgGrp_S',
+                            nomenclature=filename_without_extension,
+                            file=file_path,
+                            datetimecreated=datetimecreated,
+                            md5=md5,
+                            filesize=size,
+                            usage=usage if usage is not None else '1',
+                            side=side,
+                            target=target,
+                            scale=scale,
+                            image_dimensions=image_dimensions,
+                        )
+                        self.img_dict[filename_without_extension] = img
+                    else:
+                        alt_img = AltImg(
+                            imggroupID=imagegroupID if imagegroupID is not None else 'ImgGrp_S',
+                            file=file_path,
+                            datetimecreated=datetimecreated,
+                            md5=md5,
+                            filesize=size,
+                            usage=usage if usage is not None else ['1'],
+                            image_dimensions=image_dimensions,
+                        )
+                        self.img_dict[filename_without_extension].add_alt_img(alt_img)
+
+            # Aggiorna la barra di progresso dopo aver processato il file
+            scanned_files += 1
+            progress = (scanned_files / total_files) * 100
+            self.update_progress(progress, scanned_files, total_files)
+            old_dir = current_dir
+        return scanned_files
 
     def update_progress(self, progress, scanned_files, total_files):
         if self.scanner_running:
