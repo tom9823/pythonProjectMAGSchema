@@ -221,7 +221,8 @@ class FrameSCAN(CustomFrame):
                             usage=usage if usage is not None else ['1'],
                             image_dimensions=image_dimensions,
                         )
-                        self.img_dict[filename_without_extension].add_alt_img(alt_img)
+                        if filename_without_extension in self.img_dict:
+                            self.img_dict[filename_without_extension].add_alt_img(alt_img)
 
             # Aggiorna la barra di progresso dopo aver processato il file
             scanned_files += 1
