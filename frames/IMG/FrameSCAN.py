@@ -104,7 +104,6 @@ class FrameSCAN(CustomFrame):
         scanned_files = 0
         self.img_dict = dict()
         self.img_groups = []
-        old_dir = ''
         imagegroupID = None
         usage = None
         side = self.controller.session.get(Utils.KEY_SESSION_SIDE, None)

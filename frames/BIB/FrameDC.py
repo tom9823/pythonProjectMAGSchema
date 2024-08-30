@@ -5,11 +5,23 @@ import Utils
 from frames.CustomFrame import CustomFrame
 
 # Lista dei tipi di elementi DC (Dublin Core)
-DC_TYPES = [
-    'Identifier', 'Title', 'Creator', 'Publisher',
-    'Subject', 'Description', 'Contributor', 'Date', 'Type',
-    'Format', 'Source', 'Language', 'Relation', 'Coverage', 'Rights'
-]
+DC_TYPES = {
+    'Identifier / Identificatore': 'Identifier',
+    'Title / Titolo': 'Title',
+    'Creator / Creatore': 'Creator',
+    'Publisher / Editore': 'Publisher',
+    'Subject / Soggetto': 'Subject',
+    'Description / Descrizione': 'Description',
+    'Contributor / Collaboratore': 'Contributor',
+    'Date / Data': 'Date',
+    'Type / Tipo': 'Type',
+    'Format / Formato': 'Format',
+    'Source / Fonte': 'Source',
+    'Language / Lingua': 'Language',
+    'Relation / Relazione': 'Relation',
+    'Coverage / Copertura': 'Coverage',
+    'Rights / Diritti': 'Rights'
+}
 
 
 class FrameDC(CustomFrame):
@@ -77,8 +89,8 @@ analogico alla base della digitalizzazione; tutti gli elementi sono opzionali (t
 
         # Menu a discesa per selezionare il DC Type
         self.dc_type_var = tk.StringVar()
-        self.dc_type_var.set(DC_TYPES[0])  # Imposta il valore predefinito
-        self.dc_type_menu = tk.OptionMenu(add_frame, self.dc_type_var, *DC_TYPES)
+        self.dc_type_var.set(next(iter(DC_TYPES)))
+        self.dc_type_menu = tk.OptionMenu(add_frame, self.dc_type_var, *DC_TYPES.keys())
         self.dc_type_menu.grid(row=1, column=0)
 
         self.value_entry = tk.Entry(add_frame)
@@ -157,6 +169,11 @@ analogico alla base della digitalizzazione; tutti gli elementi sono opzionali (t
     def check_data(self):
         ret = True
         level = self.level_var.get()
+        for i in range(len(self.dc_list)):
+            dc = self.dc_list[i]
+            list_tuple = list(dc)
+            list_tuple[0] = DC_TYPES[list_tuple[0]]
+            self.dc_list[i] = tuple(list_tuple)
         if not level:
             messagebox.showwarning("Attenzione", "Per favore, compila il campo 'level'.")
             ret = False
