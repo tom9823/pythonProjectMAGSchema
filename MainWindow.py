@@ -11,9 +11,9 @@ from frames.FrameGEN import FrameGEN
 from frames.FrameINIT import FrameINIT
 from frames.IMG.FrameIMG import FrameIMG
 from frames.IMG.FrameIMG2 import FrameIMG2
+from frames.IMG.FrameNomenclature import FrameNomenclature
 from frames.IMG.FrameSCAN import FrameSCAN
 import xml.etree.ElementTree as ET
-from platformdirs import user_desktop_dir
 
 
 class MainWindow(tk.Tk):
@@ -105,22 +105,35 @@ class MainWindow(tk.Tk):
             left_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_IMG_2,
                                                        container=Utils.KEY_FRAME_IMG),
             left_button_title='IMG 1',
-            right_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_IMG_2, container=Utils.KEY_FRAME_SCAN),
-            right_button_title='SCAN'
+            right_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_IMG_2,
+                                                        container=Utils.KEY_FRAME_NOMENCLATURE),
+            right_button_title='NOMENCLATURE'
         )
         frameIMG2.grid(row=0, column=0, sticky=tk.NSEW)
         self.frames[Utils.KEY_FRAME_IMG_2] = frameIMG2
 
-        frameSCAN = FrameSCAN(
+        frameNomenclature = FrameNomenclature(
             parent=self,
             controller=self,
             left_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_SCAN, container=Utils.KEY_FRAME_IMG_2),
             left_button_title="IMG 2",
+            right_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_SCAN, container=Utils.KEY_FRAME_SCAN),
+            right_button_title="SCAN",
+        )
+
+        frameNomenclature.grid(row=0, column=0, sticky=tk.NSEW)
+        self.frames[Utils.KEY_FRAME_NOMENCLATURE] = frameNomenclature
+
+        frameSCAN = FrameSCAN(
+            parent=self,
+            controller=self,
+            left_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_SCAN,
+                                                       container=Utils.KEY_FRAME_NOMENCLATURE),
+            left_button_title="NOMENCLATURE",
             right_button_action=self.generate_file_xml,
             right_button_title="Genera file XML",
             is_ocr_recognition=False
         )
-
         frameSCAN.grid(row=0, column=0, sticky=tk.NSEW)
         self.frames[Utils.KEY_FRAME_SCAN] = frameSCAN
 
@@ -279,6 +292,7 @@ class MainWindow(tk.Tk):
     def _attach_img_tag(self, metadigit):
         for img in self.session.get(Utils.KEY_SESSION_IMG, []):
             metadigit.append(img.to_xml())
+
 
 if __name__ == "__main__":
     root = MainWindow()

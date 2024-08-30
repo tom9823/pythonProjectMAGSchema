@@ -27,6 +27,11 @@ class FrameIMG2(CustomFrame):
             **kwargs
         )
 
+        self.frame_target = None
+        self.targettype_var = None
+        self.imagedata_entry = None
+        self.targetid_entry = None
+        self.profiles_entry = None
         self._init_widgets()
 
     def _init_widgets(self):
