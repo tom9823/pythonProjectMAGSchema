@@ -50,7 +50,8 @@ analogico alla base della digitalizzazione; tutti gli elementi sono opzionali (t
         label_level = tk.Label(level_frame, text="Level (*):")
         label_level.grid(row=0, column=0)
         self.level_menu_options = {"a: spoglio": "a", "m: monografia": "a", "s: seriale": "s",
-                                   "c: raccolta prodotta dall'istituzione": "c"}
+                                   "c: raccolta prodotta dall'istituzione": "c", "f": "unità archivistica (file)",
+                                   "d": "unità documentaria (document, item)"}
         level_menu = tk.OptionMenu(level_frame, self.level_var, *self.level_menu_options.keys())
         level_menu.grid(row=0, column=1)
 
