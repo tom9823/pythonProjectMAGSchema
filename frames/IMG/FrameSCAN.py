@@ -31,6 +31,7 @@ class FrameSCAN(CustomFrame):
         self.is_ocr_recognition = is_ocr_recognition
         self._init_widgets()
         self.img_dict = dict()
+        self.nomenclature_dict = self.controller.session.get(Utils.KEY_FRAME_NOMENCLATURE, dict())
 
     def _init_widgets(self):
         super().disable_right_button()
@@ -142,6 +143,8 @@ class FrameSCAN(CustomFrame):
     def scan_folder(self, root, files, side, scanning, target, scale, imagegroupID, usage, scanned_files,
                     total_files):
         old_dir = ""
+        index_nomenclature_carta = 0
+        old_nomenclature = ""
         for filename in files:
             if not self.scanner_running:
                 break
@@ -194,11 +197,16 @@ class FrameSCAN(CustomFrame):
                     if datetimecreated is None:
                         datetimecreated = Utils.get_creation_date(file_path)
                     image_dimensions = Utils.get_image_dimensions(metas)
-
+                    if filename_without_extension in self.nomenclature_dict:
+                        nomenclature = self.nomenclature_dict[filename_without_extension]
+                    else:
+                        nomenclature = f"carta {index_nomenclature_carta} {"verso" if "recto" in old_nomenclature else "recto"}"
+                        index_nomenclature_carta += 1
+                    old_nomenclature = nomenclature
                     if file_extension.lower() in ['.tiff', '.tif']:
                         img = IMG(
                             imggroupID=imagegroupID if imagegroupID is not None else 'ImgGrp_S',
-                            nomenclature=filename_without_extension,
+                            nomenclature=nomenclature,
                             file=file_path,
                             datetimecreated=datetimecreated,
                             md5=md5,
