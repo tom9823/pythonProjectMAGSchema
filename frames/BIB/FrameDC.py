@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 
 import Utils
+from ToolTip import ToolTip
 from frames.CustomFrame import CustomFrame
 
 # Lista dei tipi di elementi DC (Dublin Core)
@@ -21,6 +22,31 @@ DC_TYPES = {
     'Relation / Relazione': 'Relation',
     'Coverage / Copertura': 'Coverage',
     'Rights / Diritti': 'Rights'
+}
+
+DC_TYPES_DEFINITIONS = {
+    'Identifier': 'Un identificatore univoco di un record descrittivo in un dato contesto. Non va confuso con '
+                  'segnatura o classificazione catalografica.',
+    'Title': 'Il titolo della risorsa, o il nome attraverso il quale la risorsa è conosciuta.',
+    'Creator': 'L\'autore della risorsa, ovvero l\'entità responsabile della produzione del contenuto della risorsa.',
+    'Publisher': 'L\'entità responsabile della produzione della risorsa, come una casa editrice.',
+    'Subject': 'L\'argomento della risorsa.',
+    'Description': 'Una spiegazione del contenuto della risorsa. Può includere un riassunto, indice, riferimento '
+                   'grafico, o testo libero.',
+    'Contributor': 'Un’entità responsabile di un contributo al contenuto della risorsa (es. curatore, traduttore, '
+                   'illustratore).',
+    'Date': 'Una data associata a un evento del ciclo di vita della risorsa. Solitamente la creazione o la '
+            'disponibilità.',
+    'Type': 'La natura o il genere del contenuto della risorsa. Codifiche consigliate includono UNIMARC o il Dublin '
+            'Core Type Vocabulary.',
+    'Format': 'La manifestazione fisica della risorsa, includendo tipo di supporto o dimensioni.',
+    'Source': 'Riferimento a una risorsa dalla quale è derivata la risorsa in oggetto.',
+    'Language': 'La lingua del contenuto intellettuale della risorsa. Si consiglia di usare codici ISO 639 seguiti da '
+                'ISO 3166 per la localizzazione.',
+    'Relation': 'Riferimento a una risorsa correlata, utilizzando identificatori formali.',
+    'Coverage': 'Estensione o scopo del contenuto della risorsa. Include localizzazione spaziale, periodo temporale o '
+                'giurisdizione.',
+    'Rights': 'Informazione sui diritti esercitati sulla risorsa, come diritti di proprietà intellettuale o copyright.'
 }
 
 
@@ -50,8 +76,8 @@ analogico alla base della digitalizzazione; tutti gli elementi sono opzionali (t
         label_level = tk.Label(level_frame, text="Level (*):")
         label_level.grid(row=0, column=0)
         self.level_menu_options = {"a: spoglio": "a", "m: monografia": "a", "s: seriale": "s",
-                                   "c: raccolta prodotta dall'istituzione": "c", "f": "unità archivistica (file)",
-                                   "d": "unità documentaria (document, item)"}
+                                   "c: raccolta prodotta dall'istituzione": "c", "f: unità archivistica (file)": "f",
+                                   "d: unità documentaria (document, item)": "d"}
         level_menu = tk.OptionMenu(level_frame, self.level_var, *self.level_menu_options.keys())
         level_menu.grid(row=0, column=1)
 
@@ -93,6 +119,11 @@ analogico alla base della digitalizzazione; tutti gli elementi sono opzionali (t
         self.dc_type_var.set(next(iter(DC_TYPES)))
         self.dc_type_menu = tk.OptionMenu(add_frame, self.dc_type_var, *DC_TYPES.keys())
         self.dc_type_menu.grid(row=1, column=0)
+
+        # Applica le tooltip agli elementi
+        for i, opzione in enumerate(DC_TYPES.values()):
+            menu = self.dc_type_menu["menu"]
+            ToolTip(menu, DC_TYPES_DEFINITIONS[opzione])
 
         self.value_entry = tk.Entry(add_frame)
         self.value_entry.grid(row=1, column=1)
