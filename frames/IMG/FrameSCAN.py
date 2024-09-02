@@ -32,22 +32,11 @@ class FrameSCAN(CustomFrame):
         self._init_widgets()
         self.img_dict = dict()
         self.nomenclature_dict = self.controller.session.get(Utils.KEY_FRAME_NOMENCLATURE, dict())
+        self.path_var = tk.StringVar()
+        self.path_var.set(self.controller.session.get(Utils.KEY_SESSION_FOLDER_PATH, ""))
 
     def _init_widgets(self):
         super().disable_right_button()
-
-        path_frame = tk.Frame(self.container_frame)
-        path_frame.pack(pady=10)
-        self.path_label = ttk.Label(path_frame, text="Seleziona un percorso:")
-        self.path_label.grid(row=0, column=0, padx=5, pady=5)
-
-        self.path_var = tk.StringVar()
-        self.path_entry = ttk.Entry(path_frame, textvariable=self.path_var, width=30)
-        self.path_entry.focus()
-        self.path_entry.grid(row=0, column=1, padx=5, pady=5)
-
-        self.browse_button = ttk.Button(path_frame, text="Naviga", command=self.browse_path)
-        self.browse_button.grid(row=0, column=2, padx=5, pady=5)
 
         button_frame = tk.Frame(self.container_frame)
         button_frame.pack(pady=10)
@@ -67,11 +56,6 @@ class FrameSCAN(CustomFrame):
 
         self.status_label = ttk.Label(self.container_frame, text="stato scannerizzazione")
         self.status_label.pack(pady=10)
-
-    def browse_path(self):
-        path = filedialog.askdirectory()
-        if path:
-            self.path_var.set(path)
 
     def start_scanning(self):
         super().disable_right_button()
@@ -199,9 +183,12 @@ class FrameSCAN(CustomFrame):
                     image_dimensions = Utils.get_image_dimensions(metas)
                     if filename_without_extension in self.nomenclature_dict:
                         nomenclature = self.nomenclature_dict[filename_without_extension]
-                    else:
+                    elif "carta" in old_nomenclature:
                         nomenclature = f"carta {index_nomenclature_carta} {"verso" if "recto" in old_nomenclature else "recto"}"
-                        index_nomenclature_carta += 1
+                        if "verso" in nomenclature:
+                            index_nomenclature_carta += 1
+                    else:
+                        nomenclature = filename_without_extension
                     old_nomenclature = nomenclature
                     if file_extension.lower() in ['.tiff', '.tif']:
                         img = IMG(
@@ -274,3 +261,6 @@ class FrameSCAN(CustomFrame):
         top.wait_window(top)
 
         return imggroupID_value.get(), usage_value.get()
+
+    def set_path(self, path):
+        self.path_var.set(path)

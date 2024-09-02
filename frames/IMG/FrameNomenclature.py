@@ -1,6 +1,6 @@
 import os
 import re
-from tkinter import Tk, Label, Button, filedialog, Frame, Scrollbar, Listbox, StringVar, OptionMenu
+from tkinter import Tk, Label, Button, filedialog, Frame, Scrollbar, Listbox, StringVar, OptionMenu, ttk
 from PIL import Image, ImageTk
 
 import Utils
@@ -32,53 +32,75 @@ class FrameNomenclature(CustomFrame):
         self.right_frame = Frame(self.grid_frame)
         self.right_frame.grid(row=0, column=1)
 
-        self.load_button = Button(self.container_frame, text="Carica cartella", command=self.load_folder)
-        self.load_button.pack(pady=20)
+        self.path_frame = Frame(self.container_frame)
+        self.path_frame.pack(pady=10)
+        self.path_label = Label(self.path_frame, text="Seleziona un percorso:")
+        self.path_label.grid(row=0, column=0, padx=5, pady=5)
+
+        self.path_var = StringVar()
+        self.path_entry = ttk.Entry(self.path_frame, textvariable=self.path_var, width=30)
+        self.path_entry.focus()
+        self.path_entry.grid(row=0, column=1, padx=5, pady=5)
+
+        self.browse_button = Button(self.path_frame, text="Naviga", command=self.load_folder)
+        self.browse_button.grid(row=0, column=2, padx=5, pady=5)
+
         self.image_frame = Frame(self.right_frame)
-        self.image_frame.pack()
         self.image_label = Label(self.image_frame)
-        self.image_label.pack()
+
+        self.frame_button_image = Frame(self.right_frame)
+        self.prev_button = Button(self.frame_button_image, text="Precedente", command=self.prev_image, state='disabled')
 
         self.label_options = [
-            "Piatto anteriore", "Contropiatto anteriore", "Carta di guardia recto", "Carta di guardia verso",
+            "Nessuna etichetta nomenclature", "Piatto anteriore", "Contropiatto anteriore", "Carta di guardia recto", "Carta di guardia verso",
             "Carta 1 recto", "Taglio laterale", "Dorso", "Taglio inferiore", "Taglio superiore",
             "Tavola fuori testo recto", "tavola fuori testo verso"
         ]
 
         self.selected_label = StringVar(self.master)
-
-        self.frame_button_image = Frame(self.right_frame)
-        self.frame_button_image.pack()
-
-        # Inizialmente disattiva i bottoni "Precedente", "Successiva" e il dropdown
-        self.prev_button = Button(self.frame_button_image, text="Precedente", command=self.prev_image, state='disabled')
-        self.prev_button.grid(column=0, row=0)
+        self.selected_label.set(self.label_options[0])
         self.label_dropdown = OptionMenu(self.frame_button_image, self.selected_label, *self.label_options)
-        self.label_dropdown.config(state='disabled')  # Disattiva dropdown
-        self.label_dropdown.grid(column=1, row=0)
         self.next_button = Button(self.frame_button_image, text="Successiva", command=self.next_image, state='disabled')
-        self.next_button.grid(column=2, row=0)
 
         self.image_listbox = Listbox(self.left_frame, height=20)
-        self.image_listbox.pack(side="left", fill="y")
-
         self.scrollbar = Scrollbar(self.left_frame)
-        self.scrollbar.pack(side="left", fill="y")
-
         self.image_listbox.config(yscrollcommand=self.scrollbar.set)
         self.scrollbar.config(command=self.image_listbox.yview)
-
         self.image_listbox.bind("<<ListboxSelect>>", self.show_image_from_listbox)
+
+        self.hide_widgets()
 
         self.images = []
         self.current_image_index = 0
         self.labels = {}
+
+    def hide_widgets(self):
+        self.image_frame.pack_forget()
+        self.image_label.pack_forget()
+        self.frame_button_image.pack_forget()
+        self.prev_button.grid_forget()
+        self.label_dropdown.grid_forget()
+        self.next_button.grid_forget()
+        self.image_listbox.pack_forget()
+        self.scrollbar.pack_forget()
+
+    def show_widgets(self):
+        self.image_frame.pack()
+        self.image_label.pack()
+        self.frame_button_image.pack()
+        self.prev_button.grid(column=0, row=0)
+        self.label_dropdown.grid(column=1, row=0)
+        self.next_button.grid(column=2, row=0)
+        self.image_listbox.pack(side="left", fill="y")
+        self.scrollbar.pack(side="left", fill="y")
 
     def load_folder(self):
         folder_path = filedialog.askdirectory()
         if folder_path:
             # Usa os.walk per attraversare ricorsivamente tutte le sottocartelle
             self.images = []
+            self.path_var.set(folder_path)
+            super().save_to_session((Utils.KEY_SESSION_FOLDER_PATH, folder_path))
             for root, _, files in os.walk(folder_path):
                 for file in files:
                     if file.lower().endswith(('tif', 'tiff')):
@@ -90,7 +112,7 @@ class FrameNomenclature(CustomFrame):
             self.update_listbox()
             if self.images:
                 self.show_image(0)
-                # Attiva i bottoni e il dropdown solo dopo che una cartella è stata caricata
+                self.show_widgets()  # Mostra i widget solo dopo che la cartella è stata caricata
                 self.enable_buttons()
 
     def extract_number(self, filename):
@@ -102,6 +124,7 @@ class FrameNomenclature(CustomFrame):
         for img in self.images:
             label = self.nomenclature_dict.get(os.path.splitext(img)[0],
                                                "")  # Ottiene l'etichetta associata o una stringa vuota
+            label = "" if label == "Nessuna etichetta nomenclature" else label
             display_text = f"{os.path.basename(img)} ({label})" if label else os.path.basename(img)
             self.image_listbox.insert("end", display_text)
 
@@ -121,13 +144,11 @@ class FrameNomenclature(CustomFrame):
 
     def next_image(self):
         current_label = self.selected_label.get()
+        self.save_current_label()
         if current_label == "Carta 1 recto":
-            self.save_current_label()
-            # Salta all'ultima immagine e imposta l'etichetta su "Taglio inferiore"
             self.show_image(len(self.images) - 1)
             self.selected_label.set("Taglio inferiore")
         elif self.current_image_index < len(self.images) - 1:
-            self.save_current_label()
             self.show_image(self.current_image_index + 1)
 
     def prev_image(self):
@@ -141,11 +162,12 @@ class FrameNomenclature(CustomFrame):
         self.show_image(selected_index)
 
     def save_current_label(self):
-        image_path = self.images[self.current_image_index]
         label = self.selected_label.get()
-        filename_without_extension, file_extension = os.path.splitext(image_path)
-        self.nomenclature_dict[filename_without_extension] = label
-        self.update_listbox()
+        if label != "Nessuna etichetta nomenclature":
+            image_path = self.images[self.current_image_index]
+            filename_without_extension, file_extension = os.path.splitext(image_path)
+            self.nomenclature_dict[filename_without_extension] = label
+            self.update_listbox()
 
     def enable_buttons(self):
         self.prev_button.config(state='normal')

@@ -115,9 +115,9 @@ class MainWindow(tk.Tk):
         frameNomenclature = FrameNomenclature(
             parent=self,
             controller=self,
-            left_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_SCAN, container=Utils.KEY_FRAME_IMG_2),
+            left_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_NOMENCLATURE, container=Utils.KEY_FRAME_IMG_2),
             left_button_title="IMG 2",
-            right_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_SCAN, container=Utils.KEY_FRAME_SCAN),
+            right_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_NOMENCLATURE, container=Utils.KEY_FRAME_SCAN),
             right_button_title="SCAN",
         )
 
@@ -168,6 +168,8 @@ class MainWindow(tk.Tk):
         if caller == Utils.KEY_FRAME_INIT and container == Utils.KEY_FRAME_GEN and not self.identifier_modal_already_shown:
             frame.show_identifier_modal()
             self.identifier_modal_already_shown = True
+        if caller == Utils.KEY_FRAME_NOMENCLATURE and container == Utils.KEY_FRAME_SCAN:
+            frame.set_path(self.session.get(Utils.KEY_SESSION_FOLDER_PATH, ""))
         frame.tkraise()
 
     def generate_file_xml(self):
