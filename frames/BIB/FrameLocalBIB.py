@@ -128,7 +128,7 @@ specialistiche raccolte durante il processo di digitalizzazione. L'elemento è o
             values = self.table_geo_coord.item(item, 'values')
             local_bib.add_geo_coord(values[0])
         for item in self.table_not_date.get_children():
-            values = self.table_geo_coord.item(item, 'values')
+            values = self.table_not_date.item(item, 'values')
             local_bib.add_not_date(values[0])
 
         row = (local_bib.print_geo_coords(), local_bib.print_not_dates())
@@ -177,7 +177,7 @@ specialistiche raccolte durante il processo di digitalizzazione. L'elemento è o
             for item in self.table_not_date.get_children():
                 values = self.table_not_date.item(item, 'values')
                 not_date_list.append(values[0])
-            selected_local_bib.set_geo_coord(geo_coord_list)
+            selected_local_bib.set_geo_coords(geo_coord_list)
             selected_local_bib.set_not_dates(not_date_list)
             self.table_local_bibs.item(item_id, text="", values=[selected_local_bib.print_geo_coords(),
                                                                  selected_local_bib.print_not_dates()])

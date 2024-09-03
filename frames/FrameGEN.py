@@ -94,13 +94,13 @@ class FrameGEN(CustomFrame):
         self.entry_creation_var = tk.StringVar()
         entry_creation = tk.Entry(self.container_frame, width=50, textvariable=self.entry_creation_var)
         entry_creation.pack()
-        ToolTip(entry_creation, "Data di creazione della sezione nel formato aaaa-mm-ggThh:mm:ss. L'elemento è opzionale, non ripetibile.")
+        ToolTip(entry_creation, "Data di creazione della sezione nel formato aaaa-mm-ggThh:mm:ss (ad esempio 2005-08-04T13:00:00). L'elemento è opzionale, non ripetibile.")
 
         tk.Label(self.container_frame, text="Last Update (opzionale):").pack(pady=(10,5))
         self.entry_last_update_var = tk.StringVar()
         entry_last_update = tk.Entry(self.container_frame, width=50, textvariable=self.entry_last_update_var)
         entry_last_update.pack()
-        ToolTip(entry_last_update, "Data dell'ultimo aggiornamento della sezione nel formato aaaa-mm-ggThh:mm:ss. L'elemento è opzionale, non ripetibile.")
+        ToolTip(entry_last_update, "Data dell'ultimo aggiornamento della sezione nel formato aaaa-mm-ggThh:mm:ss (ad esempio 2005-08-04T13:00:00). L'elemento è opzionale, non ripetibile.")
 
     def check_data(self):
         ret = True
