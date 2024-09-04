@@ -41,10 +41,10 @@ class FrameSCAN(CustomFrame):
         button_frame = tk.Frame(self.container_frame)
         button_frame.pack(pady=10)
 
-        self.start_button = ttk.Button(button_frame, text="Avvia scannerizzazione", command=self.start_scanning)
+        self.start_button = ttk.Button(button_frame, text="Avvia scansione", command=self.start_scanning)
         self.start_button.grid(row=1, column=0, padx=5, pady=10)
 
-        self.stop_button = ttk.Button(button_frame, text="Ferma scannerizzazione", command=self.stop_scanning, state=tk.DISABLED)
+        self.stop_button = ttk.Button(button_frame, text="Ferma scansione", command=self.stop_scanning, state=tk.DISABLED)
         self.stop_button.grid(row=1, column=1, padx=5, pady=10)
 
         self.progress_bar = ttk.Progressbar(
@@ -54,7 +54,7 @@ class FrameSCAN(CustomFrame):
         )
         self.progress_bar.pack(pady=10, padx=100, fill=tk.X)
 
-        self.status_label = ttk.Label(self.container_frame, text="stato scannerizzazione")
+        self.status_label = ttk.Label(self.container_frame, text="stato scansione")
         self.status_label.pack(pady=10)
 
     def start_scanning(self):
@@ -64,7 +64,7 @@ class FrameSCAN(CustomFrame):
             return
 
         self.progress_bar["value"] = 0
-        self.status_label.config(text="Scannerizzazione...")
+        self.status_label.config(text="Scansione...")
         self.scanner_running = True
         self.start_button['state'] = "disabled"
         self.stop_button['state'] = "enabled"

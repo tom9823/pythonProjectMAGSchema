@@ -98,25 +98,25 @@ analogico. L'elemento è opzionale e ripetibile.""",
         id_label.grid(row=1, column=0, sticky=tk.W)
         self.id_entry = tk.Entry(add_frame)
         self.id_entry.grid(row=2, column=0)
-        ToolTip(self.id_entry, text="ID : di tipo xsd:ID, serve a definire un identificatore univoco all'interno del "
-                                    "record MAG cui è possibile fare riferimento da altri luoghi del medesimo record. "
-                                    "L'attributo trova la sua utilità qualora vi sia la necessità di dichiarare "
+        ToolTip(self.id_entry, text="ID : di tipo xsd:ID, serve a definire un identificatore univoco all'interno del \n"
+                                    "record MAG cui è possibile fare riferimento da altri luoghi del medesimo record. \n"
+                                    "L'attributo trova la sua utilità qualora vi sia la necessità di dichiarare \n"
                                     "diversi <holdings>.")
 
         library_label = tk.Label(add_frame, text="Library")
         library_label.grid(row=1, column=1, sticky=tk.W)
         self.library_entry = tk.Entry(add_frame)
         self.library_entry.grid(row=2, column=1)
-        ToolTip(self.library_entry, text="contiene il nome dell'istituzione proprietaria dell'oggetto analogico o "
-                                         "di parte dell'oggetto analogico. Di tipo xsd:string, è opzionale e non "
+        ToolTip(self.library_entry, text="contiene il nome dell'istituzione proprietaria dell'oggetto analogico o \n"
+                                         "di parte dell'oggetto analogico. Di tipo xsd:string, è opzionale e non \n"
                                          "ripetibile.")
 
         inventory_label = tk.Label(add_frame, text="Inventory")
         inventory_label.grid(row=1, column=2, sticky=tk.W)
         self.inventory_entry = tk.Entry(add_frame)
         self.inventory_entry.grid(row=2, column=2)
-        ToolTip(self.inventory_entry, text="contiene il numero di inventario attribuito all'oggetto analogico "
-                                           "dall'istituzione che lo possiede. Di tipo xsd:string, è opzionale e non "
+        ToolTip(self.inventory_entry, text="contiene il numero di inventario attribuito all'oggetto analogico \n"
+                                           "dall'istituzione che lo possiede. Di tipo xsd:string, è opzionale e non \n"
                                            "ripetibile.")
 
         # table shelfmarks
@@ -208,9 +208,9 @@ analogico. L'elemento è opzionale e ripetibile.""",
             self.id_entry.delete(0, tk.END)
             self.id_entry.insert(0, selected_holding.get_holding_id())
             ToolTip(self.id_entry,
-                    text="ID : di tipo xsd:ID, serve a definire un identificatore univoco all'interno del "
-                         "record MAG cui è possibile fare riferimento da altri luoghi del medesimo record. "
-                         "L'attributo trova la sua utilità qualora vi sia la necessità di dichiarare "
+                    text="ID : di tipo xsd:ID, serve a definire un identificatore univoco all'interno del \n"
+                         "record MAG cui è possibile fare riferimento da altri luoghi del medesimo record. \n"
+                         "L'attributo trova la sua utilità qualora vi sia la necessità di dichiarare \n"
                          "diversi <holdings>.")
 
             library_label = tk.Label(add_frame, text="Library")
@@ -219,8 +219,8 @@ analogico. L'elemento è opzionale e ripetibile.""",
             self.library_entry.grid(row=2, column=1)
             self.library_entry.delete(0, tk.END)
             self.library_entry.insert(0, selected_holding.get_library())
-            ToolTip(self.library_entry, text="contiene il nome dell'istituzione proprietaria dell'oggetto analogico o "
-                                             "di parte dell'oggetto analogico. Di tipo xsd:string, è opzionale e non "
+            ToolTip(self.library_entry, text="contiene il nome dell'istituzione proprietaria dell'oggetto analogico o \n"
+                                             "di parte dell'oggetto analogico. Di tipo xsd:string, è opzionale e non \n"
                                              "ripetibile.")
 
             inventory_label = tk.Label(add_frame, text="Inventory")
@@ -229,8 +229,8 @@ analogico. L'elemento è opzionale e ripetibile.""",
             self.inventory_entry.grid(row=2, column=2)
             self.inventory_entry.delete(0, tk.END)
             self.inventory_entry.insert(0, selected_holding.get_inventory_number())
-            ToolTip(self.inventory_entry, text="contiene il numero di inventario attribuito all'oggetto analogico "
-                                               "dall'istituzione che lo possiede. Di tipo xsd:string, è opzionale e non "
+            ToolTip(self.inventory_entry, text="contiene il numero di inventario attribuito all'oggetto analogico \n"
+                                               "dall'istituzione che lo possiede. Di tipo xsd:string, è opzionale e non \n"
                                                "ripetibile.")
 
             # table shelfmarks pre-filled

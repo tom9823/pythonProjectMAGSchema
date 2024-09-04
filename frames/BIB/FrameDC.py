@@ -1,28 +1,8 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-
 import Utils
 from ToolTip import ToolTip
 from frames.CustomFrame import CustomFrame
-
-# Lista dei tipi di elementi DC (Dublin Core)
-DC_TYPES = {
-    'Identifier / Identificatore': 'Identifier',
-    'Title / Titolo': 'Title',
-    'Creator / Creatore': 'Creator',
-    'Publisher / Editore': 'Publisher',
-    'Subject / Soggetto': 'Subject',
-    'Description / Descrizione': 'Description',
-    'Contributor / Collaboratore': 'Contributor',
-    'Date / Data': 'Date',
-    'Type / Tipo': 'Type',
-    'Format / Formato': 'Format',
-    'Source / Fonte': 'Source',
-    'Language / Lingua': 'Language',
-    'Relation / Relazione': 'Relation',
-    'Coverage / Copertura': 'Coverage',
-    'Rights / Diritti': 'Rights'
-}
 
 DC_TYPES_DEFINITIONS = {
     'Identifier': 'Un identificatore univoco di un record descrittivo in un dato contesto. Non va confuso con '
@@ -102,37 +82,11 @@ analogico alla base della digitalizzazione; tutti gli elementi sono opzionali (t
 
         self.table_dc.pack()
 
-        # Frame per l'aggiunta di un nuovo record
-        add_frame = tk.Frame(self.container_frame)
-        add_frame.pack(pady=10)
-
-        # Etichetta per il DC Type
-        dc_type_label = tk.Label(add_frame, text="DC Type")
-        dc_type_label.grid(row=0, column=0)
-
-        # Etichetta e campo di input per il valore
-        value_label = tk.Label(add_frame, text="Value")
-        value_label.grid(row=0, column=1)
-
-        # Menu a discesa per selezionare il DC Type
-        self.dc_type_var = tk.StringVar()
-        self.dc_type_var.set(next(iter(DC_TYPES)))
-        self.dc_type_menu = tk.OptionMenu(add_frame, self.dc_type_var, *DC_TYPES.keys())
-        self.dc_type_menu.grid(row=1, column=0)
-
-        # Applica le tooltip agli elementi
-        for i, opzione in enumerate(DC_TYPES.values()):
-            menu = self.dc_type_menu["menu"]
-            ToolTip(menu, DC_TYPES_DEFINITIONS[opzione])
-
-        self.value_entry = tk.Entry(add_frame)
-        self.value_entry.grid(row=1, column=1)
-
-        # Pulsanti
+        # Frame per i pulsanti
         buttons_frame = tk.Frame(self.container_frame)
         buttons_frame.pack(pady=10)
 
-        button_add_record = tk.Button(buttons_frame, text="Aggiungi DC", command=self._add_dc)
+        button_add_record = tk.Button(buttons_frame, text="Aggiungi DC", command=self._open_add_dc_window)
         button_add_record.grid(row=0, column=0)
 
         button_remove_all = tk.Button(buttons_frame, text="Rimuovi tutto", command=self._remove_all)
@@ -141,11 +95,8 @@ analogico alla base della digitalizzazione; tutti gli elementi sono opzionali (t
         button_remove_record = tk.Button(buttons_frame, text="Rimuovi DC selezionato", command=self._remove_selected)
         button_remove_record.grid(row=0, column=2)
 
-        button_update_record = tk.Button(buttons_frame, text="Aggiorna DC", command=self._update_dc)
+        button_update_record = tk.Button(buttons_frame, text="Aggiorna DC", command=self._open_update_dc_window)
         button_update_record.grid(row=0, column=3)
-
-        self.table_dc.bind("<Double-1>", self._clicker)
-        self.table_dc.bind("<ButtonRelease-1>", self._clicker)
 
         self.dc_list = self.controller.session.get(Utils.KEY_SESSION_DC, [])
         for dc_element in self.dc_list:
@@ -153,12 +104,118 @@ analogico alla base della digitalizzazione; tutti gli elementi sono opzionali (t
             row = [dc_element_key, dc_element_value]
             self.table_dc.insert(parent='', index=tk.END, text="Parent", values=row)
 
-    def _add_dc(self):
+    def _open_add_dc_window(self):
+        # Inizializza la variabile dc_type_var
+        self.dc_type_var = tk.StringVar(value=next(iter(DC_TYPES_DEFINITIONS.keys())))
+        self.dc_type_var.trace_add('write', self._update_description)
+
+        # Crea una nuova finestra di dialogo per aggiungere un DC element
+        self.add_dc_window = tk.Toplevel(self.container_frame)
+        self.add_dc_window.title("Aggiungi DC Element")
+
+        add_frame = tk.Frame(self.add_dc_window)
+        add_frame.pack(pady=10)
+
+        # Descrizione dell'elemento DC
+        self.description_label = tk.Label(
+            add_frame,
+            text=DC_TYPES_DEFINITIONS[self.dc_type_var.get()],
+            justify=tk.LEFT,
+            wraplength=400
+        )
+        self.description_label.grid(row=0, column=0, columnspan=2, pady=(0, 10))
+
+        # labels and entries
+        dc_type_label = tk.Label(add_frame, text="DC Type")
+        dc_type_label.grid(row=1, column=0, sticky=tk.W)
+        self.dc_type_menu = tk.OptionMenu(add_frame, self.dc_type_var, *DC_TYPES_DEFINITIONS.keys())
+        self.dc_type_menu.grid(row=2, column=0)
+
+        value_label = tk.Label(add_frame, text="Value")
+        value_label.grid(row=1, column=1, sticky=tk.W)
+        self.value_entry = tk.Entry(add_frame)
+        self.value_entry.grid(row=2, column=1)
+
+        # Bottoni per confermare o annullare l'aggiunta
+        buttons_frame = tk.Frame(self.add_dc_window)
+        buttons_frame.pack(pady=5)
+
+        button_confirm = tk.Button(buttons_frame, text="Conferma", command=self._confirm_add_dc)
+        button_confirm.grid(row=0, column=0)
+
+        button_cancel = tk.Button(buttons_frame, text="Annulla", command=self.add_dc_window.destroy)
+        button_cancel.grid(row=0, column=1)
+
+    def _open_update_dc_window(self):
+        item_id = self.table_dc.focus()
+        if item_id is not None and item_id != '':
+            selected_index = self.table_dc.index(item_id)
+            selected_dc = self.dc_list[selected_index]
+
+            # Inizializza la variabile dc_type_var
+            self.dc_type_var = tk.StringVar(value=selected_dc[0])
+            self.dc_type_var.trace_add('write', self._update_description)
+
+            # Crea una nuova finestra di dialogo per aggiornare il DC element
+            self.update_dc_window = tk.Toplevel(self.container_frame)
+            self.update_dc_window.title("Aggiorna DC Element")
+
+            update_frame = tk.Frame(self.update_dc_window)
+            update_frame.pack(pady=10)
+
+            # Descrizione dell'elemento DC
+            self.description_label = tk.Label(
+                update_frame,
+                text=DC_TYPES_DEFINITIONS[self.dc_type_var.get()],
+                justify=tk.LEFT,
+                wraplength=400
+            )
+            self.description_label.grid(row=0, column=0, columnspan=2, pady=(0, 10))
+
+            # labels and pre-filled entries
+            dc_type_label = tk.Label(update_frame, text="DC Type")
+            dc_type_label.grid(row=1, column=0, sticky=tk.W)
+            self.dc_type_menu = tk.OptionMenu(update_frame, self.dc_type_var, *DC_TYPES_DEFINITIONS.keys())
+            self.dc_type_menu.grid(row=2, column=0)
+
+            value_label = tk.Label(update_frame, text="Value")
+            value_label.grid(row=1, column=1, sticky=tk.W)
+            self.value_entry = tk.Entry(update_frame)
+            self.value_entry.grid(row=2, column=1)
+            self.value_entry.delete(0, tk.END)
+            self.value_entry.insert(0, selected_dc[1])
+
+            # Bottoni per confermare o annullare l'aggiornamento
+            buttons_frame = tk.Frame(self.update_dc_window)
+            buttons_frame.pack(pady=5)
+
+            button_confirm = tk.Button(buttons_frame, text="Conferma", command=self._confirm_update_dc)
+            button_confirm.grid(row=0, column=0)
+
+            button_cancel = tk.Button(buttons_frame, text="Annulla", command=self.update_dc_window.destroy)
+            button_cancel.grid(row=0, column=1)
+        else:
+            messagebox.showerror("Errore", "Seleziona una riga nella tabella dei dublin core elements")
+
+    def _update_description(self, *args):
+        self.description_label.config(text=DC_TYPES_DEFINITIONS[self.dc_type_var.get()])
+
+    def _confirm_add_dc(self):
         dc_type = self.dc_type_var.get()
         value = self.value_entry.get()
         self.table_dc.insert(parent='', index=tk.END, text="Parent", values=(dc_type, value))
         self.dc_list.append((dc_type, value))
-        self.value_entry.delete(0, tk.END)
+        self.add_dc_window.destroy()
+
+    def _confirm_update_dc(self):
+        item_id = self.table_dc.focus()
+        if item_id is not None and item_id != '':
+            dc_type = self.dc_type_var.get()
+            value = self.value_entry.get()
+            selected_index = self.table_dc.index(item_id)
+            self.table_dc.item(item_id, values=(dc_type, value))
+            self.dc_list[selected_index] = (dc_type, value)
+            self.update_dc_window.destroy()
 
     def _remove_all(self):
         self.dc_list = []
@@ -173,39 +230,9 @@ analogico alla base della digitalizzazione; tutti gli elementi sono opzionali (t
             self.table_dc.delete(item_id)
             self.dc_list.pop(selected_index)
 
-    def _update_dc(self):
-        # ad esempio I001
-        item_id = self.table_dc.focus()
-        if item_id is not None and item_id != '':
-            selected_index = self.table_dc.index(item_id)
-            dc_type = self.dc_type_var.get()
-            value = self.value_entry.get()
-            self.table_dc.item(item_id, values=(dc_type, value))
-            self.dc_list[selected_index] = (dc_type, value)
-        else:
-            messagebox.showerror("Errore", "Seleziona una riga nella tabella dei dublin core elements")
-
-    def _select_dc(self):
-        selected = self.table_dc.focus()
-        if selected:
-            values = self.table_dc.item(selected, 'values')
-            dc_type, value = values
-            if dc_type and value:
-                self.dc_type_var.set(dc_type)
-                self.value_entry.delete(0, tk.END)
-                self.value_entry.insert(0, value)
-
-    def _clicker(self, event):
-        self._select_dc()
-
     def check_data(self):
         ret = True
         level = self.level_var.get()
-        for i in range(len(self.dc_list)):
-            dc = self.dc_list[i]
-            list_tuple = list(dc)
-            list_tuple[0] = DC_TYPES[dc[0]]
-            self.dc_list[i] = tuple(list_tuple)
         if not level:
             messagebox.showwarning("Attenzione", "Per favore, compila il campo 'level'.")
             ret = False
