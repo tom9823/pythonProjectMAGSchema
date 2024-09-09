@@ -31,9 +31,7 @@ class FrameSCAN(CustomFrame):
         self.is_ocr_recognition = is_ocr_recognition
         self._init_widgets()
         self.img_dict = dict()
-        self.nomenclature_dict = self.controller.session.get(Utils.KEY_FRAME_NOMENCLATURE, dict())
         self.path_var = tk.StringVar()
-        self.path_var.set(self.controller.session.get(Utils.KEY_SESSION_FOLDER_PATH, ""))
 
     def _init_widgets(self):
         super().disable_right_button()
@@ -59,15 +57,16 @@ class FrameSCAN(CustomFrame):
 
     def start_scanning(self):
         super().disable_right_button()
+        self.path_var.set(self.controller.session.get(Utils.KEY_SESSION_FOLDER_PATH, ""))
         if not self.path_var.get():
             messagebox.showwarning("Attenzione", "Seleziona un percorso!")
             return
-
         self.progress_bar["value"] = 0
         self.status_label.config(text="Scansione...")
         self.scanner_running = True
         self.start_button['state'] = "disabled"
         self.stop_button['state'] = "enabled"
+        self.nomenclature_dict = self.controller.session.get(Utils.KEY_SESSION_NOMENCLATURE, dict())
 
         threading.Thread(target=self.scan_files).start()
 
@@ -181,8 +180,8 @@ class FrameSCAN(CustomFrame):
                     if datetimecreated is None:
                         datetimecreated = Utils.get_creation_date(file_path)
                     image_dimensions = Utils.get_image_dimensions(metas)
-                    if filename_without_extension in self.nomenclature_dict:
-                        nomenclature = self.nomenclature_dict[filename_without_extension]
+                    if file_path in self.nomenclature_dict:
+                        nomenclature = self.nomenclature_dict[file_path]
                     elif "carta" in old_nomenclature:
                         nomenclature = f"carta {index_nomenclature_carta} {"verso" if "recto" in old_nomenclature else "recto"}"
                         if "verso" in nomenclature:

@@ -49,17 +49,19 @@ class FrameNomenclature(CustomFrame):
         self.image_label = Label(self.image_frame)
 
         self.frame_button_image = Frame(self.right_frame)
-        self.prev_button = Button(self.frame_button_image, text="Precedente", command=self.prev_image, state='disabled')
-
+        self.save_button = Button(self.frame_button_image, text="Imposta nomenclature", command=self.save_current_label, state='disabled')
         self.label_options = [
-            "Nessuna etichetta nomenclature", "Piatto anteriore", "Contropiatto anteriore", "Carta di guardia recto", "Carta di guardia verso",
+            "Nessuna etichetta nomenclature", "Piatto anteriore", "Contropiatto anteriore", "Carta di guardia recto",
+            "Carta di guardia verso",
             "Carta 1 recto", "Taglio laterale", "Dorso", "Taglio inferiore", "Taglio superiore",
-            "Tavola fuori testo recto", "tavola fuori testo verso", "piatto posteriore","contropiatto posteriore"
+            "Tavola fuori testo recto", "tavola fuori testo verso", "piatto posteriore", "contropiatto posteriore"
         ]
 
         self.selected_label = StringVar(self.master)
         self.selected_label.set(self.label_options[0])
         self.label_dropdown = OptionMenu(self.frame_button_image, self.selected_label, *self.label_options)
+
+        self.prev_button = Button(self.frame_button_image, text="Precedente", command=self.prev_image, state='disabled')
         self.next_button = Button(self.frame_button_image, text="Successiva", command=self.next_image, state='disabled')
 
         self.image_listbox = Listbox(self.left_frame, height=20)
@@ -79,6 +81,7 @@ class FrameNomenclature(CustomFrame):
         self.image_label.pack_forget()
         self.frame_button_image.pack_forget()
         self.prev_button.grid_forget()
+        self.save_button.grid_forget()
         self.label_dropdown.grid_forget()
         self.next_button.grid_forget()
         self.image_listbox.pack_forget()
@@ -88,9 +91,10 @@ class FrameNomenclature(CustomFrame):
         self.image_frame.pack()
         self.image_label.pack()
         self.frame_button_image.pack()
-        self.prev_button.grid(column=0, row=0)
+        self.save_button.grid(column=0, row=0)
         self.label_dropdown.grid(column=1, row=0)
-        self.next_button.grid(column=2, row=0)
+        self.prev_button.grid(column=0, row=1)
+        self.next_button.grid(column=1, row=1)
         self.image_listbox.pack(side="left", fill="y")
         self.scrollbar.pack(side="left", fill="y")
 
@@ -144,7 +148,6 @@ class FrameNomenclature(CustomFrame):
 
     def next_image(self):
         current_label = self.selected_label.get()
-        self.save_current_label()
         if current_label == "Carta 1 recto":
             self.show_image(len(self.images) - 1)
             self.selected_label.set("Taglio inferiore")
@@ -153,27 +156,25 @@ class FrameNomenclature(CustomFrame):
 
     def prev_image(self):
         if self.current_image_index > 0:
-            self.save_current_label()
             self.show_image(self.current_image_index - 1)
 
     def show_image_from_listbox(self, event):
         selected_index = self.image_listbox.curselection()[0]
-        self.save_current_label()
         self.show_image(selected_index)
 
     def save_current_label(self):
         label = self.selected_label.get()
         if label != "Nessuna etichetta nomenclature":
             image_path = self.images[self.current_image_index]
-            filename_without_extension, file_extension = os.path.splitext(image_path)
-            self.nomenclature_dict[filename_without_extension] = label
+            self.nomenclature_dict[image_path] = label
             self.update_listbox()
 
     def enable_buttons(self):
         self.prev_button.config(state='normal')
         self.next_button.config(state='normal')
         self.label_dropdown.config(state='normal')
+        self.save_button.config(state='normal')
 
     def check_data(self):
-        super().save_to_session((Utils.KEY_FRAME_NOMENCLATURE, self.nomenclature_dict))
+        super().save_to_session((Utils.KEY_SESSION_NOMENCLATURE, self.nomenclature_dict))
         return True
