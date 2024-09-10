@@ -126,8 +126,7 @@ class FrameNomenclature(CustomFrame):
     def update_listbox(self):
         self.image_listbox.delete(0, "end")
         for img in self.images:
-            label = self.nomenclature_dict.get(os.path.splitext(img)[0],
-                                               "")  # Ottiene l'etichetta associata o una stringa vuota
+            label = self.nomenclature_dict.get(img, "")  # Ottiene l'etichetta associata o una stringa vuota
             label = "" if label == "Nessuna etichetta nomenclature" else label
             display_text = f"{os.path.basename(img)} ({label})" if label else os.path.basename(img)
             self.image_listbox.insert("end", display_text)
@@ -146,6 +145,12 @@ class FrameNomenclature(CustomFrame):
             current_label = self.labels.get(image_path, self.label_options[0])
             self.selected_label.set(current_label)
 
+            # Aggiorna la selezione della Listbox
+            self.image_listbox.selection_clear(0, "end")  # Deseleziona tutto
+            self.image_listbox.selection_set(index)  # Seleziona l'immagine corrente
+            self.image_listbox.activate(index)  # Attiva la selezione (utile per l'evidenziazione)
+            self.image_listbox.see(index)  # Scorri per assicurarti che l'elemento sia visibile
+
     def next_image(self):
         current_label = self.selected_label.get()
         if current_label == "Carta 1 recto":
@@ -160,6 +165,7 @@ class FrameNomenclature(CustomFrame):
 
     def show_image_from_listbox(self, event):
         selected_index = self.image_listbox.curselection()[0]
+        self.save_current_label()
         self.show_image(selected_index)
 
     def save_current_label(self):
@@ -168,6 +174,12 @@ class FrameNomenclature(CustomFrame):
             image_path = self.images[self.current_image_index]
             self.nomenclature_dict[image_path] = label
             self.update_listbox()
+
+            # Mantieni selezionata l'immagine corrente nella Listbox
+            self.image_listbox.selection_clear(0, "end")  # Deseleziona tutto
+            self.image_listbox.selection_set(self.current_image_index)  # Seleziona l'indice corrente
+            self.image_listbox.activate(self.current_image_index)  # Attiva la selezione
+            self.image_listbox.see(self.current_image_index)  # Assicurati che l'elemento sia visibile
 
     def enable_buttons(self):
         self.prev_button.config(state='normal')
