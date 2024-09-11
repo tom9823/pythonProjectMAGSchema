@@ -1,3 +1,4 @@
+import re
 import threading
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox, simpledialog
@@ -99,7 +100,8 @@ class FrameSCAN(CustomFrame):
         for root, dirs, files in os.walk(path):
             if not self.scanner_running:
                 break
-
+            # Ordina i file in base al numero contenuto nel nome
+            files = self.sort_files_by_number(files)
             # Verifica se la cartella contiene file .tiff o .tif
             tiff_files = [f for f in files if f.lower().endswith(('.tiff', '.tif'))]
             if tiff_files:
@@ -110,7 +112,8 @@ class FrameSCAN(CustomFrame):
         for root, dirs, files in os.walk(path):
             if not self.scanner_running:
                 break
-
+            # Ordina i file in base al numero contenuto nel nome
+            files = self.sort_files_by_number(files)
             # Salta le cartelle già scansionate nel primo passaggio
             tiff_files = [f for f in files if f.lower().endswith(('.tiff', '.tif'))]
             if tiff_files:
@@ -126,7 +129,7 @@ class FrameSCAN(CustomFrame):
     def scan_folder(self, root, files, side, scanning, target, scale, imagegroupID, usage, scanned_files,
                     total_files):
         old_dir = ""
-        index_nomenclature_carta = 0
+        index_nomenclature_carta = -1
         old_nomenclature = ""
         for filename in files:
             if not self.scanner_running:
@@ -182,9 +185,15 @@ class FrameSCAN(CustomFrame):
                     image_dimensions = Utils.get_image_dimensions(metas)
                     if file_path in self.nomenclature_dict:
                         nomenclature = self.nomenclature_dict[file_path]
-                    elif "carta" in old_nomenclature:
-                        nomenclature = f"carta {index_nomenclature_carta} {"verso" if "recto" in old_nomenclature else "recto"}"
-                        if "verso" in nomenclature:
+                    elif "carta" in old_nomenclature.lower():
+                        if index_nomenclature_carta == -1:
+                            match = re.search(r'\d+', old_nomenclature.lower())
+                            if match:
+                                index_nomenclature_carta = int(match.group(0))  # Converti il risultato in intero
+                            else:
+                                index_nomenclature_carta = 1
+                        nomenclature = f"Carta {index_nomenclature_carta} {"verso" if "recto" in old_nomenclature.lower() else "recto"}"
+                        if "verso" in nomenclature.lower():
                             index_nomenclature_carta += 1
                     else:
                         nomenclature = filename_without_extension
@@ -263,3 +272,11 @@ class FrameSCAN(CustomFrame):
 
     def set_path(self, path):
         self.path_var.set(path)
+
+    def sort_files_by_number(self, files):
+        """Ordina i file in base al numero contenuto nel nome."""
+        def extract_number(filename):
+            match = re.search(r'(\d+)(?!.*\d)', filename)
+            return int(match.group(0)) if match else float('inf')
+
+        return sorted(files, key=extract_number)
