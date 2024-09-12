@@ -68,7 +68,7 @@ specialistiche raccolte durante il processo di digitalizzazione. L'elemento è o
                                             command=self._remove_selected)
         button_remove_local_bib.grid(row=0, column=2)
 
-        button_update_record = tk.Button(buttons_frame, text="Aggiorna local bib", command=self._open_update_local_bib_window)
+        button_update_record = tk.Button(buttons_frame, text="Modifica local bib selezionato", command=self._open_update_local_bib_window)
         button_update_record.grid(row=0, column=3)
 
     def _open_add_local_bib_window(self):
@@ -167,7 +167,7 @@ specialistiche raccolte durante il processo di digitalizzazione. L'elemento è o
 
             # Crea una nuova finestra di dialogo per l'aggiornamento
             self.update_local_bib_window = tk.Toplevel(self.container_frame)
-            self.update_local_bib_window.title("Aggiorna LocalBIB")
+            self.update_local_bib_window.title("Modifica LocalBIB")
 
             add_frame = tk.Frame(self.update_local_bib_window)
             add_frame.pack(pady=10)

@@ -71,7 +71,7 @@ analogico. L'elemento è opzionale e ripetibile.""",
                                           command=self._remove_selected)
         button_remove_holding.grid(row=0, column=2)
 
-        button_update_record = tk.Button(buttons_frame, text="Aggiorna holding", command=self._open_update_holding_window)
+        button_update_record = tk.Button(buttons_frame, text="Modifica holding selezionato", command=self._open_update_holding_window)
         button_update_record.grid(row=0, column=3)
 
     def _open_add_holding_window(self):
@@ -184,7 +184,7 @@ analogico. L'elemento è opzionale e ripetibile.""",
 
             # Crea una nuova finestra di dialogo per l'aggiornamento
             self.update_holding_window = tk.Toplevel(self.container_frame)
-            self.update_holding_window.title("Aggiorna Holding")
+            self.update_holding_window.title("Modifica Holding")
 
             # Copia il contenuto di add_frame nella nuova finestra
             add_frame = tk.Frame(self.update_holding_window)

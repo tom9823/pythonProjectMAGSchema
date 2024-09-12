@@ -55,9 +55,13 @@ analogico alla base della digitalizzazione; tutti gli elementi sono opzionali (t
         self.level_var = tk.StringVar()
         label_level = tk.Label(level_frame, text="Level (*):")
         label_level.grid(row=0, column=0)
-        self.level_menu_options = {"a: spoglio": "a", "m: monografia": "a", "s: seriale": "s",
-                                   "c: raccolta prodotta dall'istituzione": "c", "f: unità archivistica (file)": "f",
-                                   "d: unità documentaria (document, item)": "d"}
+        self.level_menu_options = {"a: spoglio (una parte di una pubblicazione più grande, ad esempio un articolo in una rivista o un capitolo in un libro)": "a",
+                                   "m: monografia (un'opera completa e indipendente)": "m",
+                                   "s: seriale (""una pubblicazione periodica come una rivista)": "s",
+                                   "c: raccolta prodotta dall'istituzione (una collezione aggregata)": "c",
+                                   "f: unità ""archivistica (file)": "f",
+                                   "d: unità documentaria (document, item)": "d"
+                                   }
         level_menu = tk.OptionMenu(level_frame, self.level_var, *self.level_menu_options.keys())
         level_menu.grid(row=0, column=1)
 
@@ -95,7 +99,7 @@ analogico alla base della digitalizzazione; tutti gli elementi sono opzionali (t
         button_remove_record = tk.Button(buttons_frame, text="Rimuovi DC selezionato", command=self._remove_selected)
         button_remove_record.grid(row=0, column=2)
 
-        button_update_record = tk.Button(buttons_frame, text="Aggiorna DC", command=self._open_update_dc_window)
+        button_update_record = tk.Button(buttons_frame, text="Modifica DC Element selezionato", command=self._open_update_dc_window)
         button_update_record.grid(row=0, column=3)
 
         self.dc_list = self.controller.session.get(Utils.KEY_SESSION_DC, [])
@@ -158,7 +162,7 @@ analogico alla base della digitalizzazione; tutti gli elementi sono opzionali (t
 
             # Crea una nuova finestra di dialogo per aggiornare il DC element
             self.update_dc_window = tk.Toplevel(self.container_frame)
-            self.update_dc_window.title("Aggiorna DC Element")
+            self.update_dc_window.title("Modifica DC Element")
 
             update_frame = tk.Frame(self.update_dc_window)
             update_frame.pack(pady=10)
