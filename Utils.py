@@ -4,6 +4,9 @@ import re
 from datetime import datetime
 from urllib.parse import urlparse
 
+import exifread
+from PIL import Image
+
 from model.IMG import ImageDimensions, ImageMetrics, PhotometricInterpretation, SamplingFrequencyPlane, \
     SamplingFrequencyUnit
 
@@ -95,18 +98,43 @@ def find_date_value(metadata_list):
     return None
 
 
-def get_image_dimensions(metadata_list):
+def get_image_dimensions(metadata_list, exif_data, img_pil):
     image_length = None
     image_width = None
     source_xdimension = None
     source_ydimension = None
-    for metadata in metadata_list:
-        if metadata.get_key() in ["ImageWidth", "XResolution"]:
-            image_width = metadata.get_values()[0]
-        if metadata.get_key() in ["ImageLength", "YResolution"]:
-            image_length = metadata.get_values()[0]
-    if image_length is not None and image_width is not None:
-        return ImageDimensions(imagewidth=image_width, imagelength=image_length)
+    if exif_data is not None:
+        image_width, image_length, source_xdimension, source_ydimension = calculate_niso_dimensions(exif_data)
+    if image_length is None or image_width is None or image_length == 0 or image_width == 0:
+        for metadata in metadata_list:
+            if metadata.get_key() in ["ImageWidth"]:
+                image_width = metadata.get_values()[0]
+            if metadata.get_key() in ["ImageLength"]:
+                image_length = metadata.get_values()[0]
+    if image_length is None or image_width is None or image_length == 0 or image_width == 0:
+        image_width, image_length = img_pil.size
+    return ImageDimensions(
+        imagewidth=image_width,
+        imagelength=image_length,
+        source_xdimension=source_xdimension,
+        source_ydimension=source_ydimension
+    )
+
+
+def calculate_niso_dimensions(exif_data):
+    # Ottieni la risoluzione X e Y in dpi, default a 300 se non trovate
+    x_res = int(exif_data.get('Image XResolution').printable) if exif_data.get('Image XResolution') else 300
+    y_res = int(exif_data.get('Image YResolution').printable) if exif_data.get('Image YResolution') else 300
+
+    # Ottieni larghezza e lunghezza dell'immagine in pixel, default a 0 se non trovate
+    image_width = int(exif_data.get('Image ImageWidth').printable) if exif_data.get('Image ImageWidth') else 0
+    image_length = int(exif_data.get('Image ImageLength').printable) if exif_data.get('Image ImageLength') else 0
+
+    # Calcola dimensioni in pollici
+    source_xdimension = image_width / x_res if x_res else 0
+    source_ydimension = image_length / y_res if y_res else 0
+
+    return image_width, image_length, source_xdimension, source_ydimension
 
 
 def get_image_metrics(metadata_list):
@@ -143,6 +171,7 @@ def get_image_metrics(metadata_list):
             photo_metric_interpretation=photo_metric_interpretation
         )
 
+
 def get_image_metrics(img_groupID):
     x_sampling_frequency = None
     y_sampling_frequency = None
@@ -169,23 +198,6 @@ def get_image_metrics(img_groupID):
     )
 
 
-def get_imagegroupID(file_path):
-    _, file_extension = os.path.splitext(file_path)
-    definition_letter = ''
-    string_parts = file_path.split('_')
-    if string_parts is not None and len(string_parts) >= 1:
-        definition_letter = string_parts[-1][0]
-
-    ret = "ImgGrp_S"
-    if definition_letter in ["s", "t"]:
-        ret = "ImgGrp_S"
-    elif definition_letter == "m":
-        ret = "ImgGrp_M"
-    elif definition_letter == "h":
-        ret = "ImgGrp_H"
-    return ret
-
-
 def split_path_into_subpaths(path):
     subpaths = []
     path, folder = os.path.split(path)
@@ -204,3 +216,17 @@ def is_iterable(obj):
         return True
     except TypeError:
         return False
+
+
+def get_ppi_dpi(exif_data, img_pil):
+    ppi, dpi = 0, 0
+    if img_pil is not None:
+        dpi = img_pil.info['dpi'][0]
+    if exif_data is not None:
+        x_res = exif_data.get('Image XResolution', None)
+        y_res = exif_data.get('Image YResolution', None)
+        res_unit = exif_data.get('Image ResolutionUnit', None)
+        if x_res is not None and y_res is not None and res_unit is not None:
+            if res_unit.printable == 'Pixels/Inch' and int(x_res.printable) == int(y_res.printable):
+                ppi = int(x_res.printable)
+    return ppi, dpi
