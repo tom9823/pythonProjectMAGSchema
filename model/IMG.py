@@ -247,9 +247,9 @@ class ImageDimensions(ObjectXMLSerializable):
         dimensions_elem = ET.Element('dimensions')
         ET.SubElement(dimensions_elem, 'imagelength').text = str(self.imagelength)
         ET.SubElement(dimensions_elem, 'imagewidth').text = str(self.imagewidth)
-        if self.source_xdimension is not None:
+        if self.source_xdimension is not None and self.source_xdimension != 0.0:
             ET.SubElement(dimensions_elem, 'source_xdimension').text = str(self.source_xdimension)
-        if self.source_ydimension is not None:
+        if self.source_ydimension is not None and self.source_ydimension != 0.0:
             ET.SubElement(dimensions_elem, 'source_ydimension').text = str(self.source_ydimension)
         return dimensions_elem
 
@@ -420,10 +420,10 @@ class AltImg(ObjectXMLSerializable):
         if self.image_metrics is not None:
             altimg_elem.append(self.image_metrics.to_xml())
 
-        if self.ppi is not None:
+        if self.ppi is not None and self.ppi != 0:
             ET.SubElement(altimg_elem, 'ppi').text = str(self.ppi)
 
-        if self.dpi is not None:
+        if self.dpi is not None and self.dpi != 0:
             ET.SubElement(altimg_elem, 'dpi').text = str(self.dpi)
 
         if self.format is not None:

@@ -3,6 +3,8 @@ import threading
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox, simpledialog
 import os
+
+import exifread
 import pytesseract
 from PIL import Image
 import Utils
@@ -178,11 +180,15 @@ class FrameSCAN(CustomFrame):
                     md5 = Utils.get_file_md5(file_path)
                     size = Utils.get_file_size(file_path)
 
-                    metas: list[MetaData] = scanner.scan(file_path)
-                    datetimecreated = Utils.find_date_value(metas)
+                    meta_list_lib: list[MetaData] = scanner.scan(file_path)
+                    with open(file_path, 'rb') as img_file:
+                        meta_list_exif = exifread.process_file(img_file)
+                    img_pil = Image.open(file_path)
+                    datetimecreated = Utils.find_date_value(meta_list_lib)
                     if datetimecreated is None:
                         datetimecreated = Utils.get_creation_date(file_path)
-                    image_dimensions = Utils.get_image_dimensions(metas)
+                    image_dimensions = Utils.get_image_dimensions(metadata_list=meta_list_lib, exif_data=meta_list_exif, img_pil=img_pil)
+                    ppi, dpi = Utils.get_ppi_dpi(meta_list_exif, img_pil)
                     if file_path in self.nomenclature_dict:
                         nomenclature = self.nomenclature_dict[file_path]
                     elif "carta" in old_nomenclature.lower():
@@ -206,6 +212,8 @@ class FrameSCAN(CustomFrame):
                             datetimecreated=datetimecreated,
                             md5=md5,
                             filesize=size,
+                            dpi=dpi,
+                            ppi=ppi,
                             usage=usage if usage is not None else '1',
                             side=side,
                             target=target,
@@ -219,6 +227,8 @@ class FrameSCAN(CustomFrame):
                             file=file_path,
                             datetimecreated=datetimecreated,
                             md5=md5,
+                            dpi=dpi,
+                            ppi=ppi,
                             filesize=size,
                             usage=usage if usage is not None else ['1'],
                             image_dimensions=image_dimensions,
