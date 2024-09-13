@@ -1,16 +1,14 @@
 import re
 import threading
 import tkinter as tk
-from tkinter import ttk, filedialog, messagebox, simpledialog
+from tkinter import ttk, messagebox
 import os
 
-import exifread
 import pytesseract
 from PIL import Image
 import Utils
 from frames.CustomFrame import CustomFrame
 from model.IMG import IMG, AltImg, ImageGroup, Format
-from scanner.MetaData import MetaData
 from scanner.Scanner import Scanner
 from scanner.ScannerFactory import ScannerFactory
 
@@ -177,18 +175,13 @@ class FrameSCAN(CustomFrame):
                         )
                         self.img_groups.append(img_group)
 
-                    md5 = Utils.get_file_md5(file_path)
-                    size = Utils.get_file_size(file_path)
+                    metadata_dict = scanner.scan(file_path)
 
-                    meta_list_lib: list[MetaData] = scanner.scan(file_path)
-                    with open(file_path, 'rb') as img_file:
-                        meta_list_exif = exifread.process_file(img_file)
-                    img_pil = Image.open(file_path)
-                    datetimecreated = Utils.find_date_value(meta_list_lib)
-                    if datetimecreated is None:
-                        datetimecreated = Utils.get_creation_date(file_path)
-                    image_dimensions = Utils.get_image_dimensions(metadata_list=meta_list_lib, exif_data=meta_list_exif, img_pil=img_pil)
-                    ppi, dpi = Utils.get_ppi_dpi(meta_list_exif, img_pil)
+                    md5 = metadata_dict.get('MD5', None)
+                    size = metadata_dict.get('FILE_SIZE', None)
+                    datetimecreated = Utils.find_date_value(metadata_dict=metadata_dict)
+                    image_dimensions = Utils.get_image_dimensions(metadata_dict=metadata_dict)
+                    ppi, dpi = Utils.get_ppi_dpi(metadata_dict)
                     if file_path in self.nomenclature_dict:
                         nomenclature = self.nomenclature_dict[file_path]
                     elif "carta" in old_nomenclature.lower():
@@ -260,7 +253,11 @@ class FrameSCAN(CustomFrame):
             return True
 
     def ask_imgroupID_usage_value(self, field_imagegroupID, field_usage, values, options):
-        top = tk.Toplevel()
+        top = tk.Toplevel(self)
+        x = self.winfo_x() + self.winfo_width() // 2 - top.winfo_width() // 2
+        y = self.winfo_y() + self.winfo_height() // 2 - top.winfo_height() // 2
+        top.geometry(f"+{x}+{y}")
+
         tk.Label(top, text=f'Seleziona il valore per {field_imagegroupID}').pack()
         imggroupID_value = tk.StringVar(value='ImgGrp_S')
         combo = ttk.Combobox(top, textvariable=imggroupID_value, values=values)

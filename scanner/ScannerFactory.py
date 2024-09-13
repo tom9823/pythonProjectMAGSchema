@@ -1,5 +1,3 @@
-from scanner.Scanner import Scanner
-from scanner.impl.PdfScanner import PdfScanner
 from scanner.impl.ImageScanner import ImageScanner
 
 

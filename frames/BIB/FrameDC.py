@@ -113,8 +113,12 @@ analogico alla base della digitalizzazione; tutti gli elementi sono opzionali (t
         self.dc_type_var = tk.StringVar(value=next(iter(DC_TYPES_DEFINITIONS.keys())))
         self.dc_type_var.trace_add('write', self._update_description)
 
-        # Crea una nuova finestra di dialogo per aggiungere un DC element
-        self.add_dc_window = tk.Toplevel(self.container_frame)
+        self.add_dc_window = tk.Toplevel(self)
+        self.add_dc_window.update_idletasks()
+        x = self.get_parent().winfo_x() + self.winfo_width() // 2 - self.add_dc_window.winfo_width() // 2
+        y = self.get_parent().winfo_y() + self.winfo_height() // 2 - self.add_dc_window.winfo_height() // 2
+        self.add_dc_window.geometry(f"+{x}+{y}")
+
         self.add_dc_window.title("Aggiungi DC Element")
 
         add_frame = tk.Frame(self.add_dc_window)
@@ -161,7 +165,14 @@ analogico alla base della digitalizzazione; tutti gli elementi sono opzionali (t
             self.dc_type_var.trace_add('write', self._update_description)
 
             # Crea una nuova finestra di dialogo per aggiornare il DC element
-            self.update_dc_window = tk.Toplevel(self.container_frame)
+            self.update_dc_window = tk.Toplevel(self.get_parent())
+
+            self.update_dc_window.update_idletasks()
+            x = self.get_parent().winfo_x() + self.winfo_width() // 2 - self.update_dc_window.winfo_width() // 2
+            y = self.get_parent().winfo_y() + self.winfo_height() // 2 - self.update_dc_window.winfo_height() // 2
+            self.update_dc_window.geometry(f"+{x}+{y}")
+
+            # Imposta la geometria della finestra Toplevel
             self.update_dc_window.title("Modifica DC Element")
 
             update_frame = tk.Frame(self.update_dc_window)

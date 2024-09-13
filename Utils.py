@@ -62,79 +62,44 @@ def validate_bici(bici_string):
     return bool(bici_pattern.fullmatch(bici_string))
 
 
-def get_creation_date(file_path):
-    # Ottieni il timestamp di creazione del file
-    creation_time = os.path.getctime(file_path)
-    # Converti il timestamp in una data leggibile
-    creation_date = datetime.fromtimestamp(creation_time)
-    # Formatta la data nel formato desiderato (es. 'YYYY-MM-DD HH:MM:SS')
-    formatted_date = creation_date.strftime('%Y-%m-%d %H:%M:%S')
-    return formatted_date
+def find_date_value(metadata_dict):
+    ret = metadata_dict.get('DateTimeOriginal')
+    if ret is None:
+        ret = metadata_dict.get('DateTimeDigitized')
+    if ret is None:
+        ret = metadata_dict.get('CreationDate')
+    if ret is None:
+        ret = metadata_dict.get('DateTime')
+    if ret is None:
+        ret = metadata_dict.get('CREATION_DATE_FILE')
+    return ret
 
 
-def get_file_md5(file_path):
-    # Crea un oggetto hash MD5
-    md5_hash = hashlib.md5()
-
-    # Leggi il file in blocchi per non occupare troppa memoria
-    with open(file_path, 'rb') as file:
-        # Leggi il file in blocchi di 4096 byte
-        for chunk in iter(lambda: file.read(4096), b""):
-            md5_hash.update(chunk)
-
-    # Restituisci l'hash MD5 in formato esadecimale
-    return md5_hash.hexdigest()
-
-
-def get_file_size(file_path):
-    # Restituisce la dimensione del file in byte
-    return os.path.getsize(file_path)
-
-
-def find_date_value(metadata_list):
-    for metadata in metadata_list:
-        if metadata.get_key() in ("DateTime", "CreationDate"):
-            return metadata.get_values()[0]
-    return None
-
-
-def get_image_dimensions(metadata_list, exif_data, img_pil):
-    image_length = None
-    image_width = None
-    source_xdimension = None
-    source_ydimension = None
-    if exif_data is not None:
-        image_width, image_length, source_xdimension, source_ydimension = calculate_niso_dimensions(exif_data)
-    if image_length is None or image_width is None or image_length == 0 or image_width == 0:
-        for metadata in metadata_list:
-            if metadata.get_key() in ["ImageWidth"]:
-                image_width = metadata.get_values()[0]
-            if metadata.get_key() in ["ImageLength"]:
-                image_length = metadata.get_values()[0]
-    if image_length is None or image_width is None or image_length == 0 or image_width == 0:
-        image_width, image_length = img_pil.size
+def get_image_dimensions(metadata_dict):
+    x_res = int(metadata_dict.get('Image XResolution', 300))
+    y_res = int(metadata_dict.get('Image YResolution', 300))
+    # Ottieni larghezza e lunghezza dell'immagine in pixel, default a 0 se non trovate
+    image_width = int(metadata_dict.get('Image ImageWidth', 0))
+    image_length = int(metadata_dict.get('Image ImageLength', 0))
+    # Calcola dimensioni in pollici
+    source_xdimension = image_width / x_res if x_res else 0
+    source_ydimension = image_length / y_res if y_res else 0
+    if image_length == 0 or image_width == 0:
+        image_width = metadata_dict.get("ImageWidth",0)
+        image_length = metadata_dict.get("ImageLength",0)
+        x_res = int(metadata_dict.get('XResolution', 300))
+        y_res = int(metadata_dict.get('YResolution', 300))
+        source_xdimension = image_width / x_res if x_res else 0
+        source_ydimension = image_length / y_res if y_res else 0
+    if image_length == 0 or image_width == 0:
+        image_width = metadata_dict.get("IMAGE_WIDTH", 0)
+        image_length = metadata_dict.get("IMAGE_LENGTH", 0)
     return ImageDimensions(
         imagewidth=image_width,
         imagelength=image_length,
         source_xdimension=source_xdimension,
         source_ydimension=source_ydimension
     )
-
-
-def calculate_niso_dimensions(exif_data):
-    # Ottieni la risoluzione X e Y in dpi, default a 300 se non trovate
-    x_res = int(exif_data.get('Image XResolution').printable) if exif_data.get('Image XResolution') else 300
-    y_res = int(exif_data.get('Image YResolution').printable) if exif_data.get('Image YResolution') else 300
-
-    # Ottieni larghezza e lunghezza dell'immagine in pixel, default a 0 se non trovate
-    image_width = int(exif_data.get('Image ImageWidth').printable) if exif_data.get('Image ImageWidth') else 0
-    image_length = int(exif_data.get('Image ImageLength').printable) if exif_data.get('Image ImageLength') else 0
-
-    # Calcola dimensioni in pollici
-    source_xdimension = image_width / x_res if x_res else 0
-    source_ydimension = image_length / y_res if y_res else 0
-
-    return image_width, image_length, source_xdimension, source_ydimension
 
 
 def get_image_metrics(metadata_list):
@@ -218,15 +183,13 @@ def is_iterable(obj):
         return False
 
 
-def get_ppi_dpi(exif_data, img_pil):
+def get_ppi_dpi(metadata_dict):
     ppi, dpi = 0, 0
-    if img_pil is not None:
-        dpi = img_pil.info['dpi'][0]
-    if exif_data is not None:
-        x_res = exif_data.get('Image XResolution', None)
-        y_res = exif_data.get('Image YResolution', None)
-        res_unit = exif_data.get('Image ResolutionUnit', None)
-        if x_res is not None and y_res is not None and res_unit is not None:
-            if res_unit.printable == 'Pixels/Inch' and int(x_res.printable) == int(y_res.printable):
-                ppi = int(x_res.printable)
+    dpi = int(metadata_dict.get('dpi',(0,0))[0])
+    x_res = metadata_dict.get('Image XResolution', None)
+    y_res = metadata_dict.get('Image YResolution', None)
+    res_unit = metadata_dict.get('Image ResolutionUnit', None)
+    if x_res is not None and y_res is not None and res_unit is not None:
+        if res_unit == 'Pixels/Inch' and int(x_res) == int(y_res):
+            ppi = int(x_res)
     return ppi, dpi

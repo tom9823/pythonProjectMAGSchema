@@ -73,7 +73,12 @@ specialistiche raccolte durante il processo di digitalizzazione. L'elemento è o
 
     def _open_add_local_bib_window(self):
         # Crea una nuova finestra di dialogo per aggiungere LocalBIB
-        self.add_local_bib_window = tk.Toplevel(self.container_frame)
+        self.add_local_bib_window = tk.Toplevel(self)
+        self.add_local_bib_window.update_idletasks()
+        x = self.get_parent().winfo_x() + self.winfo_width() // 2 - self.add_local_bib_window.winfo_width() // 2
+        y = self.get_parent().winfo_y() + self.winfo_height() // 2 - self.add_local_bib_window.winfo_height() // 2
+        self.add_local_bib_window.geometry(f"+{x}+{y}")
+
         self.add_local_bib_window.title("Aggiungi LocalBIB")
 
         add_frame = tk.Frame(self.add_local_bib_window)
@@ -166,7 +171,11 @@ specialistiche raccolte durante il processo di digitalizzazione. L'elemento è o
             selected_local_bib = self.local_bib_list[selected_index]
 
             # Crea una nuova finestra di dialogo per l'aggiornamento
-            self.update_local_bib_window = tk.Toplevel(self.container_frame)
+            self.update_local_bib_window = tk.Toplevel(self.container_frame.master)
+            self.update_local_bib_window.update_idletasks()
+            x = self.get_parent().winfo_x() + self.winfo_width() // 2 - self.update_local_bib_window.winfo_width() // 2
+            y = self.get_parent().winfo_y() + self.winfo_height() // 2 - self.update_local_bib_window.winfo_height() // 2
+            self.update_local_bib_window.geometry(f"+{x}+{y}")
             self.update_local_bib_window.title("Modifica LocalBIB")
 
             add_frame = tk.Frame(self.update_local_bib_window)

@@ -21,7 +21,8 @@ class MainWindow(tk.Tk):
         super().__init__(*args, **kwargs)
 
         self.title("Standard MAG")
-        self.geometry('1080x720')
+        self.centra_finestra(1080,720)
+        self.resizable(False, False)
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
         self.frames = dict()
@@ -294,6 +295,19 @@ class MainWindow(tk.Tk):
     def _attach_img_tag(self, metadigit):
         for img in self.session.get(Utils.KEY_SESSION_IMG, []):
             metadigit.append(img.to_xml())
+
+
+    def centra_finestra(self, larghezza, altezza):
+        # Ottieni le dimensioni dello schermo
+        larghezza_schermo = self.winfo_screenwidth()
+        altezza_schermo = self.winfo_screenheight()
+
+        # Calcola la posizione x e y per centrare la finestra
+        x = (larghezza_schermo // 2) - (larghezza // 2)
+        y = (altezza_schermo // 2) - (altezza // 2)
+
+        # Imposta la geometria della finestra (dimensioni e posizione)
+        self.geometry(f"{larghezza}x{altezza}+{x}+{y}")
 
 
 if __name__ == "__main__":

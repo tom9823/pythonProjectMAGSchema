@@ -6,6 +6,7 @@ class CustomFrame(tk.Frame):
     def __init__(self, parent, controller, title_frame, left_button_action, left_button_title, right_button_action,
                  right_button_title, **kwargs):
         super().__init__(parent, **kwargs)
+        self.parent = parent
         self.controller = controller
         self.container_frame = tk.Frame(self)
         self.container_frame.grid(row=0, column=0, sticky=tk.NSEW, padx=10, pady=10)
@@ -47,3 +48,6 @@ class CustomFrame(tk.Frame):
 
     def enable_right_button(self):
         self.right_button['state'] = "enabled"
+
+    def get_parent(self):
+        return self.parent

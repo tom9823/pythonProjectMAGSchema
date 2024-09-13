@@ -1,5 +1,9 @@
-import Utils
-from scanner.MetaData import MetaData
+import hashlib
+import os
+from datetime import datetime
+
+import exifread
+
 from scanner.Scanner import Scanner
 from PIL import Image, ExifTags, PngImagePlugin, GifImagePlugin
 from PIL.TiffTags import TAGS as TIFF_TAGS
@@ -19,37 +23,84 @@ class ImageScanner(Scanner):
         return cls._instance
 
     def scan(self, file_path):
-        metas = []
+        metadata_dict = {}
         with Image.open(file_path) as img:
-            metadata = {}
 
             # Estrai i metadati EXIF per i file TIFF/TIF
             if img.format in ['TIFF', 'TIF']:
-                metadata = {TIFF_TAGS[tag]: value for tag, value in img.tag.items()}
+                metadata_dict = {TIFF_TAGS[tag]: self.convert_value(value) for tag, value in img.tag.items()}
 
             # Estrai i metadati EXIF per i file JPEG/JPG
             if img.format in ['JPEG', 'JPG']:
                 exif_data = img._getexif()
                 if exif_data is not None:
-                    metadata = {ExifTags.TAGS.get(tag, tag): value for tag, value in exif_data.items()}
+                    metadata_dict = {ExifTags.TAGS.get(tag, tag): self.convert_value(value) for tag, value in exif_data.items()}
 
             # Estrai i metadati per i file PNG
             elif img.format == 'PNG':
                 if isinstance(img, PngImagePlugin.PngImageFile):
-                    metadata = {key: value for key, value in img.info.items()}
+                    metadata_dict = {key: self.convert_value(value) for key, value in img.info.items()}
 
             # Estrai i metadati per i file GIF
             elif img.format == 'GIF':
                 if isinstance(img, GifImagePlugin.GifImageFile):
-                    metadata = {key: value for key, value in img.info.items()}
-            for key, values in metadata.items():
-                metadata_values = []
-                if not Utils.is_iterable(values) or isinstance(values, str):
-                    metadata_values.append(values)
-                else:
-                    for value in values:
-                        metadata_values.append(value)
-                metadata = MetaData(key=key, values=metadata_values)
-                metas.append(metadata)
-        return metas
+                    metadata_dict = {key: self.convert_value(value) for key, value in img.info.items()}
+            with open(file_path, 'rb') as img_file:
+                meta_dict_exif = exifread.process_file(img_file)
+                for key, tag in meta_dict_exif.items():
+                    metadata_dict[key] = tag.printable if hasattr(tag, 'printable') else tag
+            img_pil = Image.open(file_path)
+            metadata_dict = metadata_dict | img_pil.info
+            image_width, image_length = img_pil.size
+            metadata_dict['IMAGE_WIDTH'] = image_width
+            metadata_dict['IMAGE_LENGTH'] = image_length
+            metadata_dict["MD5"] = self.get_file_md5(file_path)
+            metadata_dict["FILE_SIZE"] = self.get_file_size(file_path)
+            metadata_dict["CREATION_DATE_FILE"] = self.get_creation_date(file_path)
 
+        return metadata_dict
+
+    def convert_value(self, value):
+        """Converte tuple o singoli valori nei tipi appropriati."""
+        if isinstance(value, tuple):
+            # Se la tupla ha un solo elemento
+            if len(value) == 1:
+                single_value = value[0]
+                # Verifica se è int, float o stringa e restituiscilo nel suo tipo appropriato
+                if isinstance(single_value, int):
+                    return int(single_value)
+                elif isinstance(single_value, float):
+                    return float(single_value)
+                elif isinstance(single_value, str):
+                    return str(single_value)
+                else:
+                    return single_value
+            # Se la tupla ha più di un elemento, mettili in un array (lista)
+            return [v for v in value]
+        return value
+
+    def get_file_md5(self, file_path):
+        # Crea un oggetto hash MD5
+        md5_hash = hashlib.md5()
+
+        # Leggi il file in blocchi per non occupare troppa memoria
+        with open(file_path, 'rb') as file:
+            # Leggi il file in blocchi di 4096 byte
+            for chunk in iter(lambda: file.read(4096), b""):
+                md5_hash.update(chunk)
+
+        # Restituisci l'hash MD5 in formato esadecimale
+        return md5_hash.hexdigest()
+
+    def get_file_size(self, file_path):
+        # Restituisce la dimensione del file in byte
+        return os.path.getsize(file_path)
+
+    def get_creation_date(self,file_path):
+        # Ottieni il timestamp di creazione del file
+        creation_time = os.path.getctime(file_path)
+        # Converti il timestamp in una data leggibile
+        creation_date = datetime.fromtimestamp(creation_time)
+        # Formatta la data nel formato desiderato (es. 'YYYY-MM-DD HH:MM:SS')
+        formatted_date = creation_date.strftime('%Y-%m-%d %H:%M:%S')
+        return formatted_date

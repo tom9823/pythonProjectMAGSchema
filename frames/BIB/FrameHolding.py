@@ -76,7 +76,12 @@ analogico. L'elemento è opzionale e ripetibile.""",
 
     def _open_add_holding_window(self):
         # Crea una nuova finestra di dialogo per aggiungere holding
-        self.add_holding_window = tk.Toplevel(self.container_frame)
+        self.add_holding_window = tk.Toplevel(self)
+        self.add_holding_window.update_idletasks()
+        x = self.get_parent().winfo_x() + self.winfo_width() // 2 - self.add_holding_window.winfo_width() // 2
+        y = self.get_parent().winfo_y() + self.winfo_height() // 2 - self.add_holding_window.winfo_height() // 2
+        self.add_holding_window.geometry(f"+{x}+{y}")
+
         self.add_holding_window.title("Aggiungi Holding")
 
         # Copia il contenuto di add_frame nella nuova finestra
@@ -182,8 +187,13 @@ analogico. L'elemento è opzionale e ripetibile.""",
             selected_index = self.table_holdings.index(item_id)
             selected_holding = self.holding_list[selected_index]
 
-            # Crea una nuova finestra di dialogo per l'aggiornamento
-            self.update_holding_window = tk.Toplevel(self.container_frame)
+            self.update_holding_window = tk.Toplevel(self)
+            self.update_holding_window.update_idletasks()
+            x = self.get_parent().winfo_x() + self.winfo_width() // 2 - self.update_holding_window.winfo_width() // 2
+            y = self.get_parent().winfo_y() + self.winfo_height() // 2 - self.update_holding_window.winfo_height() // 2
+            self.update_holding_window.geometry(f"+{x}+{y}")
+
+
             self.update_holding_window.title("Modifica Holding")
 
             # Copia il contenuto di add_frame nella nuova finestra
