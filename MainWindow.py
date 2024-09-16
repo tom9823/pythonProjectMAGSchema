@@ -174,6 +174,13 @@ class MainWindow(tk.Tk):
         frame.tkraise()
 
     def generate_file_xml(self):
+        for folder, dict_folder in self.session.get(Utils.KEY_SESSION_IMG_DICT_FOLDER, dict()).items():
+            self.print_xml(folder, dict_folder)
+        dict_project = self.session.get(Utils.KEY_SESSION_IMG_DICT_PROJECT, None)
+        if dict_project:
+            self.print_xml("progetto", dict_project)
+
+    def print_xml(self, folder_name, img_dict):
         # Creare l'elemento principale
         metadigit = ET.Element("metadigit", attrib={
             "xmlns:dc": "http://purl.org/dc/elements/1.1/",
@@ -191,7 +198,7 @@ class MainWindow(tk.Tk):
         # Aggiungere il sottotag <bib>
         self._attach_bib_tag(metadigit)
 
-        self._attach_img_tag(metadigit)
+        self._attach_img_tag(metadigit, img_dict)
 
         # Convertire l'albero degli elementi XML in una stringa
         xml_content = ET.tostring(metadigit, encoding="unicode", method="xml")
@@ -199,7 +206,8 @@ class MainWindow(tk.Tk):
 
         file_path = filedialog.asksaveasfilename(
             defaultextension=".xml",
-            filetypes=[("XML files", "*.xml"), ("All files", "*.*")]
+            filetypes=[("XML files", "*.xml"), ("All files", "*.*")],
+            initialfile=folder_name
         )
         # Controlla se l'utente ha scelto un percorso
         if file_path:
@@ -292,8 +300,8 @@ class MainWindow(tk.Tk):
                         stpiece_vol_element = ET.SubElement(piece_element, "stpiece_vol")
                         stpiece_vol_element.text = piece.get_stpiece_vol()
 
-    def _attach_img_tag(self, metadigit):
-        for img in self.session.get(Utils.KEY_SESSION_IMG, []):
+    def _attach_img_tag(self, metadigit, img_dict):
+        for img in list(img_dict.values()):
             metadigit.append(img.to_xml())
 
 

@@ -53,11 +53,14 @@ def append_element(parent, tag, value):
 class IMG(ObjectXMLSerializable):
     _sequence_counter = 0  # Variabile di classe per mantenere il conteggio delle istanze
 
-    def __init__(self, nomenclature=None, usage=None, side=None, scale=None,
+    def __init__(self, sequence_counter= None, nomenclature=None, usage=None, side=None, scale=None,
                  file=None, md5=None, filesize=None, image_dimensions=None, image_metrics=None,
                  ppi=None, dpi=None, format=None, scanning=None, datetimecreated=None, target=None,
                  altimg=None, note=None, imggroupID=None, holdingsID=None):
-        IMG._increment_sequence_counter()
+        if sequence_counter is not None:
+            IMG._assign_sequence_counter(int(sequence_counter))
+        else:
+            IMG._increment_sequence_counter()
         self._sequence_number = IMG._sequence_counter
         self._nomenclature = nomenclature
         self._usage = usage if usage is not None else []
@@ -82,6 +85,10 @@ class IMG(ObjectXMLSerializable):
     @classmethod
     def _increment_sequence_counter(cls):
         cls._sequence_counter += 1
+
+    @classmethod
+    def _assign_sequence_counter(cls, sequence_counter):
+        cls._sequence_counter = sequence_counter
 
     @property
     def sequence_number(self):
@@ -198,8 +205,8 @@ class IMG(ObjectXMLSerializable):
 
         append_element(img_elem, 'nomenclature', self._nomenclature)
 
-        for use in self._usage:
-            append_element(img_elem, 'usage', use)
+        for usage in self._usage:
+            append_element(img_elem, 'usage', usage)
 
         append_element(img_elem, 'sequence_number', self.sequence_number)
         append_element(img_elem, 'side', self._side)
@@ -218,9 +225,9 @@ class IMG(ObjectXMLSerializable):
         append_element(img_elem, 'image_metrics', self._image_metrics)
         append_element(img_elem, 'format', self._format)
         append_element(img_elem, 'scanning', self._scanning)
-        append_element(img_elem, 'target', self._target)
+        for target in self._target:
+            append_element(img_elem, 'target', target)
 
-        # Process lists of ObjectXMLSerializable
         for alt_img in self.alt_imgs:
             append_element(img_elem, 'altimg', alt_img)
 
@@ -254,11 +261,19 @@ class ImageDimensions(ObjectXMLSerializable):
         return dimensions_elem
 
 
-class ImageMetrics(ObjectXMLSerializable):
+# Enum per i bit per campione, mappato dallo schema XSD
+class BitPerSample(Enum):
+    BITONAL = "1"
+    GREY_4_BIT = "4"
+    GREY_8_BIT = "8"
+    RGB_24_BIT = "8,8,8"
+    TIFF_HDR = "16,16,16"
+    CMYK_32_BIT = "8,8,8,8"
+
+class ImageMetrics:
     def __init__(self, sampling_frequency_unit: SamplingFrequencyUnit, sampling_frequency_plane: SamplingFrequencyPlane,
-                 photo_metric_interpretation: PhotometricInterpretation, bit_per_sample: str,
-                 x_sampling_frequency: Optional[int] = None, y_sampling_frequency: Optional[int] = None,
-                 ):
+                 photo_metric_interpretation: PhotometricInterpretation, bit_per_sample: BitPerSample,
+                 x_sampling_frequency: Optional[int] = None, y_sampling_frequency: Optional[int] = None):
         self.sampling_frequency_unit = sampling_frequency_unit
         self.sampling_frequency_plane = sampling_frequency_plane
         self.x_sampling_frequency = x_sampling_frequency
@@ -275,22 +290,50 @@ class ImageMetrics(ObjectXMLSerializable):
         if self.y_sampling_frequency is not None:
             ET.SubElement(metrics_elem, 'ysamplingfrequency').text = str(self.y_sampling_frequency)
         ET.SubElement(metrics_elem, 'photometricinterpretation').text = self.photo_metric_interpretation.value
-        ET.SubElement(metrics_elem, 'bitpersample').text = self.bit_per_sample
+        ET.SubElement(metrics_elem, 'bitpersample').text = self.bit_per_sample.value
         return metrics_elem
 
 
+class FormatName(Enum):
+    JPG = "JPG"
+    GIF = "GIF"
+    TIF = "TIF"
+    PDF = "PDF"
+    TIFF_EP = "TIFF/EP 1.0.0.0"  # Sintassi alternativa con revisione
+
+
+class MimeType(Enum):
+    JPEG = "image/jpeg"
+    TIFF = "image/tiff"
+    GIF = "image/gif"
+    PNG = "image/png"
+    DJVU = "image/vnd.djvu"
+    PDF = "application/pdf"
+
+
+class CompressionType(Enum):
+    UNCOMPRESSED = "Uncompressed"
+    CCITT_1D = "CCITT 1D"
+    CCITT_GROUP_3 = "CCITT Group 3"
+    CCITT_GROUP_4 = "CCITT Group 4"
+    LZW = "LZW"
+    JPG = "JPG"
+    PNG = "PNG"
+    DJVU = "DJVU"
+
+
 class Format(ObjectXMLSerializable):
-    def __init__(self, name: str, mime: str, compression: Optional[str] = None):
+    def __init__(self, name: FormatName, mime: MimeType, compression: Optional[CompressionType] = None):
         self.name = name
         self.mime = mime
         self.compression = compression
 
     def to_xml(self):
         format_elem = ET.Element('format')
-        ET.SubElement(format_elem, 'name').text = self.name
-        ET.SubElement(format_elem, 'mime').text = self.mime
+        ET.SubElement(format_elem, 'niso:name').text = self.name.value
+        ET.SubElement(format_elem, 'niso:mime').text = self.mime.value
         if self.compression is not None:
-            ET.SubElement(format_elem, 'compression').text = self.compression
+            ET.SubElement(format_elem, 'niso:compression').text = self.compression.value
         return format_elem
 
 
@@ -542,6 +585,24 @@ class ImageGroup(ObjectXMLSerializable):
         self.format = format
         self.scanning = scanning
         self.imggroupID = imggroupID
+
+    def set_image_metrics(self, image_metrics: ImageMetrics):
+        self.image_metrics = image_metrics
+
+    def set_ppi(self, ppi: int):
+        self.ppi = ppi
+
+    def set_dpi(self, dpi: int):
+        self.dpi = dpi
+
+    def get_ppi(self):
+        return self.ppi
+
+    def get_dpi(self):
+        return self.dpi
+
+    def get_image_metrics(self):
+        return self.image_metrics
 
     def to_xml(self):
         imgroup_elem = ET.Element('img_group')

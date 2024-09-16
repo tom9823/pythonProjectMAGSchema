@@ -1,14 +1,9 @@
-import hashlib
 import os
 import re
-from datetime import datetime
 from urllib.parse import urlparse
 
-import exifread
-from PIL import Image
-
 from model.IMG import ImageDimensions, ImageMetrics, PhotometricInterpretation, SamplingFrequencyPlane, \
-    SamplingFrequencyUnit
+    SamplingFrequencyUnit, BitPerSample
 
 KEY_FRAME_INIT = 'FrameINIT'
 KEY_FRAME_SCAN = 'FrameSCAN'
@@ -25,8 +20,10 @@ KEY_MAIN_WINDOW = 'MainWindow'
 KEY_SESSION_DC = 'DC'
 KEY_SESSION_LOCAL_BIB = 'LocalBIB'
 KEY_SESSION_HOLDING = 'Holding'
-KEY_SESSION_IMG = 'IMG'
+KEY_SESSION_IMG_DICT_PROJECT = 'IMG_DICT_PROJECT'
 KEY_SESSION_IMG_GROUPS = 'IMG_GROUPS'
+KEY_SESSION_IMG_DICT_FOLDER = 'IMG_DICT_FOLDER'
+KEY_SESSION_GENERATION_OPTION_XML = 'GENERATION_OPTION_XML'
 KEY_SESSION_SIDE = 'SIDE'
 KEY_SESSION_SCALE = 'SCALE'
 KEY_SESSION_SCANNING = 'SCANNING'
@@ -102,65 +99,98 @@ def get_image_dimensions(metadata_dict):
     )
 
 
-def get_image_metrics(metadata_list):
-    x_sampling_frequency = 400
-    y_sampling_frequency = 400
-    sampling_frequency_unit = SamplingFrequencyUnit.CENTIMETER
-    bits_per_sample = 24
-    photo_metric_interpretation = PhotometricInterpretation.RGB
-    sampling_frequency_plane = SamplingFrequencyPlane.CAMERA_SCANNER_FOCAL_PLANE
+def get_image_metrics(metadata_dict):
+    # Recupera la frequenza di campionamento sull'asse X
+    x_sampling_frequency = metadata_dict.get("Image XResolution", None)
+    if x_sampling_frequency is None:
+        x_sampling_frequency = metadata_dict.get('XResolution', None)
+        if isinstance(x_sampling_frequency, tuple):
+            x_sampling_frequency = x_sampling_frequency[0]
 
-    for metadata in metadata_list:
-        key = metadata.get_key()
+    # Recupera la frequenza di campionamento sull'asse Y
+    y_sampling_frequency = metadata_dict.get("Image YResolution", None)
+    if y_sampling_frequency is None:
+        y_sampling_frequency = metadata_dict.get('YResolution', None)
+        if isinstance(y_sampling_frequency, tuple):
+            y_sampling_frequency = y_sampling_frequency[0]
 
-        if key == "FocalPlaneXResolution":
-            x_sampling_frequency = metadata.get_values()[0]
+    # Recupera l'unità di misura per la frequenza di campionamento
+    sampling_frequency_unit = metadata_dict.get('ResolutionUnit', None)
+    if sampling_frequency_unit is not None:
+        sampling_frequency_unit = int(sampling_frequency_unit)
+        if sampling_frequency_unit == 2:
+            sampling_frequency_unit = SamplingFrequencyUnit.INCH
+        elif sampling_frequency_unit == 3:
+            sampling_frequency_unit = SamplingFrequencyUnit.CENTIMETER
+        else:
+            sampling_frequency_unit = SamplingFrequencyUnit.NO_UNIT
+    else:
+        sampling_frequency_unit = metadata_dict.get('Image ResolutionUnit', None)
+        if sampling_frequency_unit is not None:
+            if "inch" in sampling_frequency_unit.lower():
+                sampling_frequency_unit = SamplingFrequencyUnit.INCH
+            elif "centimeter" in sampling_frequency_unit.lower():
+                sampling_frequency_unit = SamplingFrequencyUnit.CENTIMETER
+            else:
+                sampling_frequency_unit = SamplingFrequencyUnit.NO_UNIT
 
-        if key == "FocalPlaneYResolution":
-            y_sampling_frequency = metadata.get_values()[0]
+    # Interpretazione fotometrica
+    photometric_interpretation_value = metadata_dict.get('PhotometricInterpretation', None)
+    if photometric_interpretation_value is not None:
+        photometric_interpretation_value = int(photometric_interpretation_value)
+        if photometric_interpretation_value == 0:
+            photo_metric_interpretation = PhotometricInterpretation.WHITE_IS_ZERO
+        elif photometric_interpretation_value == 1:
+            photo_metric_interpretation = PhotometricInterpretation.BLACK_IS_ZERO
+        elif photometric_interpretation_value == 2:
+            photo_metric_interpretation = PhotometricInterpretation.RGB
+        elif photometric_interpretation_value == 3:
+            photo_metric_interpretation = PhotometricInterpretation.PALETTE_COLOR
+        elif photometric_interpretation_value == 4:
+            photo_metric_interpretation = PhotometricInterpretation.TRANSPARENCY_MASK
+        elif photometric_interpretation_value == 5:
+            photo_metric_interpretation = PhotometricInterpretation.CMYK
+        elif photometric_interpretation_value == 6:
+            photo_metric_interpretation = PhotometricInterpretation.YCBCR
+        elif photometric_interpretation_value == 8:
+            photo_metric_interpretation = PhotometricInterpretation.CIELAB
+        else:
+            photo_metric_interpretation = PhotometricInterpretation.RGB
+    else:
+        photo_metric_interpretation = PhotometricInterpretation.RGB
+        # Piano focale del campionamento (sampling frequency plane)
+    sampling_frequency_plane_value = metadata_dict.get('SamplingFrequencyPlane', None)
+    if sampling_frequency_plane_value is not None:
+        sampling_frequency_plane_value = int(sampling_frequency_plane_value)
+        if sampling_frequency_plane_value == 1:
+            sampling_frequency_plane = SamplingFrequencyPlane.CAMERA_SCANNER_FOCAL_PLANE
+        elif sampling_frequency_plane_value == 2:
+            sampling_frequency_plane = SamplingFrequencyPlane.OBJECT_PLANE
+        elif sampling_frequency_plane_value == 3:
+            sampling_frequency_plane = SamplingFrequencyPlane.SOURCE_OBJECT_PLANE
+        else:
+            sampling_frequency_plane = SamplingFrequencyPlane.CAMERA_SCANNER_FOCAL_PLANE
+    else:
+        sampling_frequency_plane = SamplingFrequencyPlane.CAMERA_SCANNER_FOCAL_PLANE
 
-        if key in ["ResolutionUnit"]:
-            if metadata.get_values()[0]:
-                pass
+    # Bit per campione
+    bits_per_sample = metadata_dict.get('BitsPerSample', BitPerSample.RGB_24_BIT)  # Default a 24 se non trovato
+    if isinstance(bits_per_sample, tuple) or isinstance(bits_per_sample, list):
+        bits_str = ','.join(map(str, bits_per_sample))
+        for bit in BitPerSample:
+            if bit.value == bits_str:
+                bits_per_sample = bit
 
-        if key == "BitsPerSample":
-            bits_per_sample = sum(metadata.get_values())
-
-    if photo_metric_interpretation and bits_per_sample and sampling_frequency_unit and sampling_frequency_plane:
-        return ImageMetrics(
-            x_sampling_frequency=x_sampling_frequency,
-            y_sampling_frequency=y_sampling_frequency,
-            sampling_frequency_unit=sampling_frequency_unit,
-            bit_per_sample=str(bits_per_sample),
-            sampling_frequency_plane=sampling_frequency_plane,
-            photo_metric_interpretation=photo_metric_interpretation
+    if x_sampling_frequency and y_sampling_frequency and sampling_frequency_unit and photo_metric_interpretation and bits_per_sample and sampling_frequency_plane:
+        return ImageMetrics(x_sampling_frequency=x_sampling_frequency,
+                     y_sampling_frequency=y_sampling_frequency,
+                     sampling_frequency_plane=sampling_frequency_plane,
+                     bit_per_sample=bits_per_sample,
+                     photo_metric_interpretation=photo_metric_interpretation,
+                     sampling_frequency_unit=sampling_frequency_unit
         )
-
-
-def get_image_metrics(img_groupID):
-    x_sampling_frequency = None
-    y_sampling_frequency = None
-    sampling_frequency_unit = SamplingFrequencyUnit.CENTIMETER
-    bits_per_sample = 24
-    photo_metric_interpretation = PhotometricInterpretation.RGB
-    sampling_frequency_plane = SamplingFrequencyPlane.CAMERA_SCANNER_FOCAL_PLANE
-    if img_groupID == "ImgGrp_H" or img_groupID == "ImgGrp_M":
-        x_sampling_frequency = 400
-        y_sampling_frequency = 400
-    elif img_groupID == "ImgGrp_S":
-        x_sampling_frequency = 300
-        y_sampling_frequency = 300
-    elif img_groupID == "ImgGrp_T":
-        x_sampling_frequency = 150
-        y_sampling_frequency = 150
-    return ImageMetrics(
-        x_sampling_frequency=x_sampling_frequency,
-        y_sampling_frequency=y_sampling_frequency,
-        sampling_frequency_unit=sampling_frequency_unit,
-        bit_per_sample=str(bits_per_sample),
-        sampling_frequency_plane=sampling_frequency_plane,
-        photo_metric_interpretation=photo_metric_interpretation
-    )
+    else:
+        return None
 
 
 def split_path_into_subpaths(path):
@@ -175,17 +205,10 @@ def split_path_into_subpaths(path):
     return subpaths
 
 
-def is_iterable(obj):
-    try:
-        iter(obj)
-        return True
-    except TypeError:
-        return False
-
-
 def get_ppi_dpi(metadata_dict):
     ppi, dpi = 0, 0
-    dpi = int(metadata_dict.get('dpi',(0,0))[0])
+    tuple_dpi = metadata_dict.get('DPI', (0,0))
+    dpi = int(tuple_dpi[0]) if len(tuple_dpi) == 2 and int(tuple_dpi[0]) == int(tuple_dpi[1]) and int(tuple_dpi[0]) != 0 else 0
     x_res = metadata_dict.get('Image XResolution', None)
     y_res = metadata_dict.get('Image YResolution', None)
     res_unit = metadata_dict.get('Image ResolutionUnit', None)

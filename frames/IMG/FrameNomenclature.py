@@ -128,7 +128,7 @@ class FrameNomenclature(CustomFrame):
         for img in self.images:
             label = self.nomenclature_dict.get(img, "")  # Ottiene l'etichetta associata o una stringa vuota
             label = "" if label == "Nessuna etichetta nomenclature" else label
-            display_text = f"{os.path.basename(img)} ({label})" if label else os.path.basename(img)
+            display_text = f"{os.path.splitext(os.path.basename(img))[0]} ({label})" if label else os.path.splitext(os.path.basename(img))[0]
             self.image_listbox.insert("end", display_text)
 
     def show_image(self, index):

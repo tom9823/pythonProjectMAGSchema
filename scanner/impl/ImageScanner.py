@@ -25,7 +25,10 @@ class ImageScanner(Scanner):
     def scan(self, file_path):
         metadata_dict = {}
         with Image.open(file_path) as img:
-
+            image_width, image_length = img.size
+            metadata_dict['IMAGE_WIDTH'] = image_width
+            metadata_dict['IMAGE_LENGTH'] = image_length
+            metadata_dict = metadata_dict | img.info
             # Estrai i metadati EXIF per i file TIFF/TIF
             if img.format in ['TIFF', 'TIF']:
                 metadata_dict = {TIFF_TAGS[tag]: self.convert_value(value) for tag, value in img.tag.items()}
@@ -49,14 +52,11 @@ class ImageScanner(Scanner):
                 meta_dict_exif = exifread.process_file(img_file)
                 for key, tag in meta_dict_exif.items():
                     metadata_dict[key] = tag.printable if hasattr(tag, 'printable') else tag
-            img_pil = Image.open(file_path)
-            metadata_dict = metadata_dict | img_pil.info
-            image_width, image_length = img_pil.size
-            metadata_dict['IMAGE_WIDTH'] = image_width
-            metadata_dict['IMAGE_LENGTH'] = image_length
+
             metadata_dict["MD5"] = self.get_file_md5(file_path)
             metadata_dict["FILE_SIZE"] = self.get_file_size(file_path)
             metadata_dict["CREATION_DATE_FILE"] = self.get_creation_date(file_path)
+            metadata_dict["DPI"] = img.info.get('dpi',(0,0))
 
         return metadata_dict
 
