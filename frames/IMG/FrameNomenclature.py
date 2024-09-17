@@ -34,7 +34,7 @@ class FrameNomenclature(CustomFrame):
 
         self.path_frame = Frame(self.container_frame)
         self.path_frame.pack(pady=10)
-        self.path_label = Label(self.path_frame, text="Seleziona un percorso:")
+        self.path_label = Label(self.path_frame, text="Seleziona la cartella del progetto da scansionare:")
         self.path_label.grid(row=0, column=0, padx=5, pady=5)
 
         self.path_var = StringVar()
@@ -164,9 +164,10 @@ class FrameNomenclature(CustomFrame):
             self.show_image(self.current_image_index - 1)
 
     def show_image_from_listbox(self, event):
-        selected_index = self.image_listbox.curselection()[0]
-        self.save_current_label()
-        self.show_image(selected_index)
+        if self.image_listbox.curselection() and len(self.image_listbox.curselection()) > 0:
+            selected_index = self.image_listbox.curselection()[0]
+            self.save_current_label()
+            self.show_image(selected_index)
 
     def save_current_label(self):
         label = self.selected_label.get()
