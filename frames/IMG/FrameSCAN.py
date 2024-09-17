@@ -1,3 +1,4 @@
+import copy
 import re
 import threading
 import tkinter as tk
@@ -14,7 +15,7 @@ from scanner.ScannerFactory import ScannerFactory
 class XmlOption(Enum):
     ONE_PROJECT_FILE = "Unico file XML a livello di progetto"
     EACH_FOLDER_FILE = "Un file XML per ogni cartella"
-    BOTH = "Entrambe le opzioni"
+    BOTH = "Entrambe le opzioni (unico file XML a livello di progetto, un file XML per ogni cartella)"
 
 
 class FrameSCAN(CustomFrame):
@@ -190,7 +191,7 @@ class FrameSCAN(CustomFrame):
                     if file_extension.lower() in [".tiff", ".tif"]:
                         format = Format(name=FormatName.TIF, mime=MimeType.TIFF, compression=CompressionType.LZW)
                     elif file_extension.lower() in [".jpg", ".jpeg"]:
-                        Format(name=FormatName.JPG, mime=MimeType.JPEG, compression=CompressionType.JPG)
+                        format = Format(name=FormatName.JPG, mime=MimeType.JPEG, compression=CompressionType.JPG)
                     img_group = ImageGroup(
                         imggroupID=imagegroupID,
                         image_metrics=image_metrics,
@@ -233,8 +234,10 @@ class FrameSCAN(CustomFrame):
                     else:
                         nomenclature = filename_without_extension
                 old_nomenclature = nomenclature
-                if file_extension.lower() in ['.tiff',
-                                              '.tif'] or self.xml_option.get() == XmlOption.EACH_FOLDER_FILE.value:
+                if not (file_extension.lower() in ['.tiff',
+                                                   '.tif'] and self.xml_option.get() == XmlOption.EACH_FOLDER_FILE.value) \
+                        or (file_extension.lower() not in ['.tiff',
+                                                           '.tif'] and self.xml_option.get() == XmlOption.ONE_PROJECT_FILE.value):
                     img = IMG(
                         imggroupID=imagegroupID if imagegroupID is not None else 'ImgGrp_S',
                         nomenclature=nomenclature,
@@ -250,10 +253,14 @@ class FrameSCAN(CustomFrame):
                         scale=scale,
                         image_dimensions=image_dimensions,
                     )
-                    if self.xml_option.get() != XmlOption.EACH_FOLDER_FILE.value:
+                    if (self.xml_option.get() == XmlOption.ONE_PROJECT_FILE.value or
+                        self.xml_option.get() == XmlOption.BOTH.value) and file_extension.lower() in ['.tiff','.tif']:
                         self.img_dict[filename_without_extension] = img
                     if self.xml_option.get() != XmlOption.ONE_PROJECT_FILE.value and current_dir_img_dict is not None:
-                        current_dir_img_dict[filename_without_extension] = img
+                        if file_extension.lower() not in ['.tiff', '.tif']:
+                            current_dir_img_dict[filename_without_extension] = img
+                        else:
+                            current_dir_img_dict[filename_without_extension] = copy.deepcopy(img)
                 if file_extension.lower() not in ['.tiff', '.tif'] and (
                         self.xml_option.get() == XmlOption.BOTH.value or self.xml_option.get() == XmlOption.ONE_PROJECT_FILE.value):
                     alt_img = AltImg(
@@ -276,7 +283,7 @@ class FrameSCAN(CustomFrame):
             self.update_progress(progress, scanned_files, total_files)
             old_dir = current_dir
         if self.xml_option.get() != XmlOption.ONE_PROJECT_FILE.value and current_dir_img_dict and current_dir:
-            self.img_dict_folder_dict[current_dir] = current_dir_img_dict
+            self.img_dict_folder_dict[current_dir] = (current_dir_img_dict, img_group)
         return scanned_files
 
     def update_progress(self, progress, scanned_files, total_files):
@@ -291,7 +298,7 @@ class FrameSCAN(CustomFrame):
 
     def check_data(self):
         if not self.scanner_running:
-            super().save_to_session((Utils.KEY_SESSION_IMG_DICT_RPOJECT, self.img_dict))
+            super().save_to_session((Utils.KEY_SESSION_IMG_DICT_PROJECT, self.img_dict))
             super().save_to_session((Utils.KEY_SESSION_IMG_GROUPS, self.img_groups))
             super().save_to_session((Utils.KEY_SESSION_IMG_DICT_FOLDER, self.img_dict_folder_dict))
             super().save_to_session((Utils.KEY_SESSION_GENERATION_OPTION_XML, self.xml_option))

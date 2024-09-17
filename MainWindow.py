@@ -1,3 +1,4 @@
+import os
 import tkinter as tk
 from tkinter import filedialog
 from urllib.parse import urlparse
@@ -174,13 +175,13 @@ class MainWindow(tk.Tk):
         frame.tkraise()
 
     def generate_file_xml(self):
-        for folder, dict_folder in self.session.get(Utils.KEY_SESSION_IMG_DICT_FOLDER, dict()).items():
-            self.print_xml(folder, dict_folder)
+        for folder, (dict_folder, img_group) in self.session.get(Utils.KEY_SESSION_IMG_DICT_FOLDER, dict()).items():
+            self.print_xml(folder, dict_folder, img_group)
         dict_project = self.session.get(Utils.KEY_SESSION_IMG_DICT_PROJECT, None)
         if dict_project:
             self.print_xml("progetto", dict_project)
 
-    def print_xml(self, folder_name, img_dict):
+    def print_xml(self, folder_name, img_dict, img_group=None):
         # Creare l'elemento principale
         metadigit = ET.Element("metadigit", attrib={
             "xmlns:dc": "http://purl.org/dc/elements/1.1/",
@@ -193,7 +194,7 @@ class MainWindow(tk.Tk):
         })
 
         # Aggiungere il sottotag <gen>
-        self._attach_gen_tag(metadigit)
+        self._attach_gen_tag(metadigit, img_group)
 
         # Aggiungere il sottotag <bib>
         self._attach_bib_tag(metadigit)
@@ -207,7 +208,7 @@ class MainWindow(tk.Tk):
         file_path = filedialog.asksaveasfilename(
             defaultextension=".xml",
             filetypes=[("XML files", "*.xml"), ("All files", "*.*")],
-            initialfile=folder_name
+            initialfile=os.path.basename(os.path.dirname(folder_name))
         )
         # Controlla se l'utente ha scelto un percorso
         if file_path:
@@ -215,9 +216,10 @@ class MainWindow(tk.Tk):
                       encoding="utf-8") as file:
                 file.write(xml_declaration)
                 file.write(xml_content)
-            self.destroy()
+            if folder_name == "progetto":
+                self.destroy()
 
-    def _attach_gen_tag(self, metadigit):
+    def _attach_gen_tag(self, metadigit, img_group_folder=None):
         gen = ET.SubElement(metadigit, "gen", attrib={
             "creation": str(self.session.get('Creation', '')),
             "last_update": str(self.session.get('Last Update', '')),
@@ -237,8 +239,11 @@ class MainWindow(tk.Tk):
         completeness = ET.SubElement(gen, "completeness")
         completeness.text = str(self.session.get('Completezza', ''))
 
-        for img_group in self.session.get(Utils.KEY_SESSION_IMG_GROUPS, []):
-            gen.append(img_group.to_xml())
+        if img_group_folder is not None:
+            gen.append(img_group_folder.to_xml())
+        else:
+            for img_group in self.session.get(Utils.KEY_SESSION_IMG_GROUPS, []):
+                gen.append(img_group.to_xml())
 
     def _attach_bib_tag(self, metadigit):
         # Creare il tag <bib>

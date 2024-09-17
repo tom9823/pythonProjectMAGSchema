@@ -25,10 +25,6 @@ class ImageScanner(Scanner):
     def scan(self, file_path):
         metadata_dict = {}
         with Image.open(file_path) as img:
-            image_width, image_length = img.size
-            metadata_dict['IMAGE_WIDTH'] = image_width
-            metadata_dict['IMAGE_LENGTH'] = image_length
-            metadata_dict = metadata_dict | img.info
             # Estrai i metadati EXIF per i file TIFF/TIF
             if img.format in ['TIFF', 'TIF']:
                 metadata_dict = {TIFF_TAGS[tag]: self.convert_value(value) for tag, value in img.tag.items()}
@@ -48,6 +44,11 @@ class ImageScanner(Scanner):
             elif img.format == 'GIF':
                 if isinstance(img, GifImagePlugin.GifImageFile):
                     metadata_dict = {key: self.convert_value(value) for key, value in img.info.items()}
+
+            image_width, image_length = img.size
+            metadata_dict['IMAGE_WIDTH'] = image_width
+            metadata_dict['IMAGE_LENGTH'] = image_length
+            metadata_dict = metadata_dict | img.info
             with open(file_path, 'rb') as img_file:
                 meta_dict_exif = exifread.process_file(img_file)
                 for key, tag in meta_dict_exif.items():
