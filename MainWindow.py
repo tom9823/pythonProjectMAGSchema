@@ -1,4 +1,5 @@
 import os
+import threading
 import tkinter as tk
 from tkinter import filedialog
 from urllib.parse import urlparse
@@ -175,6 +176,10 @@ class MainWindow(tk.Tk):
         frame.tkraise()
 
     def generate_file_xml(self):
+        thread = threading.Thread(target=self._generate_file_xml_worker)
+        thread.start()
+
+    def _generate_file_xml_worker(self):
         for folder, (dict_folder, img_group) in self.session.get(Utils.KEY_SESSION_IMG_DICT_FOLDER, dict()).items():
             self.print_xml(folder, dict_folder, img_group)
         dict_project = self.session.get(Utils.KEY_SESSION_IMG_DICT_PROJECT, None)
