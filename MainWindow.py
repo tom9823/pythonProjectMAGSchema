@@ -216,8 +216,6 @@ class MainWindow(tk.Tk):
                       encoding="utf-8") as file:
                 file.write(xml_declaration)
                 file.write(xml_content)
-            if folder_name == "progetto":
-                self.destroy()
 
     def _attach_gen_tag(self, metadigit, img_group_folder=None):
         gen = ET.SubElement(metadigit, "gen", attrib={
