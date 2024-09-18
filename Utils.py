@@ -98,12 +98,12 @@ def get_image_metrics(metadata_dict):
     # Recupera la frequenza di campionamento sull'asse X
     x_sampling_frequency = metadata_dict.get('XResolution', None)
     if x_sampling_frequency and isinstance(x_sampling_frequency, tuple):
-        x_sampling_frequency = x_sampling_frequency[0]
+        x_sampling_frequency = int(x_sampling_frequency[0])
 
     # Recupera la frequenza di campionamento sull'asse Y
     y_sampling_frequency = metadata_dict.get('YResolution', None)
     if y_sampling_frequency and isinstance(y_sampling_frequency, tuple):
-        y_sampling_frequency = y_sampling_frequency[0]
+        y_sampling_frequency = int(y_sampling_frequency[0])
 
     # Recupera l'unità di misura per la frequenza di campionamento
     sampling_frequency_unit = metadata_dict.get('ResolutionUnit', None)
