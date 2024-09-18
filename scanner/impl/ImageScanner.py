@@ -1,9 +1,6 @@
 import hashlib
 import os
 from datetime import datetime
-
-import exifread
-
 from scanner.Scanner import Scanner
 from PIL import Image, ExifTags, PngImagePlugin, GifImagePlugin
 from PIL.TiffTags import TAGS as TIFF_TAGS
@@ -49,11 +46,6 @@ class ImageScanner(Scanner):
             metadata_dict['IMAGE_WIDTH'] = image_width
             metadata_dict['IMAGE_LENGTH'] = image_length
             metadata_dict = metadata_dict | img.info
-            with open(file_path, 'rb') as img_file:
-                meta_dict_exif = exifread.process_file(img_file)
-                for key, tag in meta_dict_exif.items():
-                    metadata_dict[key] = tag.printable if hasattr(tag, 'printable') else tag
-
             metadata_dict["MD5"] = self.get_file_md5(file_path)
             metadata_dict["FILE_SIZE"] = self.get_file_size(file_path)
             metadata_dict["CREATION_DATE_FILE"] = self.get_creation_date(file_path)

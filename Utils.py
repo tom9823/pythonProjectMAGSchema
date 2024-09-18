@@ -73,21 +73,16 @@ def find_date_value(metadata_dict):
 
 
 def get_image_dimensions(metadata_dict):
-    x_res = int(metadata_dict.get('Image XResolution', 300))
-    y_res = int(metadata_dict.get('Image YResolution', 300))
-    # Ottieni larghezza e lunghezza dell'immagine in pixel, default a 0 se non trovate
-    image_width = int(metadata_dict.get('Image ImageWidth', 0))
-    image_length = int(metadata_dict.get('Image ImageLength', 0))
-    # Calcola dimensioni in pollici
+    image_width = metadata_dict.get("ImageWidth",0)
+    image_length = metadata_dict.get("ImageLength",0)
+    x_res = metadata_dict.get('XResolution', (300))
+    if x_res and isinstance(x_res, tuple):
+        x_res = int(x_res[0])
+    y_res = metadata_dict.get('YResolution', (300))
+    if y_res and isinstance(y_res, tuple):
+        y_res = int(y_res[0])
     source_xdimension = image_width / x_res if x_res else 0
     source_ydimension = image_length / y_res if y_res else 0
-    if image_length == 0 or image_width == 0:
-        image_width = metadata_dict.get("ImageWidth",0)
-        image_length = metadata_dict.get("ImageLength",0)
-        x_res = int(metadata_dict.get('XResolution', 300))
-        y_res = int(metadata_dict.get('YResolution', 300))
-        source_xdimension = image_width / x_res if x_res else 0
-        source_ydimension = image_length / y_res if y_res else 0
     if image_length == 0 or image_width == 0:
         image_width = metadata_dict.get("IMAGE_WIDTH", 0)
         image_length = metadata_dict.get("IMAGE_LENGTH", 0)
@@ -101,18 +96,14 @@ def get_image_dimensions(metadata_dict):
 
 def get_image_metrics(metadata_dict):
     # Recupera la frequenza di campionamento sull'asse X
-    x_sampling_frequency = metadata_dict.get("Image XResolution", None)
-    if x_sampling_frequency is None:
-        x_sampling_frequency = metadata_dict.get('XResolution', None)
-        if isinstance(x_sampling_frequency, tuple):
-            x_sampling_frequency = x_sampling_frequency[0]
+    x_sampling_frequency = metadata_dict.get('XResolution', None)
+    if x_sampling_frequency and isinstance(x_sampling_frequency, tuple):
+        x_sampling_frequency = x_sampling_frequency[0]
 
     # Recupera la frequenza di campionamento sull'asse Y
-    y_sampling_frequency = metadata_dict.get("Image YResolution", None)
-    if y_sampling_frequency is None:
-        y_sampling_frequency = metadata_dict.get('YResolution', None)
-        if isinstance(y_sampling_frequency, tuple):
-            y_sampling_frequency = y_sampling_frequency[0]
+    y_sampling_frequency = metadata_dict.get('YResolution', None)
+    if y_sampling_frequency and isinstance(y_sampling_frequency, tuple):
+        y_sampling_frequency = y_sampling_frequency[0]
 
     # Recupera l'unità di misura per la frequenza di campionamento
     sampling_frequency_unit = metadata_dict.get('ResolutionUnit', None)
@@ -124,15 +115,6 @@ def get_image_metrics(metadata_dict):
             sampling_frequency_unit = SamplingFrequencyUnit.CENTIMETER
         else:
             sampling_frequency_unit = SamplingFrequencyUnit.NO_UNIT
-    else:
-        sampling_frequency_unit = metadata_dict.get('Image ResolutionUnit', None)
-        if sampling_frequency_unit is not None:
-            if "inch" in sampling_frequency_unit.lower():
-                sampling_frequency_unit = SamplingFrequencyUnit.INCH
-            elif "centimeter" in sampling_frequency_unit.lower():
-                sampling_frequency_unit = SamplingFrequencyUnit.CENTIMETER
-            else:
-                sampling_frequency_unit = SamplingFrequencyUnit.NO_UNIT
 
     # Interpretazione fotometrica
     photometric_interpretation_value = metadata_dict.get('PhotometricInterpretation', None)
@@ -158,7 +140,7 @@ def get_image_metrics(metadata_dict):
             photo_metric_interpretation = PhotometricInterpretation.RGB
     else:
         photo_metric_interpretation = PhotometricInterpretation.RGB
-        # Piano focale del campionamento (sampling frequency plane)
+    # Piano focale del campionamento (sampling frequency plane)
     sampling_frequency_plane_value = metadata_dict.get('SamplingFrequencyPlane', None)
     if sampling_frequency_plane_value is not None:
         sampling_frequency_plane_value = int(sampling_frequency_plane_value)
@@ -209,10 +191,14 @@ def get_ppi_dpi(metadata_dict):
     ppi, dpi = 0, 0
     tuple_dpi = metadata_dict.get('DPI', (0,0))
     dpi = int(tuple_dpi[0]) if len(tuple_dpi) == 2 and int(tuple_dpi[0]) == int(tuple_dpi[1]) and int(tuple_dpi[0]) != 0 else 0
-    x_res = metadata_dict.get('Image XResolution', None)
-    y_res = metadata_dict.get('Image YResolution', None)
-    res_unit = metadata_dict.get('Image ResolutionUnit', None)
+    x_res = metadata_dict.get('XResolution', (300))
+    if x_res and isinstance(x_res, tuple):
+        x_res = int(x_res[0])
+    y_res = metadata_dict.get('YResolution', (300))
+    if y_res and isinstance(y_res, tuple):
+        y_res = int(y_res[0])
+    res_unit = metadata_dict.get('ResolutionUnit', None)
     if x_res is not None and y_res is not None and res_unit is not None:
-        if res_unit == 'Pixels/Inch' and int(x_res) == int(y_res):
+        if res_unit == 2 and int(x_res) == int(y_res):
             ppi = int(x_res)
     return ppi, dpi
