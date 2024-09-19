@@ -1,15 +1,15 @@
-class Holding:
-    def __init__(self, holding_id, library, inventory_number, shelfmarks):
-        self.holding_id = holding_id
+class Holdings:
+    def __init__(self, holdings_id, library, inventory_number, shelfmarks):
+        self.holdings_id = holdings_id
         self.library = library
         self.inventory_number = inventory_number
         self.shelfmarks = shelfmarks
 
-    def get_holding_id(self):
-        return self.holding_id
+    def get_holdings_id(self):
+        return self.holdings_id
 
-    def set_holding_id(self, holding_id):
-        self.holding_id = holding_id
+    def set_holdings_id(self, holding_id):
+        self.holdings_id = holding_id
 
     def get_library(self):
         return self.library
@@ -39,7 +39,7 @@ class Holding:
         return shelfmarks_str
 
     def __str__(self):
-        return f"Holding(ID: {self.holding_id}, Library: {self.library}, Inventory Number: {self.inventory_number}, Shelfmarks: [{self.get_string_shelfmarks()}])"
+        return f"Holding(ID: {self.holdings_id}, Library: {self.library}, Inventory Number: {self.inventory_number}, Shelfmarks: [{self.get_string_shelfmarks()}])"
 
 
 class Shelfmark:

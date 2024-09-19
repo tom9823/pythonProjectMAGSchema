@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 
 import Utils
 from frames.BIB.FrameDC import FrameDC
-from frames.BIB.FrameHolding import FrameHolding
+from frames.BIB.FrameHoldings import FrameHoldings
 from frames.BIB.FrameLocalBIB import FrameLocalBIB
 from frames.BIB.FramePiece import FramePiece
 from frames.FrameGEN import FrameGEN
@@ -47,29 +47,29 @@ class MainWindow(tk.Tk):
             controller=self,
             left_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_DC, container=Utils.KEY_FRAME_GEN),
             left_button_title='GEN',
-            right_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_DC, container=Utils.KEY_FRAME_HOLDING),
+            right_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_DC, container=Utils.KEY_FRAME_HOLDINGS),
             right_button_title='HOLDING'
         )
         frameDC.grid(row=0, column=0, sticky=tk.NSEW)
         self.frames[Utils.KEY_FRAME_DC] = frameDC
 
-        frameHolding = FrameHolding(
+        frameHolding = FrameHoldings(
             parent=self,
             controller=self,
-            left_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_HOLDING, container=Utils.KEY_FRAME_DC),
+            left_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_HOLDINGS, container=Utils.KEY_FRAME_DC),
             left_button_title='DC',
-            right_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_HOLDING,
+            right_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_HOLDINGS,
                                                         container=Utils.KEY_FRAME_LOCAL_BIB),
             right_button_title='LOCALBIB'
         )
         frameHolding.grid(row=0, column=0, sticky=tk.NSEW)
-        self.frames[Utils.KEY_FRAME_HOLDING] = frameHolding
+        self.frames[Utils.KEY_FRAME_HOLDINGS] = frameHolding
 
         frameLocalBIB = FrameLocalBIB(
             parent=self,
             controller=self,
             left_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_LOCAL_BIB,
-                                                       container=Utils.KEY_FRAME_HOLDING),
+                                                       container=Utils.KEY_FRAME_HOLDINGS),
             left_button_title='HOLDING',
             right_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_LOCAL_BIB,
                                                         container=Utils.KEY_FRAME_PIECE),
@@ -261,8 +261,8 @@ class MainWindow(tk.Tk):
             dc_tag.text = value
 
         # aggiungere i sottotag di <bib> holding
-        for holding in self.session.get(Utils.KEY_SESSION_HOLDING, []):
-            holdings_element = ET.SubElement(bib, "holdings", ID=holding.holding_id)
+        for holding in self.session.get(Utils.KEY_SESSION_HOLDINGS, []):
+            holdings_element = ET.SubElement(bib, "holdings", ID=holding.holdings_id)
 
             # Crea il sotto-elemento library
             library_element = ET.SubElement(holdings_element, "library")
