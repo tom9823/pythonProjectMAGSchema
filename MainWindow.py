@@ -48,12 +48,12 @@ class MainWindow(tk.Tk):
             left_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_DC, container=Utils.KEY_FRAME_GEN),
             left_button_title='GEN',
             right_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_DC, container=Utils.KEY_FRAME_HOLDINGS),
-            right_button_title='HOLDING'
+            right_button_title='HOLDINGS'
         )
         frameDC.grid(row=0, column=0, sticky=tk.NSEW)
         self.frames[Utils.KEY_FRAME_DC] = frameDC
 
-        frameHolding = FrameHoldings(
+        frameHoldings = FrameHoldings(
             parent=self,
             controller=self,
             left_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_HOLDINGS, container=Utils.KEY_FRAME_DC),
@@ -62,15 +62,15 @@ class MainWindow(tk.Tk):
                                                         container=Utils.KEY_FRAME_LOCAL_BIB),
             right_button_title='LOCALBIB'
         )
-        frameHolding.grid(row=0, column=0, sticky=tk.NSEW)
-        self.frames[Utils.KEY_FRAME_HOLDINGS] = frameHolding
+        frameHoldings.grid(row=0, column=0, sticky=tk.NSEW)
+        self.frames[Utils.KEY_FRAME_HOLDINGS] = frameHoldings
 
         frameLocalBIB = FrameLocalBIB(
             parent=self,
             controller=self,
             left_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_LOCAL_BIB,
                                                        container=Utils.KEY_FRAME_HOLDINGS),
-            left_button_title='HOLDING',
+            left_button_title='HOLDINGS',
             right_button_action=lambda: self.show_frame(caller=Utils.KEY_FRAME_LOCAL_BIB,
                                                         container=Utils.KEY_FRAME_PIECE),
             right_button_title='PIECE'
