@@ -54,7 +54,7 @@ class FrameNomenclature(CustomFrame):
             "Nessuna etichetta nomenclature", "Piatto anteriore", "Contropiatto anteriore", "Carta di guardia recto",
             "Carta di guardia verso",
             "Carta 1 recto", "Taglio laterale", "Dorso", "Taglio inferiore", "Taglio superiore",
-            "Tavola fuori testo recto", "tavola fuori testo verso", "piatto posteriore", "contropiatto posteriore"
+            "Tavola fuori testo recto", "Tavola fuori testo verso", "Piatto posteriore", "Contropiatto posteriore"
         ]
 
         self.selected_label = StringVar(self.master)
