@@ -135,12 +135,12 @@ analogico alla base della digitalizzazione; tutti gli elementi sono opzionali (t
 
         # labels and entries
         dc_type_label = tk.Label(add_frame, text="DC Type")
-        dc_type_label.grid(row=1, column=0, sticky=tk.W)
+        dc_type_label.grid(row=1, column=0)
         self.dc_type_menu = tk.OptionMenu(add_frame, self.dc_type_var, *DC_TYPES_DEFINITIONS.keys())
         self.dc_type_menu.grid(row=2, column=0)
 
         value_label = tk.Label(add_frame, text="Value")
-        value_label.grid(row=1, column=1, sticky=tk.W)
+        value_label.grid(row=1, column=1)
         self.value_entry = tk.Entry(add_frame)
         self.value_entry.grid(row=2, column=1)
 
@@ -172,8 +172,7 @@ analogico alla base della digitalizzazione; tutti gli elementi sono opzionali (t
             y = self.get_parent().winfo_y() + self.winfo_height() // 2 - self.update_dc_window.winfo_height() // 2
             self.update_dc_window.geometry(f"+{x}+{y}")
 
-            # Imposta la geometria della finestra Toplevel
-            self.update_dc_window.title("Modifica DC Element")
+            self.update_dc_window.title(f"Modifica DC Element {self.dc_type_var.get()}")
 
             update_frame = tk.Frame(self.update_dc_window)
             update_frame.pack(pady=10)
@@ -189,12 +188,12 @@ analogico alla base della digitalizzazione; tutti gli elementi sono opzionali (t
 
             # labels and pre-filled entries
             dc_type_label = tk.Label(update_frame, text="DC Type")
-            dc_type_label.grid(row=1, column=0, sticky=tk.W)
+            dc_type_label.grid(row=1, column=0)
             self.dc_type_menu = tk.OptionMenu(update_frame, self.dc_type_var, *DC_TYPES_DEFINITIONS.keys())
             self.dc_type_menu.grid(row=2, column=0)
 
             value_label = tk.Label(update_frame, text="Value")
-            value_label.grid(row=1, column=1, sticky=tk.W)
+            value_label.grid(row=1, column=1)
             self.value_entry = tk.Entry(update_frame)
             self.value_entry.grid(row=2, column=1)
             self.value_entry.delete(0, tk.END)
