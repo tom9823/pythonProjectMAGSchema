@@ -76,7 +76,7 @@ class IMG(ObjectXMLSerializable):
         self._format = format
         self._scanning = scanning
         self._datetimecreated = datetimecreated
-        self._target = target if target is not None else []
+        self._target = target
         self.alt_imgs = altimg if altimg is not None else []
         self._note = note
         self._imggroupID = imggroupID
@@ -225,8 +225,8 @@ class IMG(ObjectXMLSerializable):
         append_element(img_elem, 'image_metrics', self._image_metrics)
         append_element(img_elem, 'format', self._format)
         append_element(img_elem, 'scanning', self._scanning)
-        for target in self._target:
-            append_element(img_elem, 'target', target)
+
+        append_element(img_elem, 'target', self._target)
 
         for alt_img in self.alt_imgs:
             append_element(img_elem, 'altimg', alt_img)
