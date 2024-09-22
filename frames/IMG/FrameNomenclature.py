@@ -1,6 +1,6 @@
 import os
 import re
-from tkinter import Tk, Label, Button, filedialog, Frame, Scrollbar, Listbox, StringVar, OptionMenu, ttk
+from tkinter import Tk, Label, Button, filedialog, Frame, Scrollbar, Listbox, StringVar, OptionMenu, ttk, messagebox
 from PIL import Image, ImageTk
 
 import Utils
@@ -91,8 +91,8 @@ class FrameNomenclature(CustomFrame):
         self.image_frame.pack()
         self.image_label.pack()
         self.frame_button_image.pack()
-        self.save_button.grid(column=0, row=0)
-        self.label_dropdown.grid(column=1, row=0)
+        self.save_button.grid(column=1, row=0)
+        self.label_dropdown.grid(column=0, row=0)
         self.prev_button.grid(column=0, row=1)
         self.next_button.grid(column=1, row=1)
         self.image_listbox.pack(side="left", fill="y")
@@ -189,5 +189,10 @@ class FrameNomenclature(CustomFrame):
         self.save_button.config(state='normal')
 
     def check_data(self):
-        super().save_to_session((Utils.KEY_SESSION_NOMENCLATURE, self.nomenclature_dict))
-        return True
+        ret = True
+        if not self.images or len(self.images) == 0:
+            messagebox.showerror("Attenzione", "Prima di procedere selezionare la cartella del progetto da scansionare")
+            ret = False
+        else:
+            super().save_to_session((Utils.KEY_SESSION_NOMENCLATURE, self.nomenclature_dict))
+        return ret

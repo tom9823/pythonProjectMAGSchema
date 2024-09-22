@@ -141,7 +141,7 @@ class FrameIMG(CustomFrame):
         self.scanningagency_entry = ttk.Entry(self.frame_scanning)
         self.scanningagency_entry.grid(row=1, column=1, pady=5, sticky=tk.EW)
         ToolTip(self.scanningagency_entry, "opzionale e non ripetibile, contiene il nome della persona, società o "
-                                           "ente produttore dell'immagine digitale, cioè dell'entità che ha "
+                                           "ente produttore dell'immagine digitale,\ncioè dell'entità che ha "
                                            "realizzato la scansione. È di tipo xsd:string. \n Se assente, "
                                            "si assume che la scansione sia stata effettuata all'interno "
                                            "dell'istituzione responsabile del progetto di digitalizzazione.")
@@ -153,7 +153,7 @@ class FrameIMG(CustomFrame):
         self.devicesource_entry = ttk.Entry(self.frame_scanning)
         self.devicesource_entry.grid(row=2, column=1, pady=5, sticky=tk.EW)
         ToolTip(self.devicesource_entry, "opzionale e non ripetibile, descrive la tipologia dell'apparecchiatura di "
-                                         "scansione, per esempio \"scanner\", \"fotocamera digitale\",\"videocamera\". È "
+                                         "scansione, per esempio \"scanner\", \"fotocamera digitale\",\"videocamera\".\n È "
                                          "di tipo xsd:string.")
         self.var_is_scanning_system_enabled = tk.IntVar(value=0)
         checkbox_scanning = tk.Checkbutton(self.frame_scanning,

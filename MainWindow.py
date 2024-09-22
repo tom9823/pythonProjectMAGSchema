@@ -213,7 +213,7 @@ class MainWindow(tk.Tk):
         file_path = filedialog.asksaveasfilename(
             defaultextension=".xml",
             filetypes=[("XML files", "*.xml"), ("All files", "*.*")],
-            initialfile=folder_name
+            initialfile=folder_name if folder_name == "progetto" else os.path.basename(folder_name)
         )
         # Controlla se l'utente ha scelto un percorso
         if file_path:
